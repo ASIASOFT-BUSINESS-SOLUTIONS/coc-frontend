@@ -1,0 +1,26 @@
+.no-padding .v-breadcrumbs-item {
+    padding: 0 !important;
+}
+
+.breadcrumbs-block {
+    display: block !important;
+}
+
+.breadcrumbs-hover .v-breadcrumbs-item a {
+    color: #888888;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.breadcrumbs-hover .v-breadcrumbs-item a:hover {
+    color: #1e90ff;
+}
+
+.v-btn__overlay {
+    background-color: transparent !important; /* kill the dim effect */
+}
+
+.v-btn.v-btn--disabled {
+    opacity: 0.5 !important; /* adjust to your liking */
+}
