@@ -15,9 +15,8 @@ export async function submitAttendance(code) {
         body: JSON.stringify({ guestCode: code }),
     });
 
-    // if (!res.ok) return { success: false, status: res.status, message: res.message };
     if (res.status === 204) return { success: true };
-    else return { success: false, status: res.status };
+    if (!res.ok) return { success: false, status: res.status };
 }
 
 export async function getAttendance(params = {}) {

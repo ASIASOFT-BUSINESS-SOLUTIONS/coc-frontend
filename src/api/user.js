@@ -94,6 +94,24 @@ export async function editUser(data) {
     if (res.status === 204) return { success: true };
 }
 
+export async function getRolesAndVoucherTypes(params = {}) {
+    const userStore = useUserStore();
+
+    const myHeaders = new Headers();
+    myHeaders.append("Accept", "application/json");
+    myHeaders.append("Authorization", `Bearer ${userStore.token}`);
+    const requestOptions = {
+        method: "GET",
+        headers: myHeaders,
+        redirect: "follow",
+    };
+
+    const query = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_USER}/entryCatg?${query}`, requestOptions);
+    if (!res.ok) throw new Error("Failed to fetch voucher types and guest list");
+    return res.json();
+}
+
 // Login
 export async function authLogin(data) {
     const res = await fetch(API_LOGIN, {

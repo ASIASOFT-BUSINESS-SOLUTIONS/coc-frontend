@@ -1,4 +1,4 @@
-import { API_BASE_URL, API_LOG, API_VOUCHER } from "../constants/api.constant";
+import { API_BASE_URL, API_VOUCHER_LOG, API_VOUCHER } from "../constants/api.constant";
 import { useUserStore } from "../stores/userStore.js";
 
 // Voucher
@@ -108,7 +108,7 @@ export async function getVoucherLog(params = {}) {
     };
 
     const query = new URLSearchParams(params).toString();
-    const res = await fetch(`${API_LOG}/inquiry?${query}`, requestOptions);
+    const res = await fetch(`${API_VOUCHER_LOG}/list?${query}`, requestOptions);
     if (!res.ok) throw new Error("Failed to fetch voucher log");
     return res.json();
 }
@@ -144,6 +144,6 @@ export async function getVoucherTypesAndGuests(params = {}) {
 
     const query = new URLSearchParams(params).toString();
     const res = await fetch(`${API_VOUCHER}/entryCatg?${query}`, requestOptions);
-    if (!res.ok) throw new Error("Failed to fetch voucher log");
+    if (!res.ok) throw new Error("Failed to fetch voucher types and guest list");
     return res.json();
 }

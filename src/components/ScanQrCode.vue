@@ -116,7 +116,7 @@ const onSubmit = async () => {
 
         if (response.success) {
             isSuccess.value = true;
-            successTitle.value = `${payload.type.charAt(0).toUpperCase()} submited successfully!`;
+            successTitle.value = `${payload.type.charAt(0).toUpperCase() + props.type.slice(1)} submited successfully!`;
             snackbar.value = true;
         } else {
             isSuccess.value = false;

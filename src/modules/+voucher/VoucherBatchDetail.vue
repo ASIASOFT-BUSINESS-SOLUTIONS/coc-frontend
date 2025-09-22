@@ -175,6 +175,15 @@
             </v-col>
         </v-row>
         <v-btn class="ma-auto mt-6" rounded="lg" prepend-icon="mdi-arrow-left" @click="router.back()" flat>Back</v-btn>
+
+        <Snackbar
+            v-model="snackbar"
+            :title="isSuccess ? successTitle : errorTitle"
+            :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
+            :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
+            :iconColor="isSuccess ? '#388E3C' : '#F44336'"
+            :timeout="2500"
+        ></Snackbar>
     </div>
 </template>
 
@@ -187,12 +196,18 @@ import NotFound from "../../views/NotFound.vue";
 import logo from "../../assets/logo.svg";
 import { getGuests } from "../../api/guest";
 import ConfirmDialog from "../../components/ConfirmDialog.vue";
+import Snackbar from "../../components/Snackbar.vue";
 
 const detail = ref(null);
 const route = useRoute();
 const router = useRouter();
 const id = route.params.id;
 const isEdit = computed(() => route.path.endsWith("/edit"));
+
+const isSuccess = ref(false);
+const successTitle = ref(null);
+const errorTitle = ref(null);
+const snackbar = ref(false);
 
 // Breadcrumbs
 const breadcrumbs = [
@@ -239,9 +254,8 @@ onMounted(async () => {
 
 const search = ref("");
 const filteredGuests = computed(() => {
-    const term = search.value.trim().toLowerCase();
-    if (!term) return allGuests.value;
-    return allGuests.value.filter((g) => g.guestName?.toLowerCase().includes(term));
+    if (!search.value) return allGuests.value;
+    return allGuests.value.filter((g) => g.guestName.toLowerCase().includes(search.value.toLowerCase()));
 });
 
 const selectAll = computed({
@@ -258,23 +272,39 @@ const selectAll = computed({
 async function submitForm() {
     loading.value = true;
     try {
+        const selectedEmails = new Set(
+            (form.value.guestList || []).map((s) =>
+                (typeof s === "string" ? s : s.emailAddress || "").trim().toLowerCase()
+            )
+        );
+
+        const details = allGuests.value.map((g) => {
+            const email = (g.emailAddress || "").trim().toLowerCase();
+            const isSelected = selectedEmails.has(email);
+            return {
+                emailAddress: g.emailAddress,
+                voucherKey: g.voucherKey ?? null,
+                isDeleted: !isSelected,
+            };
+        });
+
         const payload = {
             batchKey: id,
-            details: form.value.guestList,
+            details: details,
         };
 
         console.log("%c Payload: ", "background: #222; color: #bada55", payload);
 
-        // const response = await editVoucher(payload);
-        // if (response.success) {
-        //     isSuccess.value = true;
-        //     successTitle.value = "Voucher updated successfully!";
-        //     snackbar.value = true;
-        // } else {
-        //     isSuccess.value = false;
-        //     errorTitle.value = `Status ${response.status}: Failed to ${isEdit.value ? "update" : "create"} user`;
-        //     snackbar.value = true;
-        // }
+        const response = await editVoucher(payload);
+        if (response.success) {
+            isSuccess.value = true;
+            successTitle.value = "Voucher updated successfully!";
+            snackbar.value = true;
+        } else {
+            isSuccess.value = false;
+            errorTitle.value = `Status ${response.status}: Failed to update voucher`;
+            snackbar.value = true;
+        }
     } catch (error) {
         console.error(error);
     } finally {

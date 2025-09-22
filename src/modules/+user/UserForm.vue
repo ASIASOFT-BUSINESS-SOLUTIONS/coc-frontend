@@ -156,13 +156,31 @@
                                 </v-col>
                                 <v-col cols="12" md="6">
                                     <div class="text-subtitle-2 font-weight-bold">Role</div>
-                                    <v-text-field
+                                    <v-select
                                         v-model="form.userTypeCode"
-                                        disabled
-                                        placeholder="Role"
-                                        class="mb-2"
                                         density="compact"
-                                    ></v-text-field>
+                                        class="mb-2"
+                                        placeholder="Role Selection"
+                                        :rules="[rules.required]"
+                                        :items="userRoles"
+                                        item-title="description"
+                                        item-value="code"
+                                    ></v-select>
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col cols="12">
+                                    <div class="text-subtitle-2 font-weight-bold">Voucher Type Code</div>
+                                    <v-select
+                                        v-model="form.voucherTypeCode"
+                                        density="compact"
+                                        class="mb-2"
+                                        placeholder="Voucher Type Code Selection"
+                                        :rules="[rules.required]"
+                                        :items="voucherTypes"
+                                        item-title="code"
+                                        item-value="code"
+                                    ></v-select>
                                 </v-col>
                             </v-row>
                             <v-row class="mt-1" dense>
@@ -221,7 +239,7 @@
 <script setup>
 import { useRoute, useRouter } from "vue-router";
 import { onMounted, ref } from "vue";
-import { createUser, editUser, getUser } from "../../api/user";
+import { createUser, editUser, getRolesAndVoucherTypes, getUser } from "../../api/user";
 import Snackbar from "../../components/Snackbar.vue";
 import { rules } from "../../constants/validation.constant";
 import ConfirmDialog from "../../components/ConfirmDialog.vue";
@@ -247,7 +265,7 @@ const form = ref({
     userName: null,
     password: null,
     confirmPassword: null,
-    userTypeCode: "Admin",
+    userTypeCode: null,
     voucherTypeCode: null,
 });
 
@@ -260,6 +278,9 @@ const isSuccess = ref(false);
 const successTitle = ref(null);
 const errorTitle = ref(null);
 const snackbar = ref(false);
+
+const userRoles = ref(null);
+const voucherTypes = ref(null);
 
 onMounted(async () => {
     if (route.params.id) {
@@ -276,6 +297,12 @@ onMounted(async () => {
             loading.value = false;
         }
         isEdit.value = true;
+    }
+
+    const response = await getRolesAndVoucherTypes({ includeUserTypes: true, includeVoucherTypes: true });
+    if (response) {
+        userRoles.value = response.data.userTypes;
+        voucherTypes.value = response.data.voucherTypes;
     }
     loading.value = false;
 });
@@ -324,7 +351,7 @@ function resetForm() {
             userName: null,
             password: null,
             confirmPassword: null,
-            userTypeCode: "Admin",
+            userTypeCode: null,
             voucherTypeCode: null,
         };
     }

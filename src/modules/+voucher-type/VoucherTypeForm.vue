@@ -56,7 +56,7 @@
                                     <v-row dense class="align-center">
                                         <v-col cols="12" sm="6">
                                             <div class="text-subtitle-1 text-medium-emphasis">Voucher Type</div>
-                                            <v-select
+                                            <!-- <v-select
                                                 v-model="form.voucherTypeCode"
                                                 density="compact"
                                                 class="mb-2"
@@ -65,14 +65,14 @@
                                                 :items="voucherType"
                                                 item-title="name"
                                                 item-value="name"
-                                            ></v-select>
-                                            <!-- <v-text-field
+                                            ></v-select> -->
+                                            <v-text-field
                                                 placeholder="Enter Voucher Type"
                                                 v-model="form.voucherTypeCode"
                                                 class="mb-2"
                                                 density="compact"
                                                 :rules="[validation.required, validation.maxLength(100)]"
-                                            ></v-text-field> -->
+                                            ></v-text-field>
                                         </v-col>
                                         <v-col cols="12" sm="6">
                                             <div class="text-subtitle-1 text-medium-emphasis">Voucher Color</div>
@@ -107,6 +107,7 @@
                                                 density="compact"
                                                 type="date"
                                                 :rules="[validation.required]"
+                                                :min="tomorrowStr"
                                                 :max="form.endDate"
                                             ></v-text-field>
                                         </v-col>
@@ -397,6 +398,9 @@ const loading = ref(true);
 const notFound = ref(false);
 
 const today = new Date().toISOString().split("T")[0];
+const tomorrow = new Date(new Date());
+tomorrow.setDate(tomorrow.getDate() + 1);
+const tomorrowStr = tomorrow.toISOString().split("T")[0];
 
 const isSuccess = ref(false);
 const successTitle = ref(null);
@@ -431,11 +435,7 @@ const form = ref({
 
 const isFormValid = computed(() => {
     return (
-        form.value.voucherTypeCode &&
-        form.value.startDate &&
-        form.value.endDate &&
-        form.value.remark &&
-        form.value.voucherTypeDesc !== null // allow 0 or 1
+        form.value.voucherTypeCode && form.value.startDate && form.value.endDate && form.value.remark !== null // allow 0 or 1
     );
 });
 

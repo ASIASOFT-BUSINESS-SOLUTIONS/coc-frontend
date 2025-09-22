@@ -24,8 +24,8 @@
             <v-col cols="12" sm="6" md="3">
                 <v-card class="position-relative pa-2" rounded="lg" style="border: 2px solid #e0e0e0" flat>
                     <v-card-item>
-                        <v-card-subtitle class="text-left font-weight-bold">Available Vouchers</v-card-subtitle>
-                        <v-card-title class="text-left text-h4 font-weight-bold">24,699</v-card-title>
+                        <v-card-subtitle class="text-left font-weight-bold">Total Voucher Types</v-card-subtitle>
+                        <v-card-title class="text-left text-h4 font-weight-bold">{{ data.totalVouchers }}</v-card-title>
                         <v-icon class="position-absolute top-0 right-0 ma-4" color="grey-darken-1"
                             >mdi-tag-check</v-icon
                         >
@@ -59,7 +59,9 @@
                 <v-card class="position-relative pa-2" rounded="lg" style="border: 2px solid #e0e0e0" flat>
                     <v-card-item>
                         <v-card-subtitle class="text-left font-weight-bold">Redeemed Voucher</v-card-subtitle>
-                        <v-card-title class="text-left text-h4 font-weight-bold">2,342</v-card-title>
+                        <v-card-title class="text-left text-h4 font-weight-bold">{{
+                            data.redeemedVoucher
+                        }}</v-card-title>
                         <v-icon class="position-absolute top-0 right-0 ma-4" color="grey-darken-1"
                             >mdi-account-tag-outline</v-icon
                         >
@@ -91,6 +93,8 @@ import { getAttendance } from "../api/attendance";
 import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, PieController } from "chart.js";
 import { DoughnutChart } from "vue-chart-3";
 import { formatEmpty } from "../utils/formatter";
+import { getVoucherLog } from "../api/voucher";
+import { getVoucherTypes } from "../api/voucher-type";
 
 ChartJS.register(Title, Tooltip, Legend, ArcElement, PieController);
 
@@ -123,7 +127,9 @@ const chartOptions = ref({
 
 const data = ref({
     guestsNumber: 0,
+    totalVouchers: 0,
     attendanceRate: 0,
+    redeemedVoucher: 0,
 });
 
 onMounted(async () => {
@@ -149,6 +155,12 @@ onMounted(async () => {
         const rate = (attendanceApi.data.length / result.data.length) * 100;
         data.value.attendanceRate = rate;
     }
+
+    const vouchersApi = await getVoucherTypes();
+    if (vouchersApi) data.value.totalVouchers = vouchersApi.data.length;
+
+    const voucherLogApi = await getVoucherLog();
+    if (voucherLogApi) data.value.redeemedVoucher = voucherLogApi.data.length;
 });
 </script>
 
