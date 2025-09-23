@@ -120,7 +120,7 @@ const onSubmit = async () => {
             snackbar.value = true;
         } else {
             isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: Failed to submit ${payload.type}`;
+            errorTitle.value = `Status ${response.status}: ${response.message}`;
             snackbar.value = true;
         }
     } catch (error) {

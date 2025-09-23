@@ -1,7 +1,7 @@
 <template>
     <v-navigation-drawer v-model="drawer" app>
         <div class="pa-4 d-flex justify-center">
-            <v-img :src="ara" alt="Asiasoft Reward Admin" max-width="150"></v-img>
+            <v-img :src="ara" alt="Asiasoft Reward Admin" max-width="150" draggable="false"></v-img>
         </div>
         <v-list density="compact" class="text-left" color="#FFD700" variant="flat" nav>
             <v-divider></v-divider>

@@ -80,23 +80,49 @@
                 </v-sheet>
             </v-col>
             <v-col cols="12" md="6">
-                <v-sheet class="pa-6 mt-6" rounded="lg" style="border: 2px solid #e0e0e0" flat> </v-sheet>
+                <v-sheet class="pa-6 mt-6" rounded="lg" style="border: 2px solid #e0e0e0" flat>
+                    <v-select
+                        v-model="selectedVoucherType"
+                        :items="vouchersList"
+                        item-title="title"
+                        item-value="batchKey"
+                        label="Select Voucher"
+                        :loading="loadingTypes"
+                        density="compact"
+                        variant="outlined"
+                        hide-details
+                        clearable
+                    />
+                    <BarChart :chart-data="barData" :options="barOptions" />
+                </v-sheet>
             </v-col>
         </v-row>
     </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
-import { getGuests } from "../api/guest";
+import { onMounted, ref, watch } from "vue";
+import { guestInquiry } from "../api/guest";
 import { getAttendance } from "../api/attendance";
-import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, PieController } from "chart.js";
-import { DoughnutChart } from "vue-chart-3";
-import { formatEmpty } from "../utils/formatter";
-import { getVoucherLog } from "../api/voucher";
+import {
+    Chart as ChartJS,
+    Title,
+    Tooltip,
+    Legend,
+    ArcElement,
+    PieController,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    BarController,
+} from "chart.js";
+import { DoughnutChart, BarChart } from "vue-chart-3";
+import { formatDate, formatEmpty } from "../utils/formatter";
+import { getVoucher, getVoucherLog, getVouchers, voucherInquiry } from "../api/voucher";
 import { getVoucherTypes } from "../api/voucher-type";
 
 ChartJS.register(Title, Tooltip, Legend, ArcElement, PieController);
+ChartJS.register(Title, Tooltip, Legend, CategoryScale, LinearScale, BarElement, BarController);
 
 /* Pie Chart Configuration */
 const chartData = ref({
@@ -117,13 +143,47 @@ const chartOptions = ref({
             display: true,
             text: "Guest Food Selection",
             font: { size: 20, weight: "bold" },
-            padding: { top: 10, bottom: 10 },
+            padding: { top: 10, bottom: 30 },
             color: "#333",
             align: "center",
         },
         legend: { position: "bottom" },
     },
 });
+
+/* Bar Graph Configuration */
+const vouchersList = ref([]);
+const selectedVoucherType = ref(null);
+const loadingTypes = ref(false);
+
+const barData = ref({
+    labels: [],
+    datasets: [
+        {
+            label: "Guest",
+            data: [],
+            backgroundColor: ["rgba(54, 162, 235, 0.2)", "rgba(153, 102, 255, 0.2)", "rgba(75, 192, 192, 0.2)"],
+            borderColor: ["rgb(54, 162, 235)", "rgb(153, 102, 255)", "rgb(75, 192, 192)"],
+            borderWidth: 1,
+        },
+    ],
+});
+
+const barOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        title: {
+            display: true,
+            text: "Assigned Guest Food Selection for Lunch Voucher",
+            font: { size: 20, weight: "bold" },
+            padding: { top: 30, bottom: 30 },
+            color: "#333",
+            align: "center",
+        },
+        legend: { position: "bottom" },
+    },
+};
 
 const data = ref({
     guestsNumber: 0,
@@ -133,35 +193,67 @@ const data = ref({
 });
 
 onMounted(async () => {
-    const result = await getGuests();
-    if (result) {
-        data.value.guestsNumber = result.data.length;
-
-        const categories = ["Normal", "Halal", "Vegetarian"];
-        chartData.value.labels = categories;
-        const counts = { Normal: 0, Halal: 0, Vegetarian: 0 };
-
-        for (const g of result.data) {
-            if (categories.includes(g.foodSelection)) {
-                counts[g.foodSelection]++;
-            }
-        }
-
-        chartData.value.datasets[0].data = categories.map((cat) => counts[cat]);
-    }
-
-    const attendanceApi = await getAttendance();
-    if (attendanceApi) {
-        const rate = (attendanceApi.data.length / result.data.length) * 100;
-        data.value.attendanceRate = rate;
-    }
-
-    const vouchersApi = await getVoucherTypes();
-    if (vouchersApi) data.value.totalVouchers = vouchersApi.data.length;
+    const voucherTypesApi = await getVoucherTypes();
+    if (voucherTypesApi) data.value.totalVouchers = voucherTypesApi.data.length;
 
     const voucherLogApi = await getVoucherLog();
     if (voucherLogApi) data.value.redeemedVoucher = voucherLogApi.data.length;
+
+    const vouchersApi = await getVouchers();
+    if (vouchersApi)
+        vouchersList.value = vouchersApi.data
+            .filter((v) => v.forFoodSelection === true)
+            .map((v) => ({
+                ...v,
+                // Create a new property for the displayed title
+                title: `${v.voucherTypeCode} (${formatDate(v.startDate)} to ${formatDate(v.endDate)})`,
+            }));
+
+    const gInquiry = await guestInquiry();
+    let totalCount = 0;
+    if (gInquiry) {
+        chartData.value.labels = gInquiry.data.foodSelections.map((s) => s.title);
+        chartData.value.datasets[0].data = gInquiry.data.foodSelections.map((s) => s.count);
+
+        totalCount = gInquiry.data.foodSelections.reduce((sum, s) => sum + s.count, 0);
+    }
+
+    data.value.guestsNumber = totalCount;
+    const attendanceApi = await getAttendance();
+    if (attendanceApi) {
+        const rate = (attendanceApi.data.length / totalCount) * 100;
+        data.value.attendanceRate = rate;
+    }
 });
+
+watch(
+    () => selectedVoucherType.value,
+    async (newKey) => {
+        if (!newKey) return;
+
+        try {
+            const res = await getVoucher(selectedVoucherType.value);
+            if (res.data.details) {
+                const grouped = res.data.details.reduce((acc, item) => {
+                    const key = item.foodSelection || "Unknown";
+                    acc[key] = (acc[key] || 0) + 1;
+                    return acc;
+                }, {});
+
+                const result = Object.entries(grouped).map(([foodSelection, count]) => ({
+                    foodSelection,
+                    count,
+                }));
+
+                barData.value.labels = result.map((item) => item.foodSelection);
+
+                barData.value.datasets[0].data = result.map((i) => i.count);
+            }
+        } catch (err) {
+            console.error("Failed to load voucher detail", err);
+        }
+    }
+);
 </script>
 
 <style scoped></style>

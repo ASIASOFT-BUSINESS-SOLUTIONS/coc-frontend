@@ -89,13 +89,19 @@
                             <div class="text-subtitle-2 font-weight-bold">{{ formatEmpty(detail?.userID) }}</div>
                         </v-col>
                         <v-col cols="12" sm="6">
-                            <div class="text-subtitle-1 text-medium-emphasis">User Type</div>
+                            <div class="text-subtitle-1 text-medium-emphasis">User Role Type</div>
                             <div class="text-subtitle-2 font-weight-bold">{{ formatEmpty(detail?.userTypeCode) }}</div>
                         </v-col>
 
-                        <v-col cols="12" sm="12">
+                        <v-col cols="12" sm="6">
                             <div class="text-subtitle-1 text-medium-emphasis">Display Name</div>
                             <div class="text-subtitle-2 font-weight-bold">{{ formatEmpty(detail?.userName) }}</div>
+                        </v-col>
+                        <v-col cols="12" sm="6">
+                            <div class="text-subtitle-1 text-medium-emphasis">User Voucher Type</div>
+                            <div class="text-subtitle-2 font-weight-bold">
+                                {{ formatEmpty(detail?.voucherTypeCode) }}
+                            </div>
                         </v-col>
                         <v-col cols="12" sm="6">
                             <div class="text-subtitle-1 text-medium-emphasis">Registration Date</div>
@@ -235,7 +241,7 @@
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Snackbar from "../../components/Snackbar.vue";
-import { getUser } from "../../api/user";
+import { getRolesAndVoucherTypes, getUser } from "../../api/user";
 import { formatDate, formatEmpty } from "../../utils/formatter";
 import NotFound from "../../views/NotFound.vue";
 import logo from "../../assets/logo.svg";
@@ -259,7 +265,14 @@ function goBack() {
 const loading = ref(true);
 const notFound = ref(false);
 
+const accessRight = ref([]);
+
 onMounted(async () => {
+    const response = await getRolesAndVoucherTypes({ includeUserTypes: true, includeVoucherTypes: true });
+    if (response) {
+        accessRight.value = response.data.voucherTypes;
+    }
+
     try {
         const result = await getUser(route.params.id);
         if (result) detail.value = result.data;

@@ -30,8 +30,8 @@
             show-current-page
             @update:options="loadItems"
         >
-            <template #item.guestCode="{ item }"> {{ formatDate(item.guestCode) }} </template>
-            <template #item.emailAddress="{ item }"> {{ formatDate(item.emailAddress) }} </template>
+            <template #item.guestCode="{ item }"> {{ formatEmpty(item.guestCode) }} </template>
+            <template #item.emailAddress="{ item }"> {{ formatEmpty(item.emailAddress) }} </template>
             <template #item.createdAt="{ item }"> {{ formatDate(item.createdAt) }} </template>
             <template #item.action="{ item }">
                 <v-tooltip text="View" location="top">

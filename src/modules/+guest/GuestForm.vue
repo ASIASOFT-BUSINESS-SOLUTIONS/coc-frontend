@@ -271,7 +271,7 @@ async function submitForm() {
             snackbar.value = true;
         } else {
             isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: Failed to update guest detail`;
+            errorTitle.value = `Status ${response.status}: ${response.message}`;
             snackbar.value = true;
         }
     } catch (error) {

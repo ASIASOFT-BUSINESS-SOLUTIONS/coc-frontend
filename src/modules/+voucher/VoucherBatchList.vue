@@ -254,10 +254,10 @@ async function confirmDelete(id) {
         const response = await deleteVoucher(id);
         if (response.success) {
             isSuccess.value = true;
-            successTitle.value = "The voucher is successfully deleted!";
+            successTitle.value = "All the assigned guests are successfully removed!";
         } else {
             isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: Failed to delete voucher`;
+            errorTitle.value = `Status ${response.status}: Failed to remove the assigned guests`;
         }
         modal.value = false;
         snackbar.value = true;

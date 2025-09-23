@@ -54,7 +54,7 @@
                             <v-card-text class="text-left">
                                 <v-form>
                                     <v-row dense class="align-center">
-                                        <v-col cols="12" sm="6">
+                                        <v-col cols="12" sm="9">
                                             <div class="text-subtitle-1 text-medium-emphasis">Voucher Type</div>
                                             <!-- <v-select
                                                 v-model="form.voucherTypeCode"
@@ -74,7 +74,18 @@
                                                 :rules="[validation.required, validation.maxLength(100)]"
                                             ></v-text-field>
                                         </v-col>
-                                        <v-col cols="12" sm="6">
+                                        <v-col cols="12" sm="3" class="float-right">
+                                            <v-checkbox
+                                                color="info"
+                                                inset
+                                                hide-details
+                                                label="Food Selection"
+                                                v-model="form.forFoodSelection"
+                                            />
+                                        </v-col>
+                                    </v-row>
+                                    <v-row dense class="align-center">
+                                        <v-col cols="12">
                                             <div class="text-subtitle-1 text-medium-emphasis">Voucher Color</div>
                                             <v-select
                                                 v-model="form.colourSchema"
@@ -124,15 +135,29 @@
                                     </v-row>
                                     <v-row dense class="align-center">
                                         <v-col>
-                                            <div class="text-subtitle-1 text-medium-emphasis">Image Url</div>
-                                            <v-text-field
+                                            <div class="text-subtitle-1 text-medium-emphasis">Image</div>
+                                            <!-- <v-text-field
                                                 placeholder="Enter Image Url"
                                                 v-model="form.image"
                                                 hint="Suggestion: Image with transparent background."
                                                 persistent-hint="true"
                                                 class="mb-2"
                                                 density="compact"
-                                            ></v-text-field>
+                                            ></v-text-field> -->
+                                            <v-file-upload
+                                                class="mb-6"
+                                                color="#F4F4F4"
+                                                hide-browse
+                                                title="Choose File or drag and drop"
+                                                divider-text="JPG or PNG formats, up to 10MB"
+                                                show-size
+                                                clearable
+                                                accept=".jpg, .png"
+                                                icon="mdi-upload"
+                                                v-model="form.image"
+                                                @update:model-value="previewImage"
+                                            >
+                                            </v-file-upload>
                                         </v-col>
                                     </v-row>
                                     <v-row dense class="align-center">
@@ -164,7 +189,7 @@
                                                 placeholder="Enter Remark"
                                                 v-model="form.remark"
                                                 class="mb-2"
-                                                :rules="[validation.required, validation.maxLength(100)]"
+                                                :rules="[validation.maxLength(100)]"
                                                 density="compact"
                                             ></v-text-field>
                                         </v-col>
@@ -267,13 +292,14 @@
                                 <v-img
                                     rounded="lg"
                                     aspect-ratio="16/9"
-                                    class="ma-auto"
+                                    min-height="150"
+                                    class="voucher-card"
                                     :gradient="`to right, ${form.colourSchema}`"
                                 >
-                                    <v-container>
-                                        <v-row dense align="center">
+                                    <v-container style="height: 100%">
+                                        <v-row dense align="center" style="height: 100%">
                                             <v-col cols="5">
-                                                <v-img :src="form.image"></v-img>
+                                                <v-img :src="previewUrl"></v-img>
                                             </v-col>
                                             <v-col cols="7" class="text-left">
                                                 <v-row dense justify="stretch">
@@ -285,52 +311,31 @@
                                                             {{ form.voucherTypeCode }}
                                                         </div>
                                                     </v-col>
-                                                    <v-col cols="12">
-                                                        <v-chip
-                                                            color="green"
-                                                            size="small"
-                                                            rounded="lg"
-                                                            class="text-white font-weight-bold"
-                                                            variant="flat"
-                                                            v-if="form.voucherTypeCode"
-                                                        >
-                                                            Active
-                                                        </v-chip>
-                                                    </v-col>
                                                 </v-row>
                                             </v-col>
                                         </v-row>
                                     </v-container>
-                                    <!-- <v-sheet
-                                        rounded="circle"
-                                        class="absolute bottom-4 right-[-1%]"
-                                        width="10%"
-                                        aspect-ratio="1"
-                                    ></v-sheet>
-                                    <v-sheet
-                                        rounded="circle"
-                                        height="40"
-                                        width="40"
-                                        color="white"
-                                        class="position-absolute bottom-0 mb-10"
-                                        style="left: -20px"
-                                    ></v-sheet> -->
                                 </v-img>
+                                <div class="status-badge__wrapper active">
+                                    <div class="pl-3 pr-3 pt-1 pb-1 font-weight-bold status-badge active">Active</div>
+                                </div>
                             </template>
                             <template v-else>
-                                <v-sheet height="120" rounded="lg" color="#D9D9D9" class="pt-3 position-relative">
-                                    <v-row dense>
-                                        <v-col>
-                                            <v-icon color="#9E9E9E" size="60"> mdi-note-remove </v-icon>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row dense>
-                                        <v-col>
-                                            <span class="text-subtitle-2 text-disabled font-weight-medium"
-                                                >No Voucher Color Selected
-                                            </span>
-                                        </v-col>
-                                    </v-row>
+                                <v-sheet min-height="150" rounded="lg" color="#D9D9D9" class="pt-3 voucher-card">
+                                    <v-container>
+                                        <v-row dense>
+                                            <v-col>
+                                                <v-icon color="#9E9E9E" size="60"> mdi-note-remove </v-icon>
+                                            </v-col>
+                                        </v-row>
+                                        <v-row dense>
+                                            <v-col>
+                                                <span class="text-subtitle-2 text-disabled font-weight-medium"
+                                                    >No Voucher Color Selected
+                                                </span>
+                                            </v-col>
+                                        </v-row>
+                                    </v-container>
                                 </v-sheet>
                             </template>
                             <v-card-text class="pa-0 mt-5">
@@ -384,10 +389,11 @@ import Snackbar from "../../components/Snackbar.vue";
 import { createVoucherType, editVoucherType, getVoucherType } from "../../api/voucher-type";
 import { rules } from "../../constants/validation.constant";
 import { convertDate } from "../../utils/formatter";
-import { voucher, voucherColorType } from "../../constants/selection.constant";
+import { voucherColorType } from "../../constants/selection.constant";
 import ConfirmDialog from "../../components/ConfirmDialog.vue";
 import NotFound from "../../views/NotFound.vue";
 import logo from "../../assets/logo.svg";
+import { Cloudflare_UploadToR2 } from "../../api/upload";
 
 const { smAndDown } = useDisplay();
 
@@ -433,9 +439,32 @@ const form = ref({
     forFoodSelection: false,
 });
 
+const previewUrl = ref(null);
+function previewImage(file) {
+    if (!file) {
+        previewUrl.value = null;
+        return;
+    }
+    // file can be File or File[]
+    const selected = Array.isArray(file) ? file[0] : file;
+
+    const validTypes = ["image/jpeg", "image/png"];
+
+    if (!validTypes.includes(selected.type)) {
+        previewUrl.value = null;
+        form.value.image = null;
+        isSuccess.value = false;
+        errorTitle.value = `Invalid file type: ${selected.name}. Only JPG and PNG are allowed.`;
+        snackbar.value = true;
+        return;
+    }
+
+    previewUrl.value = URL.createObjectURL(selected);
+}
+
 const isFormValid = computed(() => {
     return (
-        form.value.voucherTypeCode && form.value.startDate && form.value.endDate && form.value.remark !== null // allow 0 or 1
+        form.value.voucherTypeCode && form.value.startDate && form.value.endDate !== null // allow 0 or 1
     );
 });
 
@@ -452,6 +481,11 @@ onMounted(async () => {
                 originalData = { ...response.data };
                 originalData.startDate = new Date(response.data.startDate).toISOString().slice(0, 10);
                 originalData.endDate = new Date(response.data.endDate).toISOString().slice(0, 10);
+                originalData.image = null;
+                originalData.previewUrl = response.data.image;
+
+                previewUrl.value = response.data.image;
+                form.value.image = null;
             } else {
                 notFound.value = true;
             }
@@ -466,7 +500,6 @@ onMounted(async () => {
     loading.value = false;
 });
 
-const voucherType = voucher;
 const voucherColor = voucherColorType;
 
 const selectedGradient = computed(() => {
@@ -477,6 +510,13 @@ const selectedGradient = computed(() => {
 async function submitForm() {
     loading.value = true;
     try {
+        const upload = await Cloudflare_UploadToR2({
+            bucket: "asiasoft-reward-bucket",
+            filepath: "/backoffice/voucher",
+            body: form.value.image,
+        });
+        // const result = upload.result;
+
         const payload = {
             voucherTypeCode: form.value.voucherTypeCode,
             voucherTypeDesc: form.value.voucherTypeDesc,
@@ -487,40 +527,41 @@ async function submitForm() {
             termCondition: form.value.termCondition,
             image: form.value.image,
             colourSchema: form.value.colourSchema,
-            forFoodSelection: form.value.voucherTypeCode === "Lunch" ? true : false,
+            forFoodSelection: form.value.forFoodSelection,
             ...(isEdit.value && { voucherTypeKey: route.params.id }), // add only in edit
         };
 
-        // console.log("%c payload: ", "background: #222; color: #bada55", payload);
+        console.log("%c Payload: ", "background: #222; color: #bada55", payload);
 
-        const response = isEdit.value ? await editVoucherType(payload) : await createVoucherType(payload);
-        if (response.success) {
-            if (isEdit.value) {
-                isSuccess.value = true;
-                successTitle.value = "Voucher type detail updated successfully!";
-                submitModal.value = false;
-                snackbar.value = true;
-            } else {
-                router.push({ path: "/voucher-type", query: { created: "true" } });
-            }
-        } else {
-            isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: Failed to ${
-                isEdit.value ? "update" : "create"
-            } voucher type`;
-            submitModal.value = false;
-            snackbar.value = true;
-        }
+        // const response = isEdit.value ? await editVoucherType(payload) : await createVoucherType(payload);
+        // if (response.success) {
+        //     if (isEdit.value) {
+        //         isSuccess.value = true;
+        //         successTitle.value = "Voucher type detail updated successfully!";
+        //         submitModal.value = false;
+        //         snackbar.value = true;
+        //     } else {
+        //         router.push({ path: "/voucher-type", query: { created: "true" } });
+        //     }
+        // } else {
+        //     isSuccess.value = false;
+        //     errorTitle.value = `Status ${response.status}: ${response.message}`;
+        //     submitModal.value = false;
+        //     snackbar.value = true;
+        // }
     } catch (error) {
         console.error(error);
     } finally {
         loading.value = false;
+        submitModal.value = false;
     }
 }
 
 function resetForm() {
-    if (route.params.id) form.value = { ...originalData };
-    else {
+    if (route.params.id) {
+        form.value = { ...originalData };
+        previewUrl.value = originalData.previewUrl;
+    } else {
         form.value = {
             voucherTypeCode: null,
             colourSchema: null,

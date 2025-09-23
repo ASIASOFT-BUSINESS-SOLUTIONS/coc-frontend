@@ -95,14 +95,28 @@
                             <v-row dense class="align-center">
                                 <v-col>
                                     <div class="text-subtitle-1 text-medium-emphasis">Image Url</div>
-                                    <v-text-field
+                                    <!-- <v-text-field
                                         placeholder="Enter Image Url"
                                         v-model="form.image"
                                         hint="Suggestion: Image with transparent background."
                                         persistent-hint="true"
                                         class="mb-2"
                                         density="compact"
-                                    ></v-text-field>
+                                    ></v-text-field> -->
+                                    <v-file-upload
+                                        class="mb-6"
+                                        color="#F4F4F4"
+                                        hide-browse
+                                        title="Choose File or drag and drop"
+                                        divider-text="JPG or PNG formats, up to 10MB"
+                                        show-size
+                                        clearable
+                                        accept=".jpg, .png"
+                                        icon="mdi-upload"
+                                        v-model="form.image"
+                                        @update:model-value="previewImage"
+                                    >
+                                    </v-file-upload>
                                 </v-col>
                             </v-row>
                             <v-row dense class="align-center">
@@ -237,7 +251,7 @@
                                             <v-container>
                                                 <v-row dense align="center">
                                                     <v-col cols="5">
-                                                        <v-img :src="form.image"></v-img>
+                                                        <v-img :src="previewUrl"></v-img>
                                                     </v-col>
                                                     <v-col cols="7" class="text-left">
                                                         <v-row dense justify="stretch">
@@ -265,20 +279,6 @@
                                                     </v-col>
                                                 </v-row>
                                             </v-container>
-                                            <!-- <v-sheet
-                                        rounded="circle"
-                                        class="absolute bottom-4 right-[-1%]"
-                                        width="10%"
-                                        aspect-ratio="1"
-                                    ></v-sheet>
-                                    <v-sheet
-                                        rounded="circle"
-                                        height="40"
-                                        width="40"
-                                        color="white"
-                                        class="position-absolute bottom-0 mb-10"
-                                        style="left: -20px"
-                                    ></v-sheet> -->
                                         </v-img>
                                     </template>
                                     <template v-else>
@@ -383,6 +383,29 @@ const tomorrowStr = tomorrow.toISOString().split("T")[0];
 
 const validation = rules;
 
+const previewUrl = ref(null);
+function previewImage(file) {
+    if (!file) {
+        previewUrl.value = null;
+        return;
+    }
+    // file can be File or File[]
+    const selected = Array.isArray(file) ? file[0] : file;
+
+    const validTypes = ["image/jpeg", "image/png"];
+
+    // ✅ Validate the MIME type
+    if (!validTypes.includes(selected.type)) {
+        previewUrl.value = null; // clear preview
+        form.value.image = null; // clear the v-model if you use it
+        isSuccess.value = false;
+        errorTitle.value = `Invalid file type: ${selected.name}. Only JPG and PNG are allowed.`;
+        snackbar.value = true;
+        return;
+    }
+    previewUrl.value = URL.createObjectURL(selected);
+}
+
 const formValid = ref(null);
 const form = ref({
     voucherTypeKey: null,
@@ -428,9 +451,6 @@ watch(
             const response = await getVoucherType(newKey);
             form.value.voucherTypeCode = response.data.voucherTypeCode;
             form.value.voucherTypeDesc = response.data.voucherTypeDesc;
-            // form.value.startDate = new Date(response.data.startDate).toISOString().slice(0, 10);
-            // form.value.endDate = new Date(response.data.endDate).toISOString().slice(0, 10);
-            form.value.image = response.data.image;
             form.value.colourSchema = response.data.colourSchema;
             form.value.termCondition = response.data.termCondition;
 
@@ -442,6 +462,11 @@ watch(
             originalData = { ...response.data };
             originalData.startDate = new Date(response.data.startDate).toISOString().slice(0, 10);
             originalData.endDate = new Date(response.data.endDate).toISOString().slice(0, 10);
+            originalData.image = null;
+            originalData.previewUrl = response.data.image;
+
+            previewUrl.value = response.data.image;
+            form.value.image = null;
         } catch (err) {
             console.error("Failed to load voucher type detail", err);
         }
@@ -516,7 +541,7 @@ async function onSubmit() {
         if (response.success) router.push({ path: "/voucher-batch-list", query: { created: "true" } });
         else {
             isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: Failed to generate voucher by batch`;
+            errorTitle.value = `Status ${response.status}: ${response.message}`;
             snackbar.value = true;
         }
     } catch (error) {

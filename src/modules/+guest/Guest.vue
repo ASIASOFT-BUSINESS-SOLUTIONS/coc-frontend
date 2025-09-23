@@ -7,10 +7,6 @@
                     View and manage registered users and their voucher redemptions
                 </div>
             </v-col>
-
-            <v-col cols="12" sm="4" class="text-sm-right text-left mt-2 mt-md-0">
-                <ExportList type="guest" />
-            </v-col>
         </v-row>
 
         <v-text-field
