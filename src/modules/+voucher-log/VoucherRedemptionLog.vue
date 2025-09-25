@@ -63,7 +63,7 @@
                     <div class="text-center mb-12">
                         <v-icon class="mb-5" color="success" icon="mdi-check-circle" size="80"></v-icon>
                         <h3 class="text-h4 font-weight-bold mb-3">Redeemed</h3>
-                        <div class="mb-4 justify-center">Asiasoft Reward</div>
+                        <div class="mb-4 justify-center">{{ formatEmpty(selectedItem.voucherTypeCode) }}</div>
                         <!-- <v-chip color="#6A0DAD" size="large" label class="text-white font-weight-bold" variant="flat"
                             >Halal</v-chip
                         > -->
@@ -72,6 +72,12 @@
                         <v-col cols="4" class="opacity-60">Guest Code:</v-col>
                         <v-col cols="8" class="font-weight-medium text-right">{{
                             formatEmpty(selectedItem.guestCode)
+                        }}</v-col>
+                    </v-row>
+                    <v-row dense class="mt-1">
+                        <v-col cols="4" class="opacity-60">Email Address:</v-col>
+                        <v-col cols="8" class="font-weight-medium text-right">{{
+                            formatEmpty(selectedItem.emailAddress)
                         }}</v-col>
                     </v-row>
 
@@ -86,13 +92,6 @@
                         <v-col cols="4" class="opacity-60">Issued Datetime:</v-col>
                         <v-col cols="8" class="font-weight-medium text-right">{{
                             formatDatetime(selectedItem.createdAt)
-                        }}</v-col>
-                    </v-row>
-
-                    <v-row dense class="mt-1">
-                        <v-col cols="4" class="opacity-60">Issued By:</v-col>
-                        <v-col cols="8" class="font-weight-medium text-right">{{
-                            formatEmpty(selectedItem.createdBy)
                         }}</v-col>
                     </v-row>
 

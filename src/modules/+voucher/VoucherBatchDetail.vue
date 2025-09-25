@@ -109,6 +109,68 @@
                     <v-divider thickness="2"></v-divider>
                     <v-card-text class="text-left">
                         <v-row>
+                            <v-col>
+                                <v-card flat rounded="lg" class="pa-2 ma-auto">
+                                    <template v-if="detail?.colourSchema !== null">
+                                        <v-img
+                                            rounded="lg"
+                                            class="voucher-card"
+                                            min-height="150"
+                                            :gradient="`to right, ${detail?.colourSchema}`"
+                                        >
+                                            <v-container min-height="150" style="height: 100%">
+                                                <v-row dense align="center" style="height: 100%">
+                                                    <v-col cols="5">
+                                                        <v-img :src="detail?.image"></v-img>
+                                                    </v-col>
+                                                    <v-col cols="7" class="text-left">
+                                                        <v-row dense justify="stretch">
+                                                            <v-col cols="12">
+                                                                <div
+                                                                    class="text-white font-weight-bold text-sm-h2 text-md-h4"
+                                                                    :class="smAndDown ? 'text-h4' : 'text-h5'"
+                                                                >
+                                                                    {{ formatEmpty(detail?.voucherTypeCode) }}
+                                                                </div>
+                                                            </v-col>
+                                                        </v-row>
+                                                    </v-col>
+                                                </v-row>
+                                            </v-container>
+                                        </v-img>
+                                        <div class="status-badge__wrapper active">
+                                            <div class="pl-3 pr-3 pt-1 pb-1 font-weight-bold status-badge active">
+                                                Active
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <template v-else>
+                                        <v-sheet
+                                            min-height="150"
+                                            rounded="lg"
+                                            color="#D9D9D9"
+                                            class="pt-3 voucher-card text-center"
+                                        >
+                                            <v-container>
+                                                <v-row dense>
+                                                    <v-col>
+                                                        <v-icon color="#9E9E9E" size="60"> mdi-note-remove </v-icon>
+                                                    </v-col>
+                                                </v-row>
+                                                <v-row dense>
+                                                    <v-col>
+                                                        <span class="text-subtitle-2 text-disabled font-weight-medium"
+                                                            >No Voucher Color Selected
+                                                        </span>
+                                                    </v-col>
+                                                </v-row>
+                                            </v-container>
+                                        </v-sheet>
+                                    </template>
+                                </v-card>
+                            </v-col>
+                        </v-row>
+                        <v-row class="pl-2 pr-2">
                             <v-col cols="12" sm="6" order="1" order-sm="1">
                                 <div class="text-subtitle-1 text-medium-emphasis">Batch Key</div>
                                 <div class="text-subtitle-2 font-weight-bold">{{ formatEmpty(detail?.batchKey) }}</div>
@@ -118,7 +180,7 @@
                                 <div class="text-subtitle-2 font-weight-bold">{{ formatDate(detail?.startDate) }}</div>
                             </v-col>
                         </v-row>
-                        <v-row>
+                        <v-row class="pl-2 pr-2">
                             <v-col cols="12" sm="6" order="2" order-sm="1">
                                 <div class="text-subtitle-1 text-medium-emphasis">Voucher Type</div>
                                 <div class="text-subtitle-2 font-weight-bold">
@@ -130,7 +192,7 @@
                                 <div class="text-subtitle-2 font-weight-bold">{{ formatDate(detail?.endDate) }}</div>
                             </v-col>
                         </v-row>
-                        <v-row>
+                        <v-row class="pl-2 pr-2">
                             <v-col cols="12">
                                 <div class="text-subtitle-1 text-medium-emphasis">Description</div>
                                 <div class="text-body-2">{{ formatEmpty(detail?.voucherTypeDesc) }}</div>
@@ -244,10 +306,12 @@ import logo from "../../assets/logo.svg";
 import { getGuests } from "../../api/guest";
 import ConfirmDialog from "../../components/ConfirmDialog.vue";
 import Snackbar from "../../components/Snackbar.vue";
+import { useDisplay } from "vuetify";
 
 const detail = ref(null);
 const route = useRoute();
 const router = useRouter();
+const { smAndDown } = useDisplay();
 const id = route.params.id;
 const isEdit = computed(() => route.path.endsWith("/edit"));
 
@@ -284,6 +348,7 @@ onMounted(async () => {
         const response = await getVoucher(id);
         if (response) {
             detail.value = response.data;
+            console.log(detail.value);
         } else notFound.value = true;
 
         if (isEdit) {

@@ -261,10 +261,12 @@ import { convertDate, formatDatetime, formatEmpty } from "../../utils/formatter"
 import Snackbar from "../../components/Snackbar.vue";
 import NotFound from "../../views/NotFound.vue";
 import logo from "../../assets/logo.svg";
+import { useDisplay } from "vuetify";
 
 const detail = ref(null);
 const route = useRoute();
 const router = useRouter();
+const { smAndDown } = useDisplay();
 const id = route.params.id;
 
 const loading = ref(true);

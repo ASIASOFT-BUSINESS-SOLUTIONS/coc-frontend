@@ -3,7 +3,14 @@
         <v-card rounded="xl">
             <v-card-title class="d-flex justify-space-between align-center" style="background-color: #ffd700">
                 <span class="text-h6 font-weight-bold pl-2">Manual Key In</span>
-                <v-btn icon variant="text" @click="isOpen = false">
+                <v-btn
+                    icon
+                    variant="text"
+                    @click="
+                        isOpen = false;
+                        resetForm();
+                    "
+                >
                     <v-icon>mdi-close</v-icon>
                 </v-btn>
             </v-card-title>
@@ -93,6 +100,10 @@ const errorTitle = ref(null);
 const snackbar = ref(false);
 
 const typeLabel = computed(() => props.type.charAt(0).toUpperCase() + props.type.slice(1));
+
+function resetForm() {
+    code.value = null;
+}
 
 const onSubmit = async () => {
     const payload = {

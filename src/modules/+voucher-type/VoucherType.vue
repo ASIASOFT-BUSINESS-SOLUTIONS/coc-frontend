@@ -152,6 +152,7 @@ import { useRoute, useRouter } from "vue-router";
 import Snackbar from "../../components/Snackbar.vue";
 import { deleteVoucherType, getVoucherTypes } from "../../api/voucher-type";
 import { formatDate, formatDatetime } from "../../utils/formatter";
+import { deleteFile } from "../../api/upload";
 
 const route = useRoute();
 const router = useRouter();
@@ -267,6 +268,10 @@ async function confirmDelete(id) {
         if (response.success) {
             isSuccess.value = true;
             successTitle.value = "The voucher type is successfully deleted!";
+            if (selectedItem.value.image) {
+                const params = new URL(selectedItem.value.image).searchParams;
+                const deleteImage = await deleteFile({ filename: params.get("filename") });
+            }
         } else {
             isSuccess.value = false;
             errorTitle.value = `Status ${response.status}: Failed to delete voucher type`;

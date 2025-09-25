@@ -82,7 +82,7 @@
                     </v-row>
 
                     <v-row dense class="mt-1">
-                        <v-col cols="4" class="opacity-60">Checked In Datetime:</v-col>
+                        <v-col cols="4" class="opacity-60">Check In Datetime:</v-col>
                         <v-col cols="8" class="font-weight-medium text-right">{{
                             formatDatetime(selectedItem.createdAt) ?? "-"
                         }}</v-col>

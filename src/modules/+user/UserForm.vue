@@ -185,7 +185,7 @@
                                 </v-col>
                             </v-row>
                             <v-row class="mt-1" dense>
-                                <v-col sm="6" cols="12">
+                                <v-col md="3">
                                     <v-btn
                                         block
                                         flat
@@ -199,7 +199,7 @@
                                         {{ isEdit ? "Save Changes" : "Create" }}
                                     </v-btn>
                                 </v-col>
-                                <v-col sm="6" cols="12">
+                                <v-col md="3">
                                     <v-btn
                                         class="text-none text-body-1"
                                         flat
@@ -247,7 +247,6 @@ import { rules } from "../../constants/validation.constant";
 import ConfirmDialog from "../../components/ConfirmDialog.vue";
 import NotFound from "../../views/NotFound.vue";
 import logo from "../../assets/logo.svg";
-import { isObject } from "chart.js/helpers";
 
 const route = useRoute();
 const router = useRouter();

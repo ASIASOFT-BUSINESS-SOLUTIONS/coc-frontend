@@ -340,7 +340,7 @@
                             </template>
                             <v-card-text class="pa-0 mt-5">
                                 <div class="text-body-1 text-justify text-medium-emphasis">
-                                    {{ form.voucherTypeDesc ?? "-" }}
+                                    {{ formatEmpty(form.voucherTypeDesc) }}
                                 </div>
 
                                 <div class="text-subtitle-1 font-weight-bold text-left mt-6">Validity</div>
@@ -357,7 +357,7 @@
                                     class="text-body-2 text-justify text-medium-emphasis"
                                     style="white-space: pre-line"
                                 >
-                                    {{ form.termCondition ?? "-" }}
+                                    {{ formatEmpty(form.termCondition) }}
                                 </div>
                                 <v-btn flat block rounded="lg" color="#FFD700" size="large" class="mt-8" readonly>
                                     Redeem Now
@@ -376,7 +376,7 @@
             :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
             :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
             :iconColor="isSuccess ? '#388E3C' : '#F44336'"
-            :timeout="2500"
+            :timeout="3000"
         ></Snackbar>
     </div>
 </template>
@@ -388,12 +388,12 @@ import { useDisplay } from "vuetify";
 import Snackbar from "../../components/Snackbar.vue";
 import { createVoucherType, editVoucherType, getVoucherType } from "../../api/voucher-type";
 import { rules } from "../../constants/validation.constant";
-import { convertDate } from "../../utils/formatter";
+import { convertDate, compressImageToWebP, formatEmpty } from "../../utils/formatter";
 import { voucherColorType } from "../../constants/selection.constant";
 import ConfirmDialog from "../../components/ConfirmDialog.vue";
 import NotFound from "../../views/NotFound.vue";
 import logo from "../../assets/logo.svg";
-import { Cloudflare_UploadToR2 } from "../../api/upload";
+import { deleteFile, uploadFile } from "../../api/upload";
 
 const { smAndDown } = useDisplay();
 
@@ -510,12 +510,18 @@ const selectedGradient = computed(() => {
 async function submitForm() {
     loading.value = true;
     try {
-        const upload = await Cloudflare_UploadToR2({
-            bucket: "asiasoft-reward-bucket",
-            filepath: "/backoffice/voucher",
-            body: form.value.image,
-        });
-        // const result = upload.result;
+        let fileUrl = previewUrl.value;
+        let compressedImage;
+        if (form.value.image) {
+            compressedImage = await compressImageToWebP(form.value.image, 35);
+            const upload = await uploadFile({ filename: compressedImage.lastModified }, compressedImage);
+            if (upload && upload.success) fileUrl = upload.data;
+            else {
+                // TODO: Block from add voucher
+                throw new Error();
+            }
+        }
+        // console.log("%c Payload: ", "background: #222; color: #bada55", compressedImage);
 
         const payload = {
             voucherTypeCode: form.value.voucherTypeCode,
@@ -525,30 +531,36 @@ async function submitForm() {
             endDate: new Date(form.value.endDate).toISOString(),
             remark: form.value.remark,
             termCondition: form.value.termCondition,
-            image: form.value.image,
+            image: fileUrl,
             colourSchema: form.value.colourSchema,
             forFoodSelection: form.value.forFoodSelection,
             ...(isEdit.value && { voucherTypeKey: route.params.id }), // add only in edit
         };
 
-        console.log("%c Payload: ", "background: #222; color: #bada55", payload);
+        const response = isEdit.value ? await editVoucherType(payload) : await createVoucherType(payload);
+        if (response.success) {
+            if (isEdit.value) {
+                isSuccess.value = true;
+                successTitle.value = "Voucher type detail updated successfully!";
+                submitModal.value = false;
+                snackbar.value = true;
 
-        // const response = isEdit.value ? await editVoucherType(payload) : await createVoucherType(payload);
-        // if (response.success) {
-        //     if (isEdit.value) {
-        //         isSuccess.value = true;
-        //         successTitle.value = "Voucher type detail updated successfully!";
-        //         submitModal.value = false;
-        //         snackbar.value = true;
-        //     } else {
-        //         router.push({ path: "/voucher-type", query: { created: "true" } });
-        //     }
-        // } else {
-        //     isSuccess.value = false;
-        //     errorTitle.value = `Status ${response.status}: ${response.message}`;
-        //     submitModal.value = false;
-        //     snackbar.value = true;
-        // }
+                if (payload.image !== originalData.previewUrl) {
+                    const params = new URL(originalData.previewUrl).searchParams;
+                    const deleteImage = await deleteFile({ filename: params.get("filename") });
+                }
+            } else {
+                router.push({ path: "/voucher-type", query: { created: "true" } });
+            }
+        } else {
+            if (form.value.image) {
+                const deleteImage = await deleteFile({ filename: compressedImage.lastModified });
+            }
+            isSuccess.value = false;
+            errorTitle.value = `Status ${response.status}: ${response.message}`;
+            submitModal.value = false;
+            snackbar.value = true;
+        }
     } catch (error) {
         console.error(error);
     } finally {
