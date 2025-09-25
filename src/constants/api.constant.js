@@ -15,7 +15,7 @@ export const API_VOUCHER_TYPE = `${API_BACKOFFICE}/voucherType`;
 export const API_VOUCHER = `${API_BACKOFFICE}/voucher`;
 
 // Log
-export const API_LOG = `${API_BACKOFFICE}/log`;
+export const API_VOUCHER_LOG = `${API_BACKOFFICE}/voucherLog`;
 
 // Login
 export const API_LOGIN = `${API_BACKOFFICE}/auth/login`;

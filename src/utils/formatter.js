@@ -53,3 +53,66 @@ export function statusColor(status) {
             return "grey";
     }
 }
+
+/**
+ * Compress an image to WebP while keeping transparency.
+ * @param {File} file           Original image file (PNG, etc.)
+ * @param {number} targetKB     Target size in KB (default 35)
+ * @param {number} maxWidth     Maximum width in pixels before downscaling
+ * @returns {Promise<File>}     A new File object in WebP format
+ */
+export async function compressImageToWebP(file, targetKB = 35, maxWidth = 800) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            // Scale image if it's wider than maxWidth
+            let scale = Math.min(1, maxWidth / img.width);
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+
+            function redraw() {
+                canvas.width = img.width * scale;
+                canvas.height = img.height * scale;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            }
+
+            redraw();
+
+            let quality = 0.8; // start quality
+            const tryCompress = () => {
+                canvas.toBlob(
+                    (blob) => {
+                        if (!blob) return reject("Compression failed");
+
+                        const sizeKB = blob.size / 1024;
+                        if (sizeKB <= targetKB || (quality <= 0.3 && scale <= 0.3)) {
+                            // Done: return as File
+                            resolve(
+                                new File([blob], file.name.replace(/\.[^.]+$/, ".webp"), {
+                                    type: "image/webp",
+                                })
+                            );
+                        } else {
+                            // If still too big, lower quality first, then scale
+                            if (quality > 0.3) {
+                                quality -= 0.1;
+                            } else {
+                                scale *= 0.8;
+                                redraw();
+                                quality = 0.8; // reset quality when resizing
+                            }
+                            tryCompress();
+                        }
+                    },
+                    "image/webp",
+                    quality
+                );
+            };
+
+            tryCompress();
+        };
+        img.onerror = reject;
+        img.src = URL.createObjectURL(file);
+    });
+}

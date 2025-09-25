@@ -30,16 +30,9 @@
             show-current-page
             @update:options="loadItems"
         >
-            <template #item.status="{ item }">
-                <v-chip
-                    :color="item.status === 'Redeemed' ? 'green' : 'yellow'"
-                    size="small"
-                    label
-                    class="text-white font-weight-bold"
-                >
-                    {{ item.status }}
-                </v-chip>
-            </template>
+            <template #item.guestCode="{ item }"> {{ formatEmpty(item.guestCode) }} </template>
+            <template #item.emailAddress="{ item }"> {{ formatEmpty(item.emailAddress) }} </template>
+            <template #item.createdAt="{ item }"> {{ formatDate(item.createdAt) }} </template>
             <template #item.action="{ item }">
                 <v-tooltip text="View" location="top">
                     <template v-slot:activator="{ props }">
@@ -69,39 +62,36 @@
                 <v-card-text>
                     <div class="text-center mb-12">
                         <v-icon class="mb-5" color="success" icon="mdi-check-circle" size="80"></v-icon>
-                        <h3 class="text-h4 font-weight-bold mb-3">Free {{ selectedItem.voucher_type }}</h3>
-                        <div class="mb-4 justify-center">
-                            Complimentary spaghetti set with a regular size aloha chichken pizza with extra cheese.
-                        </div>
-                        <v-chip color="#6A0DAD" size="large" label class="text-white font-weight-bold" variant="flat"
+                        <h3 class="text-h4 font-weight-bold mb-3">Redeemed</h3>
+                        <div class="mb-4 justify-center">{{ formatEmpty(selectedItem.voucherTypeCode) }}</div>
+                        <!-- <v-chip color="#6A0DAD" size="large" label class="text-white font-weight-bold" variant="flat"
                             >Halal</v-chip
-                        >
+                        > -->
                     </div>
                     <v-row dense class="mt-1">
-                        <v-col cols="4" class="opacity-60">Guest Name:</v-col>
+                        <v-col cols="4" class="opacity-60">Guest Code:</v-col>
                         <v-col cols="8" class="font-weight-medium text-right">{{
-                            selectedItem.guest_name ?? "-"
+                            formatEmpty(selectedItem.guestCode)
+                        }}</v-col>
+                    </v-row>
+                    <v-row dense class="mt-1">
+                        <v-col cols="4" class="opacity-60">Email Address:</v-col>
+                        <v-col cols="8" class="font-weight-medium text-right">{{
+                            formatEmpty(selectedItem.emailAddress)
                         }}</v-col>
                     </v-row>
 
                     <v-row dense class="mt-1">
                         <v-col cols="4" class="opacity-60">Reference No:</v-col>
                         <v-col cols="8" class="font-weight-medium text-right">{{
-                            selectedItem.voucher_code ?? "-"
+                            formatEmpty(selectedItem.voucherNo)
                         }}</v-col>
                     </v-row>
 
                     <v-row dense class="mt-1">
                         <v-col cols="4" class="opacity-60">Issued Datetime:</v-col>
                         <v-col cols="8" class="font-weight-medium text-right">{{
-                            selectedItem.redemption_date ?? "-"
-                        }}</v-col>
-                    </v-row>
-
-                    <v-row dense class="mt-1">
-                        <v-col cols="4" class="opacity-60">Issued By:</v-col>
-                        <v-col cols="8" class="font-weight-medium text-right">{{
-                            selectedItem.issued_by ?? "-"
+                            formatDatetime(selectedItem.createdAt)
                         }}</v-col>
                     </v-row>
 
@@ -124,7 +114,7 @@
 <script setup>
 import { ref } from "vue";
 import { getVoucherLog } from "../../api/voucher";
-import { getGuest } from "../../api/guest";
+import { formatDatetime, formatEmpty, formatDate } from "../../utils/formatter";
 
 const modal = ref(false);
 const selectedItem = ref(null);
@@ -134,11 +124,10 @@ function viewItem(item) {
 }
 
 const headers = ref([
-    { title: "Guest Name", key: "guest_name", minWidth: 200 },
-    { title: "Voucher Code", key: "voucher_code", minWidth: 150 },
-    { title: "Voucher Type", key: "voucher_type", minWidth: 150 },
-    { title: "Redemption Date", key: "redemption_date", minWidth: 200 },
-    { title: "Status", key: "status" },
+    { title: "Voucher No.", key: "voucherNo", minWidth: 150 },
+    { title: "Guest Code", key: "guestCode", minWidth: 200 },
+    { title: "Email Address", key: "emailAddress", minWidth: 150 },
+    { title: "Redemption Date", key: "createdAt", minWidth: 150 },
     { title: "Action", key: "action", sortable: false, fixed: "end" },
 ]);
 

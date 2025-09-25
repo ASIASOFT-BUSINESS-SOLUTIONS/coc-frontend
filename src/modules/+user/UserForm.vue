@@ -9,7 +9,7 @@
 
     <NotFound v-else-if="notFound" />
     <div v-else class="pa-8">
-        <v-row class="align-center mb-4">
+        <v-row class="align-center">
             <v-col cols="12" md="8">
                 <v-breadcrumbs
                     :items="breadcrumbs"
@@ -25,7 +25,7 @@
         </v-row>
 
         <v-row>
-            <v-col cols="12" md="4" v-if="isEdit">
+            <!-- <v-col cols="12" md="4" v-if="isEdit">
                 <v-row>
                     <v-col cols="12">
                         <v-card rounded="xl" flat style="border: 2px solid #e0e0e0">
@@ -90,8 +90,8 @@
                         </v-card>
                     </v-col>
                 </v-row>
-            </v-col>
-            <v-col cols="12" md="8">
+            </v-col> -->
+            <v-col cols="12">
                 <v-card rounded="xl" flat style="border: 2px solid #e0e0e0">
                     <v-card-title class="d-flex justify-space-between align-center">
                         <span class="font-weight-bold">Account Detail</span>
@@ -156,17 +156,36 @@
                                 </v-col>
                                 <v-col cols="12" md="6">
                                     <div class="text-subtitle-2 font-weight-bold">Role</div>
-                                    <v-text-field
+                                    <v-select
                                         v-model="form.userTypeCode"
-                                        disabled
-                                        placeholder="Role"
-                                        class="mb-2"
                                         density="compact"
-                                    ></v-text-field>
+                                        class="mb-2"
+                                        placeholder="Role Selection"
+                                        :rules="[rules.required]"
+                                        :items="userRoles"
+                                        item-title="description"
+                                        item-value="code"
+                                    ></v-select>
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col cols="12">
+                                    <div class="text-subtitle-2 font-weight-bold">Voucher Type Code</div>
+                                    <v-select
+                                        v-model="form.voucherTypeCode"
+                                        density="compact"
+                                        class="mb-2"
+                                        multiple
+                                        placeholder="Voucher Type Code Selection"
+                                        :disabled="form.userTypeCode !== 'K'"
+                                        :items="voucherTypes"
+                                        item-title="code"
+                                        item-value="code"
+                                    ></v-select>
                                 </v-col>
                             </v-row>
                             <v-row class="mt-1" dense>
-                                <v-col sm="6" cols="12">
+                                <v-col md="3">
                                     <v-btn
                                         block
                                         flat
@@ -174,12 +193,13 @@
                                         color="#FFD700"
                                         size="large"
                                         :loading="loading"
+                                        :disabled="!isFormValid"
                                         @click="submitForm"
                                     >
                                         {{ isEdit ? "Save Changes" : "Create" }}
                                     </v-btn>
                                 </v-col>
-                                <v-col sm="6" cols="12">
+                                <v-col md="3">
                                     <v-btn
                                         class="text-none text-body-1"
                                         flat
@@ -220,8 +240,8 @@
 
 <script setup>
 import { useRoute, useRouter } from "vue-router";
-import { onMounted, ref } from "vue";
-import { createUser, editUser, getUser } from "../../api/user";
+import { onMounted, ref, watch, computed } from "vue";
+import { createUser, editUser, getRolesAndVoucherTypes, getUser } from "../../api/user";
 import Snackbar from "../../components/Snackbar.vue";
 import { rules } from "../../constants/validation.constant";
 import ConfirmDialog from "../../components/ConfirmDialog.vue";
@@ -247,7 +267,7 @@ const form = ref({
     userName: null,
     password: null,
     confirmPassword: null,
-    userTypeCode: "Admin",
+    userTypeCode: null,
     voucherTypeCode: null,
 });
 
@@ -261,7 +281,16 @@ const successTitle = ref(null);
 const errorTitle = ref(null);
 const snackbar = ref(false);
 
+const userRoles = ref(null);
+const voucherTypes = ref(null);
+
 onMounted(async () => {
+    const response = await getRolesAndVoucherTypes({ includeUserTypes: true, includeVoucherTypes: true });
+    if (response) {
+        userRoles.value = response.data.userTypes;
+        voucherTypes.value = response.data.voucherTypes;
+    }
+
     if (route.params.id) {
         try {
             const response = await getUser(route.params.id);
@@ -277,10 +306,26 @@ onMounted(async () => {
         }
         isEdit.value = true;
     }
+
     loading.value = false;
 });
 
 const validation = rules;
+
+const isFormValid = computed(() => {
+    const f = form.value;
+
+    // always required
+    const baseChecks = f.userID && f.userTypeCode !== null;
+
+    if (isEdit.value) {
+        // ✅ In edit mode: no password or confirmPassword check
+        return baseChecks;
+    } else {
+        // ✅ Create mode: include password + confirmPassword match
+        return baseChecks && f.password && f.confirmPassword && f.password === f.confirmPassword;
+    }
+});
 
 async function submitForm() {
     loading.value = true;
@@ -289,7 +334,7 @@ async function submitForm() {
             userID: form.value.userID,
             userName: form.value.userName,
             userTypeCode: form.value.userTypeCode,
-            voucherTypeCode: form.value.voucherTypeCode,
+            voucherTypeCode: form.value.voucherTypeCode.join(","),
             password: form.value.password || undefined, // skip empty password on edit
             ...(isEdit.value && { userKey: route.params.id }), // add only in edit
         };
@@ -305,7 +350,7 @@ async function submitForm() {
             }
         } else {
             isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: Failed to ${isEdit.value ? "update" : "create"} user`;
+            errorTitle.value = `Status ${response.status}: ${response.message}`;
             snackbar.value = true;
         }
     } catch (error) {
@@ -324,10 +369,19 @@ function resetForm() {
             userName: null,
             password: null,
             confirmPassword: null,
-            userTypeCode: "Admin",
+            userTypeCode: null,
             voucherTypeCode: null,
         };
     }
     cancelModal.value = false;
 }
+
+watch(
+    () => form.value.userTypeCode,
+    (newVal) => {
+        if (newVal !== "K") {
+            form.value.voucherTypeCode = null; // clear it so stale values don’t stay
+        }
+    }
+);
 </script>

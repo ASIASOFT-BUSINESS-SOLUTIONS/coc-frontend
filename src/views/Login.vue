@@ -105,9 +105,14 @@ async function onSubmit() {
         const response = await authLogin({ userID: userID.value, password: password.value });
 
         if (response.status === 200) {
+            if (response.data.voucherTypeCode && response.data.userTypeCode == "K") {
+                isSuccess.value = false;
+                errorTitle.value = `Status ${response.status}: Only admin account is allowed to access.`;
+                snackbar.value = true;
+                return;
+            }
             const userStore = useUserStore();
             userStore.setUser(response.data);
-
             router.push("/dashboard");
         } else {
             isSuccess.value = false;

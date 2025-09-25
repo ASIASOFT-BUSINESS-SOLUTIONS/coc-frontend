@@ -82,7 +82,7 @@
                     </v-row>
 
                     <v-row dense class="mt-1">
-                        <v-col cols="4" class="opacity-60">Issued Datetime:</v-col>
+                        <v-col cols="4" class="opacity-60">Check In Datetime:</v-col>
                         <v-col cols="8" class="font-weight-medium text-right">{{
                             formatDatetime(selectedItem.createdAt) ?? "-"
                         }}</v-col>
@@ -126,7 +126,6 @@ import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Snackbar from "../../components/Snackbar.vue";
 import { formatDatetime, formatEmpty } from "../../utils/formatter";
-import ExportList from "../../components/ExportList.vue";
 
 // The Datatable
 const headers = ref([
@@ -135,7 +134,7 @@ const headers = ref([
     { title: "Company Name", key: "companyName", minWidth: 180 },
     { title: "Email Address", key: "emailAddress", minWidth: 200 },
     { title: "Mobile No.", key: "mobileNo", minWidth: 150 },
-    { title: "Issued Datetime", key: "createdAt", minWidth: 200 },
+    { title: "Checked In Datetime", key: "createdAt", minWidth: 200 },
     { title: "Status", key: "status" },
     { title: "Action", key: "action", sortable: false, fixed: "end" },
 ]);

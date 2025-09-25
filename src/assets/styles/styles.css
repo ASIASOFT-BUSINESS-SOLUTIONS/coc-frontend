@@ -24,3 +24,141 @@
 .v-btn.v-btn--disabled {
     opacity: 0.5 !important; /* adjust to your liking */
 }
+
+.voucher-card {
+    position: relative;
+    display: flex;
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+
+    &::before,
+    &::after {
+        content: "";
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: white;
+        top: 50%;
+        transform: translateY(-50%);
+        box-shadow: 0 0 0 2px var(--colors-background-secondary);
+    }
+
+    &::before {
+        left: -14px;
+    }
+
+    &::after {
+        right: -14px;
+    }
+}
+
+.status-badge__wrapper {
+    position: absolute;
+    top: 4px;
+    right: 3px;
+    border-top-right-radius: 20%;
+    border-bottom-left-radius: 20%;
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -4px;
+        width: 4px;
+        height: 4px;
+        border-top-left-radius: 100%;
+        z-index: 0;
+    }
+
+    &::after {
+        content: "";
+        position: absolute;
+        bottom: -5px;
+        right: 0;
+        width: 5px;
+        height: 5px;
+        border-bottom-right-radius: 100%;
+        z-index: 0;
+    }
+
+    &.active {
+        background: #c7ffc9;
+        color: #388e3c;
+
+        &::before,
+        &::after {
+            background: green;
+            border: 1px solid green;
+        }
+    }
+
+    &.upcoming {
+        background: var(--colors-state-warningLight);
+        color: var(--colors-state-warning);
+
+        &::before,
+        &::after {
+            background: var(--colors-state-warning);
+            border: 1px solid var(--colors-state-warningLight);
+        }
+    }
+
+    &.expired {
+        background: var(--colors-state-errorLight);
+        color: var(--colors-state-error);
+
+        &::before,
+        &::after {
+            background: var(--colors-state-error);
+            border: 1px solid var(--colors-state-errorLight);
+        }
+    }
+
+    &.redeemed {
+        background: var(--colors-state-infoLight);
+        color: var(--colors-state-info);
+
+        &::before,
+        &::after {
+            background: var(--colors-state-info);
+            border: 1px solid var(--colors-state-infoLight);
+        }
+    }
+}
+
+.status-badge {
+    top: 0;
+    right: 0;
+    font-size: var(--font-size-xxs);
+    font-weight: var(--font-weight-md);
+    border-top-right-radius: 20%;
+    border-bottom-left-radius: 20%;
+    text-align: center;
+    padding: var(--spacing-sm);
+    z-index: 2;
+    text-transform: capitalize;
+    position: relative;
+    box-shadow: -3px 2px 3px rgba(0, 0, 0, 0.4);
+
+    &.active {
+        background: #c7ffc9;
+        color: #388e3c;
+    }
+
+    &.upcoming {
+        background: var(--colors-state-warningLight);
+        color: var(--colors-state-warning);
+    }
+
+    &.expired {
+        background: var(--colors-state-errorLight);
+        color: var(--colors-state-error);
+    }
+
+    &.redeemed {
+        background: var(--colors-state-infoLight);
+        color: var(--colors-state-info);
+    }
+}

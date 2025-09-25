@@ -49,7 +49,54 @@
                         :onYes="resetForm"
                         color="#f44336"
                     />
-                    <v-btn flat rounded="lg" color="#ffd700" @click="submitForm" class="ml-2"> Save Changes </v-btn>
+
+                    <v-dialog v-model="submitModal" width="500">
+                        <template v-slot:activator="{ props: activatorProps }">
+                            <v-btn flat color="#ffd700" rounded="lg" class="ml-2" v-bind="activatorProps">
+                                Save Changes
+                            </v-btn>
+                        </template>
+
+                        <v-card rounded="xl">
+                            <v-card-title
+                                class="d-flex justify-space-between align-center"
+                                style="background-color: #ffd700"
+                            >
+                                <span class="text-h6 font-weight-bold pl-2">Confirm</span>
+                                <v-btn icon variant="text" @click="submitModal = false">
+                                    <v-icon>mdi-close</v-icon>
+                                </v-btn>
+                            </v-card-title>
+                            <v-card-text class="text-center mt-4">
+                                <div class="font-weight-medium">Are you sure you want to submit?</div>
+                                <v-row class="mt-6" dense>
+                                    <v-col>
+                                        <v-btn
+                                            flat
+                                            block
+                                            rounded="lg"
+                                            color="#FFD700"
+                                            size="large"
+                                            :loading="loading"
+                                            @click="submitForm"
+                                            >Yes</v-btn
+                                        >
+                                    </v-col>
+                                    <v-col>
+                                        <v-btn
+                                            flat
+                                            block
+                                            rounded="lg"
+                                            style="border: 2px solid #ffd700"
+                                            size="large"
+                                            @click="submitModal = false"
+                                            >No</v-btn
+                                        >
+                                    </v-col>
+                                </v-row>
+                            </v-card-text>
+                        </v-card>
+                    </v-dialog>
                 </template>
             </v-col>
         </v-row>
@@ -62,6 +109,68 @@
                     <v-divider thickness="2"></v-divider>
                     <v-card-text class="text-left">
                         <v-row>
+                            <v-col>
+                                <v-card flat rounded="lg" class="pa-2 ma-auto">
+                                    <template v-if="detail?.colourSchema !== null">
+                                        <v-img
+                                            rounded="lg"
+                                            class="voucher-card"
+                                            min-height="150"
+                                            :gradient="`to right, ${detail?.colourSchema}`"
+                                        >
+                                            <v-container min-height="150" style="height: 100%">
+                                                <v-row dense align="center" style="height: 100%">
+                                                    <v-col cols="5">
+                                                        <v-img :src="detail?.image"></v-img>
+                                                    </v-col>
+                                                    <v-col cols="7" class="text-left">
+                                                        <v-row dense justify="stretch">
+                                                            <v-col cols="12">
+                                                                <div
+                                                                    class="text-white font-weight-bold text-sm-h2 text-md-h4"
+                                                                    :class="smAndDown ? 'text-h4' : 'text-h5'"
+                                                                >
+                                                                    {{ formatEmpty(detail?.voucherTypeCode) }}
+                                                                </div>
+                                                            </v-col>
+                                                        </v-row>
+                                                    </v-col>
+                                                </v-row>
+                                            </v-container>
+                                        </v-img>
+                                        <div class="status-badge__wrapper active">
+                                            <div class="pl-3 pr-3 pt-1 pb-1 font-weight-bold status-badge active">
+                                                Active
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <template v-else>
+                                        <v-sheet
+                                            min-height="150"
+                                            rounded="lg"
+                                            color="#D9D9D9"
+                                            class="pt-3 voucher-card text-center"
+                                        >
+                                            <v-container>
+                                                <v-row dense>
+                                                    <v-col>
+                                                        <v-icon color="#9E9E9E" size="60"> mdi-note-remove </v-icon>
+                                                    </v-col>
+                                                </v-row>
+                                                <v-row dense>
+                                                    <v-col>
+                                                        <span class="text-subtitle-2 text-disabled font-weight-medium"
+                                                            >No Voucher Color Selected
+                                                        </span>
+                                                    </v-col>
+                                                </v-row>
+                                            </v-container>
+                                        </v-sheet>
+                                    </template>
+                                </v-card>
+                            </v-col>
+                        </v-row>
+                        <v-row class="pl-2 pr-2">
                             <v-col cols="12" sm="6" order="1" order-sm="1">
                                 <div class="text-subtitle-1 text-medium-emphasis">Batch Key</div>
                                 <div class="text-subtitle-2 font-weight-bold">{{ formatEmpty(detail?.batchKey) }}</div>
@@ -71,7 +180,7 @@
                                 <div class="text-subtitle-2 font-weight-bold">{{ formatDate(detail?.startDate) }}</div>
                             </v-col>
                         </v-row>
-                        <v-row>
+                        <v-row class="pl-2 pr-2">
                             <v-col cols="12" sm="6" order="2" order-sm="1">
                                 <div class="text-subtitle-1 text-medium-emphasis">Voucher Type</div>
                                 <div class="text-subtitle-2 font-weight-bold">
@@ -83,7 +192,7 @@
                                 <div class="text-subtitle-2 font-weight-bold">{{ formatDate(detail?.endDate) }}</div>
                             </v-col>
                         </v-row>
-                        <v-row>
+                        <v-row class="pl-2 pr-2">
                             <v-col cols="12">
                                 <div class="text-subtitle-1 text-medium-emphasis">Description</div>
                                 <div class="text-body-2">{{ formatEmpty(detail?.voucherTypeDesc) }}</div>
@@ -175,6 +284,15 @@
             </v-col>
         </v-row>
         <v-btn class="ma-auto mt-6" rounded="lg" prepend-icon="mdi-arrow-left" @click="router.back()" flat>Back</v-btn>
+
+        <Snackbar
+            v-model="snackbar"
+            :title="isSuccess ? successTitle : errorTitle"
+            :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
+            :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
+            :iconColor="isSuccess ? '#388E3C' : '#F44336'"
+            :timeout="2500"
+        ></Snackbar>
     </div>
 </template>
 
@@ -187,12 +305,20 @@ import NotFound from "../../views/NotFound.vue";
 import logo from "../../assets/logo.svg";
 import { getGuests } from "../../api/guest";
 import ConfirmDialog from "../../components/ConfirmDialog.vue";
+import Snackbar from "../../components/Snackbar.vue";
+import { useDisplay } from "vuetify";
 
 const detail = ref(null);
 const route = useRoute();
 const router = useRouter();
+const { smAndDown } = useDisplay();
 const id = route.params.id;
 const isEdit = computed(() => route.path.endsWith("/edit"));
+
+const isSuccess = ref(false);
+const successTitle = ref(null);
+const errorTitle = ref(null);
+const snackbar = ref(false);
 
 // Breadcrumbs
 const breadcrumbs = [
@@ -208,11 +334,12 @@ const form = ref({
     guestList: [],
 });
 
+const submitModal = ref(false);
 const cancelModal = ref(false);
 let originalData = null;
 
 function resetForm() {
-    if (route.params.id) form.value = { ...originalData };
+    form.value.guestList = originalData;
     cancelModal.value = false;
 }
 
@@ -221,13 +348,21 @@ onMounted(async () => {
         const response = await getVoucher(id);
         if (response) {
             detail.value = response.data;
-            originalData = { ...response.data };
+            console.log(detail.value);
         } else notFound.value = true;
 
         if (isEdit) {
             const guests = await getGuests();
             if (guests) allGuests.value = guests.data;
-            form.value.guestList = response.data.details.map((g) => g.emailAddress);
+
+            const merged = [
+                ...allGuests.value,
+                ...detail.value.details.filter((d) => !allGuests.value.some((g) => g.guestCode === d.guestCode)),
+            ];
+
+            allGuests.value = merged;
+            form.value.guestList = detail.value.details.map((g) => g.emailAddress);
+            originalData = detail.value.details.map((g) => g.emailAddress);
         }
     } catch (err) {
         console.error(err);
@@ -239,42 +374,59 @@ onMounted(async () => {
 
 const search = ref("");
 const filteredGuests = computed(() => {
-    const term = search.value.trim().toLowerCase();
-    if (!term) return allGuests.value;
-    return allGuests.value.filter((g) => g.guestName?.toLowerCase().includes(term));
+    if (!search.value) return allGuests.value;
+    return allGuests.value.filter((g) => g.guestName.toLowerCase().includes(search.value.toLowerCase()));
 });
 
 const selectAll = computed({
-    get: () => form.value.guestList.length === filteredGuests.value.length,
+    get: () =>
+        filteredGuests.value.length > 0 &&
+        filteredGuests.value.every((g) => form.value.guestList.includes(g.emailAddress)),
+
     set: (val) => {
         if (val) {
-            form.value.guestList = filteredGuests.value.map((g) => g.emailAddress);
+            // Add only the filtered guests to the selection,
+            // but keep previously-selected guests as well
+            const filteredEmails = filteredGuests.value.map((g) => g.emailAddress);
+            form.value.guestList = [...new Set([...form.value.guestList, ...filteredEmails])];
         } else {
-            form.value.guestList = [];
+            // Remove only the filtered guests from the selection
+            const filteredEmails = filteredGuests.value.map((g) => g.emailAddress);
+            form.value.guestList = form.value.guestList.filter((email) => !filteredEmails.includes(email));
         }
     },
 });
+
+function buildPayload() {
+    // Map voucherKey by email for quick lookup
+    const voucherMap = Object.fromEntries((detail.value?.details || []).map((d) => [d.emailAddress, d.voucherKey]));
+
+    return allGuests.value.map((g) => ({
+        emailAddress: g.emailAddress,
+        voucherKey: voucherMap[g.emailAddress] || null,
+        isDeleted: !form.value.guestList.includes(g.emailAddress) || false,
+    }));
+}
 
 async function submitForm() {
     loading.value = true;
     try {
         const payload = {
             batchKey: id,
-            details: form.value.guestList,
+            details: buildPayload(),
         };
 
-        console.log("%c Payload: ", "background: #222; color: #bada55", payload);
-
-        // const response = await editVoucher(payload);
-        // if (response.success) {
-        //     isSuccess.value = true;
-        //     successTitle.value = "Voucher updated successfully!";
-        //     snackbar.value = true;
-        // } else {
-        //     isSuccess.value = false;
-        //     errorTitle.value = `Status ${response.status}: Failed to ${isEdit.value ? "update" : "create"} user`;
-        //     snackbar.value = true;
-        // }
+        const response = await editVoucher(payload);
+        if (response.success) {
+            isSuccess.value = true;
+            successTitle.value = "Voucher updated successfully!";
+            snackbar.value = true;
+        } else {
+            isSuccess.value = false;
+            errorTitle.value = `Status ${response.status}: ${response.message}`;
+            snackbar.value = true;
+        }
+        submitModal.value = false;
     } catch (error) {
         console.error(error);
     } finally {

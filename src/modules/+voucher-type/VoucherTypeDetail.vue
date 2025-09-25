@@ -163,15 +163,15 @@
                     <v-card-title class="text-left">Preview</v-card-title>
                     <v-card-text>
                         <v-card flat rounded="lg" class="pa-2 ma-auto" style="border: 2px solid #e0e0e0">
-                            <template v-if="detail?.colourSchema !== '[Any]'">
+                            <template v-if="detail?.colourSchema !== null">
                                 <v-img
                                     rounded="lg"
-                                    aspect-ratio="16/9"
-                                    class="ma-auto"
+                                    class="voucher-card"
+                                    min-height="150"
                                     :gradient="`to right, ${detail?.colourSchema}`"
                                 >
-                                    <v-container>
-                                        <v-row dense align="center">
+                                    <v-container min-height="150" style="height: 100%">
+                                        <v-row dense align="center" style="height: 100%">
                                             <v-col cols="5">
                                                 <v-img :src="detail?.image"></v-img>
                                             </v-col>
@@ -185,37 +185,31 @@
                                                             {{ formatEmpty(detail?.voucherTypeCode) }}
                                                         </div>
                                                     </v-col>
-                                                    <v-col cols="12">
-                                                        <v-chip
-                                                            color="green"
-                                                            size="small"
-                                                            rounded="lg"
-                                                            class="text-white font-weight-bold"
-                                                            variant="flat"
-                                                        >
-                                                            Active
-                                                        </v-chip>
-                                                    </v-col>
                                                 </v-row>
                                             </v-col>
                                         </v-row>
                                     </v-container>
                                 </v-img>
+                                <div class="status-badge__wrapper active">
+                                    <div class="pl-3 pr-3 pt-1 pb-1 font-weight-bold status-badge active">Active</div>
+                                </div>
                             </template>
                             <template v-else>
-                                <v-sheet height="120" rounded="lg" color="#D9D9D9" class="pt-3 position-relative">
-                                    <v-row dense>
-                                        <v-col>
-                                            <v-icon color="#9E9E9E" size="60"> mdi-note-remove </v-icon>
-                                        </v-col>
-                                    </v-row>
-                                    <v-row dense>
-                                        <v-col>
-                                            <span class="text-subtitle-2 text-disabled font-weight-medium"
-                                                >No Voucher Color Selected
-                                            </span>
-                                        </v-col>
-                                    </v-row>
+                                <v-sheet min-height="150" rounded="lg" color="#D9D9D9" class="pt-3 voucher-card">
+                                    <v-container>
+                                        <v-row dense>
+                                            <v-col>
+                                                <v-icon color="#9E9E9E" size="60"> mdi-note-remove </v-icon>
+                                            </v-col>
+                                        </v-row>
+                                        <v-row dense>
+                                            <v-col>
+                                                <span class="text-subtitle-2 text-disabled font-weight-medium"
+                                                    >No Voucher Color Selected
+                                                </span>
+                                            </v-col>
+                                        </v-row>
+                                    </v-container>
                                 </v-sheet>
                             </template>
                             <v-card-text class="pa-0 mt-5">
@@ -267,10 +261,12 @@ import { convertDate, formatDatetime, formatEmpty } from "../../utils/formatter"
 import Snackbar from "../../components/Snackbar.vue";
 import NotFound from "../../views/NotFound.vue";
 import logo from "../../assets/logo.svg";
+import { useDisplay } from "vuetify";
 
 const detail = ref(null);
 const route = useRoute();
 const router = useRouter();
+const { smAndDown } = useDisplay();
 const id = route.params.id;
 
 const loading = ref(true);
