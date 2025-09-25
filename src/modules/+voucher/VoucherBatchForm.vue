@@ -111,7 +111,7 @@
                                         divider-text="JPG or PNG formats, up to 10MB"
                                         show-size
                                         clearable
-                                        accept=".jpg, .png"
+                                        accept="image/*"
                                         icon="mdi-upload"
                                         v-model="form.image"
                                         @update:model-value="previewImage"
@@ -365,7 +365,7 @@ import logo from "../../assets/logo.svg";
 import { voucherColorType } from "../../constants/selection.constant";
 import { formatEmpty, convertDate, compressImageToWebP } from "../../utils/formatter";
 import ConfirmDialog from "../../components/ConfirmDialog.vue";
-import { uploadFile } from "../../api/upload";
+import { deleteFile, uploadFile } from "../../api/upload";
 import { useDisplay } from "vuetify";
 
 // Breadcrumbs
@@ -391,14 +391,12 @@ function previewImage(file) {
     // file can be File or File[]
     const selected = Array.isArray(file) ? file[0] : file;
 
-    const validTypes = ["image/jpeg", "image/png"];
-
     // ✅ Validate the MIME type
-    if (!validTypes.includes(selected.type)) {
+    if (!selected.type.startsWith("image/")) {
         previewUrl.value = null; // clear preview
         form.value.image = null; // clear the v-model if you use it
         isSuccess.value = false;
-        errorTitle.value = `Invalid file type: ${selected.name}. Only JPG and PNG are allowed.`;
+        errorTitle.value = `Invalid file type: ${selected.name}. Only image are allowed.`;
         snackbar.value = true;
         return;
     }
@@ -452,11 +450,8 @@ watch(
             form.value.voucherTypeDesc = response.data.voucherTypeDesc;
             form.value.colourSchema = response.data.colourSchema;
             form.value.termCondition = response.data.termCondition;
-
-            if (new Date(response.data.startDate).toISOString().slice(0, 10) >= today) {
-                form.value.startDate = new Date(response.data.startDate).toISOString().slice(0, 10);
-                form.value.endDate = new Date(response.data.endDate).toISOString().slice(0, 10);
-            }
+            form.value.startDate = new Date(response.data.startDate).toISOString().slice(0, 10);
+            form.value.endDate = new Date(response.data.endDate).toISOString().slice(0, 10);
 
             originalData = { ...response.data };
             originalData.startDate = new Date(response.data.startDate).toISOString().slice(0, 10);
@@ -551,6 +546,10 @@ async function onSubmit() {
         const response = await createVoucher(payload);
         if (response.success) router.push({ path: "/voucher-batch-list", query: { created: "true" } });
         else {
+            if (payload.image) {
+                const params = new URL(payload.image).searchParams;
+                const deleteImage = await deleteFile({ filename: params.get("filename") });
+            }
             isSuccess.value = false;
             errorTitle.value = `Status ${response.status}: ${response.message}`;
             snackbar.value = true;

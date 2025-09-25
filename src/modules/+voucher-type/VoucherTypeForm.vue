@@ -152,7 +152,7 @@
                                                 divider-text="JPG or PNG formats, up to 10MB"
                                                 show-size
                                                 clearable
-                                                accept=".jpg, .png"
+                                                accept="image/*"
                                                 icon="mdi-upload"
                                                 v-model="form.image"
                                                 @update:model-value="previewImage"
@@ -448,13 +448,11 @@ function previewImage(file) {
     // file can be File or File[]
     const selected = Array.isArray(file) ? file[0] : file;
 
-    const validTypes = ["image/jpeg", "image/png"];
-
-    if (!validTypes.includes(selected.type)) {
+    if (!selected.type.startsWith("image/")) {
         previewUrl.value = null;
         form.value.image = null;
         isSuccess.value = false;
-        errorTitle.value = `Invalid file type: ${selected.name}. Only JPG and PNG are allowed.`;
+        errorTitle.value = `Invalid file type: ${selected.name}. Only image are allowed.`;
         snackbar.value = true;
         return;
     }
