@@ -4,7 +4,7 @@
         <div class="d-flex align-center justify-center">
             <v-img :src="logo" alt="Asiasoft Business Solution" width="20" class="mr-2" draggable="false"></v-img>
             <div class="text-caption font-weight-regular opacity-60">
-                Copywrite © {{ new Date().getFullYear() }} Asiasoft Business Solutions 200801030089 (831418-H). All
+                Copyright © {{ new Date().getFullYear() }} Asiasoft Business Solutions 200801030089 (831418-H). All
                 rights reserved.
             </div>
         </div>

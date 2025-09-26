@@ -111,26 +111,42 @@
                                         </v-col>
                                     </v-row>
                                     <v-row dense class="align-center">
-                                        <v-col cols="12" sm="6">
+                                        <v-col cols="12" sm="6" class="pr-2">
                                             <div class="text-subtitle-1 text-medium-emphasis">Start Date</div>
-                                            <v-text-field
+                                            <!-- <v-text-field
                                                 v-model="form.startDate"
                                                 density="compact"
                                                 type="date"
                                                 :rules="[validation.required]"
-                                                :min="tomorrowStr"
                                                 :max="form.endDate"
-                                            ></v-text-field>
+                                            ></v-text-field> -->
+                                            <v-date-input
+                                                placeholder="Start Date"
+                                                v-model="form.startDate"
+                                                density="compact"
+                                                :rules="[validation.required]"
+                                                :max="form.endDate"
+                                                display-format="fullDateWithWeekday"
+                                            >
+                                            </v-date-input>
                                         </v-col>
-                                        <v-col cols="12" sm="6">
+                                        <v-col cols="12" sm="6" class="pl-2">
                                             <div class="text-subtitle-1 text-medium-emphasis">End Date</div>
-                                            <v-text-field
+                                            <!-- <v-text-field
                                                 v-model="form.endDate"
                                                 density="compact"
                                                 type="date"
                                                 :rules="[validation.required]"
                                                 :min="form.startDate ?? today"
-                                            ></v-text-field>
+                                            ></v-text-field> -->
+                                            <v-date-input
+                                                placeholder="End Date"
+                                                v-model="form.endDate"
+                                                density="compact"
+                                                :rules="[validation.required]"
+                                                :min="form.startDate ?? today"
+                                                display-format="fullDateWithWeekday"
+                                            ></v-date-input>
                                         </v-col>
                                     </v-row>
                                     <v-row dense class="align-center">
@@ -388,7 +404,7 @@ import { useDisplay } from "vuetify";
 import Snackbar from "../../components/Snackbar.vue";
 import { createVoucherType, editVoucherType, getVoucherType } from "../../api/voucher-type";
 import { rules } from "../../constants/validation.constant";
-import { convertDate, compressImageToWebP, formatEmpty } from "../../utils/formatter";
+import { convertDate, compressImageToWebP, formatEmpty, toMidnightUTC } from "../../utils/formatter";
 import { voucherColorType } from "../../constants/selection.constant";
 import ConfirmDialog from "../../components/ConfirmDialog.vue";
 import NotFound from "../../views/NotFound.vue";
@@ -404,9 +420,6 @@ const loading = ref(true);
 const notFound = ref(false);
 
 const today = new Date().toISOString().split("T")[0];
-const tomorrow = new Date(new Date());
-tomorrow.setDate(tomorrow.getDate() + 1);
-const tomorrowStr = tomorrow.toISOString().split("T")[0];
 
 const isSuccess = ref(false);
 const successTitle = ref(null);
@@ -519,14 +532,13 @@ async function submitForm() {
                 throw new Error();
             }
         }
-        // console.log("%c Payload: ", "background: #222; color: #bada55", compressedImage);
 
         const payload = {
             voucherTypeCode: form.value.voucherTypeCode,
             voucherTypeDesc: form.value.voucherTypeDesc,
             forNewUser: form.value.forNewUser,
-            startDate: new Date(form.value.startDate).toISOString(),
-            endDate: new Date(form.value.endDate).toISOString(),
+            startDate: toMidnightUTC(new Date(form.value.startDate)),
+            endDate: toMidnightUTC(new Date(form.value.endDate)),
             remark: form.value.remark,
             termCondition: form.value.termCondition,
             image: fileUrl,
@@ -534,6 +546,8 @@ async function submitForm() {
             forFoodSelection: form.value.forFoodSelection,
             ...(isEdit.value && { voucherTypeKey: route.params.id }), // add only in edit
         };
+
+        // console.log("%c Payload: ", "background: #222; color: #bada55", payload);
 
         const response = isEdit.value ? await editVoucherType(payload) : await createVoucherType(payload);
         if (response.success) {

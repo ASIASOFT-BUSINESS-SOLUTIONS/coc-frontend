@@ -97,7 +97,13 @@
                     <v-col cols="12" sm="6">
                         <div class="text-subtitle-1 text-medium-emphasis">Food Selection</div>
                         <div class="text-subtitle-2 font-weight-bold">
-                            <v-chip :color="chipColor" size="small" label class="text-white font-weight-bold">
+                            <v-chip
+                                :color="chipColor"
+                                size="small"
+                                variant="flat"
+                                label
+                                class="text-white font-weight-bold"
+                            >
                                 {{ detail?.foodSelection }}
                             </v-chip>
                         </div>
@@ -235,7 +241,7 @@ const chipColor = computed(() => {
         case "Vegetarian":
             return "green";
         case "Halal":
-            return "yellow";
+            return "purple";
         case "Normal":
             return "blue";
         default:
