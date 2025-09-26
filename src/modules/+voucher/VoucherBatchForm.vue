@@ -517,7 +517,7 @@ const snackbar = ref(false);
 async function onSubmit() {
     loading.value = true;
     try {
-        let fileUrl = null;
+        let fileUrl = previewUrl.value;
         let compressedImage;
         if (form.value.image) {
             compressedImage = await compressImageToWebP(form.value.image, 35);
@@ -545,7 +545,7 @@ async function onSubmit() {
         const response = await createVoucher(payload);
         if (response.success) router.push({ path: "/voucher-batch-list", query: { created: "true" } });
         else {
-            if (payload.image) {
+            if (payload.image !== originalData.previewUrl) {
                 const params = new URL(payload.image).searchParams;
                 const deleteImage = await deleteFile({ filename: params.get("filename") });
             }

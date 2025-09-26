@@ -126,6 +126,7 @@ import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Snackbar from "../../components/Snackbar.vue";
 import { formatDatetime, formatEmpty } from "../../utils/formatter";
+import { loadDatatable } from "../../utils/loader";
 
 // The Datatable
 const headers = ref([
@@ -167,43 +168,16 @@ async function loadItems({ page, itemsPerPage, sortBy }) {
     loading.value = true;
 
     try {
-        // 1. Fetch all data
-        const response = await getAttendance();
-        let data = response.data || [];
+        const { items: result, total } = await loadDatatable({
+            fetchFn: getAttendance,
+            searchTerm: search.value,
+            page: page,
+            itemsPerPage: itemsPerPage,
+            sortBy: sortBy,
+        });
 
-        // 2. Search filter
-        const term = search.value?.trim().toLowerCase();
-        if (term) {
-            data = data.filter((row) =>
-                Object.values(row).some((val) =>
-                    String(val ?? "") // ✅ null/undefined → empty string
-                        .toLowerCase()
-                        .includes(term)
-                )
-            );
-        }
-
-        // 3. Sorting
-        if (sortBy?.length) {
-            const { key, order } = sortBy[0];
-            data.sort((a, b) => {
-                let aVal = a[key];
-                let bVal = b[key];
-
-                // Handle dates
-                if (key === "createdAt") {
-                    aVal = new Date(aVal);
-                    bVal = new Date(bVal);
-                }
-
-                return order === "asc" ? (aVal > bVal ? 1 : -1) : aVal < bVal ? 1 : -1;
-            });
-        }
-
-        // 4. Pagination
-        totalItems.value = data.length;
-        const start = (page - 1) * itemsPerPage;
-        items.value = data.slice(start, start + itemsPerPage);
+        totalItems.value = total;
+        items.value = result;
     } catch (error) {
         console.error("Failed to fetch attendance.", error);
     } finally {

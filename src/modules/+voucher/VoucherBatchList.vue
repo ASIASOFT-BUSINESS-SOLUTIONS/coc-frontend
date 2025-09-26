@@ -38,6 +38,7 @@
         >
             <template #item.startDate="{ item }"> {{ formatDate(item.startDate) }} </template>
             <template #item.endDate="{ item }"> {{ formatDate(item.endDate) }} </template>
+            <template #item.voucherTypeDesc="{ item }"> {{ formatEmpty(item.voucherTypeDesc) }} </template>
             <template #item.action="{ item }">
                 <v-tooltip text="View" location="top">
                     <template v-slot:activator="{ props }">
@@ -140,7 +141,8 @@ import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Snackbar from "../../components/Snackbar.vue";
 import { deleteVoucher, getVouchers } from "../../api/voucher";
-import { formatDate } from "../../utils/formatter";
+import { formatDate, formatEmpty } from "../../utils/formatter";
+import { loadDatatable } from "../../utils/loader";
 
 const route = useRoute();
 const router = useRouter();
@@ -196,43 +198,16 @@ async function loadItems({ page, itemsPerPage, sortBy }) {
     loading.value = true;
 
     try {
-        // 1. Fetch all data
-        const response = await getVouchers();
-        let data = response.data || [];
+        const { items: result, total } = await loadDatatable({
+            fetchFn: getVouchers,
+            searchTerm: search.value,
+            page: page,
+            itemsPerPage: itemsPerPage,
+            sortBy: sortBy,
+        });
 
-        // 2. Search filter
-        const term = search.value?.trim().toLowerCase();
-        if (term) {
-            data = data.filter((row) =>
-                Object.values(row).some((val) =>
-                    String(val ?? "") // ✅ null/undefined → empty string
-                        .toLowerCase()
-                        .includes(term)
-                )
-            );
-        }
-
-        // 3. Sorting
-        if (sortBy?.length) {
-            const { key, order } = sortBy[0];
-            data.sort((a, b) => {
-                let aVal = a[key];
-                let bVal = b[key];
-
-                // Handle dates
-                if (key === "createdAt") {
-                    aVal = new Date(aVal);
-                    bVal = new Date(bVal);
-                }
-
-                return order === "asc" ? (aVal > bVal ? 1 : -1) : aVal < bVal ? 1 : -1;
-            });
-        }
-
-        // 4. Pagination
-        totalItems.value = data.length;
-        const start = (page - 1) * itemsPerPage;
-        items.value = data.slice(start, start + itemsPerPage);
+        totalItems.value = total;
+        items.value = result;
     } catch (error) {
         console.error("Failed to fetch vouchers.", error);
     } finally {
