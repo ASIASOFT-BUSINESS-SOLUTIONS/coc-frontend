@@ -1,5 +1,5 @@
 <template>
-    <v-container class="fill-height" fluid>
+    <v-container class="fill-height" width="1500" fluid>
         <v-row align="center" justify="center" class="text-center">
             <v-col cols="12">
                 <v-img :src="logo" alt="Asiasoft Reward Admin" max-width="200" class="mx-auto"></v-img>
@@ -83,6 +83,7 @@ import { useRouter } from "vue-router";
 import { authLogin } from "../api/user";
 import { useUserStore } from "../stores/userStore";
 import { rules } from "../constants/validation.constant";
+import { useHotkey } from "vuetify";
 
 const userID = ref(null);
 const password = ref(null);
@@ -125,17 +126,11 @@ async function onSubmit() {
         loading.value = false;
     }
 }
+
+useHotkey("Enter", onSubmit);
 </script>
 
 <style scoped>
-.login-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background-color: #fff8e1;
-}
-
 .v-btn:focus,
 .v-btn:active {
     outline: none !important;

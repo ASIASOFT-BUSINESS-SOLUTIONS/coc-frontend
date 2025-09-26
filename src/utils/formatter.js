@@ -116,3 +116,12 @@ export async function compressImageToWebP(file, targetKB = 35, maxWidth = 800) {
         img.src = URL.createObjectURL(file);
     });
 }
+
+/**
+ * Convert a local Date to an ISO string at midnight UTC
+ * @param {Date} localDate - a Date in the user's local time zone
+ * @returns {string} e.g. "2025-09-15T00:00:00.000Z"
+ */
+export function toMidnightUTC(localDate) {
+    return new Date(Date.UTC(localDate.getFullYear(), localDate.getMonth(), localDate.getDate())).toISOString();
+}

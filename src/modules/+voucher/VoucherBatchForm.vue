@@ -72,24 +72,26 @@
                             <v-row dense class="align-center">
                                 <v-col cols="12" sm="6">
                                     <div class="text-subtitle-1 text-medium-emphasis">Start Date</div>
-                                    <v-text-field
+                                    <v-date-input
+                                        placeholder="Start Date"
                                         v-model="form.startDate"
                                         density="compact"
-                                        type="date"
                                         :rules="[validation.required]"
-                                        :min="tomorrowStr"
                                         :max="form.endDate"
-                                    ></v-text-field>
+                                        display-format="fullDateWithWeekday"
+                                    >
+                                    </v-date-input>
                                 </v-col>
                                 <v-col cols="12" sm="6">
                                     <div class="text-subtitle-1 text-medium-emphasis">End Date</div>
-                                    <v-text-field
+                                    <v-date-input
+                                        placeholder="End Date"
                                         v-model="form.endDate"
                                         density="compact"
-                                        type="date"
                                         :rules="[validation.required]"
                                         :min="form.startDate ?? today"
-                                    ></v-text-field>
+                                        display-format="fullDateWithWeekday"
+                                    ></v-date-input>
                                 </v-col>
                             </v-row>
                             <v-row dense class="align-center">
@@ -363,7 +365,7 @@ import Snackbar from "../../components/Snackbar.vue";
 import NotFound from "../../views/NotFound.vue";
 import logo from "../../assets/logo.svg";
 import { voucherColorType } from "../../constants/selection.constant";
-import { formatEmpty, convertDate, compressImageToWebP } from "../../utils/formatter";
+import { formatEmpty, convertDate, compressImageToWebP, toMidnightUTC } from "../../utils/formatter";
 import ConfirmDialog from "../../components/ConfirmDialog.vue";
 import { deleteFile, uploadFile } from "../../api/upload";
 import { useDisplay } from "vuetify";
@@ -375,9 +377,6 @@ const breadcrumbs = [
 ];
 
 const today = new Date().toISOString().split("T")[0];
-const tomorrow = new Date(new Date());
-tomorrow.setDate(tomorrow.getDate() + 1);
-const tomorrowStr = tomorrow.toISOString().split("T")[0];
 
 const validation = rules;
 const { smAndDown } = useDisplay();
@@ -533,8 +532,8 @@ async function onSubmit() {
         const payload = {
             voucherTypeKey: form.value.voucherTypeKey,
             voucherTypeCode: form.value.voucherTypeCode,
-            startDate: new Date(form.value.startDate).toISOString(),
-            endDate: new Date(form.value.endDate).toISOString(),
+            startDate: toMidnightUTC(new Date(form.value.startDate)),
+            endDate: toMidnightUTC(new Date(form.value.endDate)),
             voucherTypeDesc: form.value.voucherTypeDesc,
             termCondition: form.value.termCondition,
             image: fileUrl,
