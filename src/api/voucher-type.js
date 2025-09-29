@@ -1,13 +1,9 @@
 import { API_VOUCHER_TYPE } from "../constants/api.constant.js";
-import { useUserStore } from "../stores/userStore.js";
+import { newHeader } from "../stores/userStore.js";
 
 // Voucher Type
 export async function getVoucherTypes(params = {}) {
-    const userStore = useUserStore();
-
-    const myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    myHeaders.append("Authorization", `Bearer ${userStore.token}`);
+    const myHeaders = newHeader();
     const requestOptions = {
         method: "GET",
         headers: myHeaders,
@@ -21,12 +17,8 @@ export async function getVoucherTypes(params = {}) {
 }
 
 export async function getVoucherType(id) {
-    const userStore = useUserStore();
     try {
-        const myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/json");
-        myHeaders.append("Accept", "application/json");
-        myHeaders.append("Authorization", `Bearer ${userStore.token}`);
+        const myHeaders = newHeader();
 
         const response = await fetch(`${API_VOUCHER_TYPE}/view`, {
             method: "POST",
@@ -45,12 +37,7 @@ export async function getVoucherType(id) {
 }
 
 export async function createVoucherType(data) {
-    const userStore = useUserStore();
-
-    const myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    myHeaders.append("Authorization", `Bearer ${userStore.token}`);
-    myHeaders.append("Content-Type", "application/json");
+    const myHeaders = newHeader();
     try {
         const res = await fetch(`${API_VOUCHER_TYPE}/add`, {
             method: "POST",
@@ -85,12 +72,7 @@ export async function createVoucherType(data) {
 }
 
 export async function editVoucherType(data) {
-    const userStore = useUserStore();
-
-    const myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    myHeaders.append("Authorization", `Bearer ${userStore.token}`);
-    myHeaders.append("Content-Type", "application/json");
+    const myHeaders = newHeader();
     try {
         const res = await fetch(`${API_VOUCHER_TYPE}/update`, {
             method: "PATCH",
@@ -126,12 +108,7 @@ export async function editVoucherType(data) {
 }
 
 export async function deleteVoucherType(id) {
-    const userStore = useUserStore();
-
-    const myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    myHeaders.append("Authorization", `Bearer ${userStore.token}`);
-    myHeaders.append("Content-Type", "application/json");
+    const myHeaders = newHeader();
     const res = await fetch(`${API_VOUCHER_TYPE}/delete`, {
         method: "DELETE",
         headers: myHeaders,

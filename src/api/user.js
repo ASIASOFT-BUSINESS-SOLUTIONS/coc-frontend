@@ -1,12 +1,8 @@
 import { API_USER, API_LOGIN } from "../constants/api.constant";
-import { useUserStore } from "../stores/userStore.js";
+import { newHeader } from "../stores/userStore.js";
 
 export async function getUsers(params = {}) {
-    const userStore = useUserStore();
-
-    const myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    myHeaders.append("Authorization", `Bearer ${userStore.token}`);
+    const myHeaders = newHeader();
     const requestOptions = {
         method: "GET",
         headers: myHeaders,
@@ -20,12 +16,8 @@ export async function getUsers(params = {}) {
 }
 
 export async function getUser(id) {
-    const userStore = useUserStore();
     try {
-        const myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/json");
-        myHeaders.append("Accept", "application/json");
-        myHeaders.append("Authorization", `Bearer ${userStore.token}`);
+        const myHeaders = newHeader();
 
         const response = await fetch(`${API_USER}/view`, {
             method: "POST",
@@ -44,12 +36,7 @@ export async function getUser(id) {
 }
 
 export async function deleteUser(id) {
-    const userStore = useUserStore();
-
-    const myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    myHeaders.append("Authorization", `Bearer ${userStore.token}`);
-    myHeaders.append("Content-Type", "application/json");
+    const myHeaders = newHeader();
     const res = await fetch(`${API_USER}/delete`, {
         method: "DELETE",
         headers: myHeaders,
@@ -61,12 +48,7 @@ export async function deleteUser(id) {
 }
 
 export async function createUser(data) {
-    const userStore = useUserStore();
-
-    const myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    myHeaders.append("Authorization", `Bearer ${userStore.token}`);
-    myHeaders.append("Content-Type", "application/json");
+    const myHeaders = newHeader();
     try {
         const res = await fetch(`${API_USER}/add`, {
             method: "POST",
@@ -102,12 +84,7 @@ export async function createUser(data) {
 }
 
 export async function editUser(data) {
-    const userStore = useUserStore();
-
-    const myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    myHeaders.append("Authorization", `Bearer ${userStore.token}`);
-    myHeaders.append("Content-Type", "application/json");
+    const myHeaders = newHeader();
     try {
         const res = await fetch(`${API_USER}/update`, {
             method: "PATCH",
@@ -143,11 +120,7 @@ export async function editUser(data) {
 }
 
 export async function getRolesAndVoucherTypes(params = {}) {
-    const userStore = useUserStore();
-
-    const myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    myHeaders.append("Authorization", `Bearer ${userStore.token}`);
+    const myHeaders = newHeader();
     const requestOptions = {
         method: "GET",
         headers: myHeaders,
@@ -175,12 +148,7 @@ export async function authLogin(data) {
 }
 
 export async function changeUserPassword(data) {
-    const userStore = useUserStore();
-
-    const myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    myHeaders.append("Authorization", `Bearer ${userStore.token}`);
-    myHeaders.append("Content-Type", "application/json");
+    const myHeaders = newHeader();
     try {
         const res = await fetch(`${API_USER}Profile/update`, {
             method: "PATCH",

@@ -24,3 +24,20 @@ export const useUserStore = defineStore("currentUser", {
     },
     persist: true,
 });
+
+export function newHeader(extra = {}) {
+    const userStore = useUserStore();
+
+    const myHeaders = new Headers();
+    myHeaders.append("Accept", "application/json");
+    myHeaders.append("Authorization", `Bearer ${userStore.token}`);
+    myHeaders.append("Content-Type", "application/json");
+
+    Object.entries(extra).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+            myHeaders.set(key, value);
+        }
+    });
+
+    return myHeaders;
+}

@@ -1,14 +1,9 @@
 import { API_ATTENDANCE } from "../constants/api.constant";
-import { useUserStore } from "../stores/userStore.js";
+import { newHeader } from "../stores/userStore.js";
 
 // Attendance
 export async function submitAttendance(code) {
-    const userStore = useUserStore();
-
-    const myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    myHeaders.append("Authorization", `Bearer ${userStore.token}`);
-    myHeaders.append("Content-Type", "application/json");
+    const myHeaders = newHeader();
     try {
         const res = await fetch(`${API_ATTENDANCE}/attend`, {
             method: "POST",
@@ -44,11 +39,7 @@ export async function submitAttendance(code) {
 }
 
 export async function getAttendance(params = {}) {
-    const userStore = useUserStore();
-
-    const myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    myHeaders.append("Authorization", `Bearer ${userStore.token}`);
+    const myHeaders = newHeader();
     const requestOptions = {
         method: "GET",
         headers: myHeaders,

@@ -1,12 +1,8 @@
 import { API_GUEST } from "../constants/api.constant";
-import { useUserStore } from "../stores/userStore.js";
+import { newHeader } from "../stores/userStore.js";
 
 export async function getGuests(params = {}) {
-    const userStore = useUserStore();
-
-    const myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    myHeaders.append("Authorization", `Bearer ${userStore.token}`);
+    const myHeaders = newHeader();
     const requestOptions = {
         method: "GET",
         headers: myHeaders,
@@ -20,12 +16,8 @@ export async function getGuests(params = {}) {
 }
 
 export async function getGuest(id) {
-    const userStore = useUserStore();
     try {
-        const myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/json");
-        myHeaders.append("Accept", "application/json");
-        myHeaders.append("Authorization", `Bearer ${userStore.token}`);
+        const myHeaders = newHeader();
 
         const response = await fetch(`${API_GUEST}/view`, {
             method: "POST",
@@ -44,12 +36,7 @@ export async function getGuest(id) {
 }
 
 export async function editGuest(data) {
-    const userStore = useUserStore();
-
-    const myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    myHeaders.append("Authorization", `Bearer ${userStore.token}`);
-    myHeaders.append("Content-Type", "application/json");
+    const myHeaders = newHeader();
     try {
         const res = await fetch(`${API_GUEST}/update`, {
             method: "PATCH",
@@ -85,12 +72,7 @@ export async function editGuest(data) {
 }
 
 export async function deleteGuest(id) {
-    const userStore = useUserStore();
-
-    const myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    myHeaders.append("Authorization", `Bearer ${userStore.token}`);
-    myHeaders.append("Content-Type", "application/json");
+    const myHeaders = newHeader();
 
     const res = await fetch(`${API_GUEST}/delete`, {
         method: "DELETE",
@@ -103,12 +85,7 @@ export async function deleteGuest(id) {
 }
 
 export async function deactivateOrActivateGuest(id) {
-    const userStore = useUserStore();
-
-    const myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    myHeaders.append("Authorization", `Bearer ${userStore.token}`);
-    myHeaders.append("Content-Type", "application/json");
+    const myHeaders = newHeader();
 
     const res = await fetch(`${API_GUEST}/activation`, {
         method: "PATCH",
@@ -121,12 +98,7 @@ export async function deactivateOrActivateGuest(id) {
 }
 
 export async function guestInquiry() {
-    const userStore = useUserStore();
-
-    const myHeaders = new Headers();
-    myHeaders.append("Accept", "application/json");
-    myHeaders.append("Authorization", `Bearer ${userStore.token}`);
-    myHeaders.append("Content-Type", "application/json");
+    const myHeaders = newHeader();
     try {
         const res = await fetch(`${API_GUEST}/inquiry`, {
             method: "POST",
