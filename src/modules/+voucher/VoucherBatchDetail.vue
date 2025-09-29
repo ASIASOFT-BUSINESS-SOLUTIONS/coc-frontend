@@ -107,7 +107,7 @@
                         <span class="font-weight-bold">Voucher Detail</span>
                     </v-card-title>
                     <v-divider thickness="2"></v-divider>
-                    <v-card-text class="text-left">
+                    <v-card-text>
                         <v-row>
                             <v-col>
                                 <v-card flat rounded="lg" class="pa-2 ma-auto">
@@ -121,7 +121,14 @@
                                             <v-container min-height="150" style="height: 100%">
                                                 <v-row dense align="center" style="height: 100%">
                                                     <v-col cols="5">
-                                                        <v-img :src="detail?.image"></v-img>
+                                                        <template v-if="detail?.image">
+                                                            <v-img :src="detail?.image"></v-img>
+                                                        </template>
+                                                        <template v-else>
+                                                            <v-icon size="100" color="white" class="text-center"
+                                                                >mdi-file-image-remove</v-icon
+                                                            >
+                                                        </template>
                                                     </v-col>
                                                     <v-col cols="7" class="text-left">
                                                         <v-row dense justify="stretch">
@@ -170,7 +177,7 @@
                                 </v-card>
                             </v-col>
                         </v-row>
-                        <v-row class="pl-2 pr-2">
+                        <v-row class="pl-2 pr-2 text-left">
                             <v-col cols="12" sm="6" order="1" order-sm="1">
                                 <div class="text-subtitle-1 text-medium-emphasis">Batch Key</div>
                                 <div class="text-subtitle-2 font-weight-bold">{{ formatEmpty(detail?.batchKey) }}</div>
@@ -180,7 +187,7 @@
                                 <div class="text-subtitle-2 font-weight-bold">{{ formatDate(detail?.startDate) }}</div>
                             </v-col>
                         </v-row>
-                        <v-row class="pl-2 pr-2">
+                        <v-row class="pl-2 pr-2 text-left">
                             <v-col cols="12" sm="6" order="2" order-sm="1">
                                 <div class="text-subtitle-1 text-medium-emphasis">Voucher Type</div>
                                 <div class="text-subtitle-2 font-weight-bold">
@@ -192,7 +199,7 @@
                                 <div class="text-subtitle-2 font-weight-bold">{{ formatDate(detail?.endDate) }}</div>
                             </v-col>
                         </v-row>
-                        <v-row class="pl-2 pr-2">
+                        <v-row class="pl-2 pr-2 text-left">
                             <v-col cols="12">
                                 <div class="text-subtitle-1 text-medium-emphasis">Description</div>
                                 <div class="text-body-2">{{ formatEmpty(detail?.voucherTypeDesc) }}</div>
@@ -348,7 +355,6 @@ onMounted(async () => {
         const response = await getVoucher(id);
         if (response) {
             detail.value = response.data;
-            console.log(detail.value);
         } else notFound.value = true;
 
         if (isEdit) {
@@ -357,7 +363,9 @@ onMounted(async () => {
 
             const merged = [
                 ...allGuests.value,
-                ...detail.value.details.filter((d) => !allGuests.value.some((g) => g.guestCode === d.guestCode)),
+                ...detail.value.details
+                    .filter((item) => item.guestCode)
+                    .filter((d) => !allGuests.value.some((g) => g.guestCode === d.guestCode)),
             ];
 
             allGuests.value = merged;
@@ -421,6 +429,8 @@ async function submitForm() {
             isSuccess.value = true;
             successTitle.value = "Voucher updated successfully!";
             snackbar.value = true;
+            const resetData = await getVoucher(id);
+            originalData = resetData.data.details.map((g) => g.emailAddress);
         } else {
             isSuccess.value = false;
             errorTitle.value = `Status ${response.status}: ${response.message}`;

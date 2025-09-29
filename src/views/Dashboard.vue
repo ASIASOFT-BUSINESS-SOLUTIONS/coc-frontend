@@ -234,11 +234,13 @@ watch(
         try {
             const res = await getVoucher(selectedVoucherType.value);
             if (res.data.details) {
-                const grouped = res.data.details.reduce((acc, item) => {
-                    const key = item.foodSelection || "Unknown";
-                    acc[key] = (acc[key] || 0) + 1;
-                    return acc;
-                }, {});
+                const grouped = res.data.details
+                    .filter((item) => item.foodSelection)
+                    .reduce((acc, item) => {
+                        const key = item.foodSelection;
+                        acc[key] = (acc[key] || 0) + 1;
+                        return acc;
+                    }, {});
 
                 const result = Object.entries(grouped).map(([foodSelection, count]) => ({
                     foodSelection,

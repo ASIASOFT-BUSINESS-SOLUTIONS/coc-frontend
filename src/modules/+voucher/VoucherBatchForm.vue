@@ -201,7 +201,14 @@
                                             <v-container style="height: 100%">
                                                 <v-row dense align="center" style="height: 100%">
                                                     <v-col cols="5">
-                                                        <v-img :src="previewUrl"></v-img>
+                                                        <template v-if="previewUrl">
+                                                            <v-img :src="previewUrl"></v-img>
+                                                        </template>
+                                                        <template v-else>
+                                                            <v-icon size="100" color="white"
+                                                                >mdi-file-image-remove</v-icon
+                                                            >
+                                                        </template>
                                                     </v-col>
                                                     <v-col cols="7" class="text-left">
                                                         <v-row dense justify="stretch">

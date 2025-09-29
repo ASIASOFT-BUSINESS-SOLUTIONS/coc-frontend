@@ -107,7 +107,7 @@
                         <v-row>
                             <v-col cols="12" sm="6">
                                 <div class="text-subtitle-1 text-medium-emphasis">Voucher Color</div>
-                                <template v-if="detail?.colourSchema !== '[Any]'">
+                                <template v-if="detail?.colourSchema !== null">
                                     <v-img
                                         rounded="lg"
                                         height="30"
@@ -173,7 +173,12 @@
                                     <v-container min-height="150" style="height: 100%">
                                         <v-row dense align="center" style="height: 100%">
                                             <v-col cols="5">
-                                                <v-img :src="detail?.image"></v-img>
+                                                <template v-if="detail?.image">
+                                                    <v-img :src="detail?.image"></v-img>
+                                                </template>
+                                                <template v-else>
+                                                    <v-icon size="100" color="white">mdi-file-image-remove</v-icon>
+                                                </template>
                                             </v-col>
                                             <v-col cols="7" class="text-left">
                                                 <v-row dense justify="stretch">
