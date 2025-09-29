@@ -349,6 +349,7 @@ async function submitForm() {
                 successTitle.value = "User detail updated successfully!";
                 snackbar.value = true;
                 originalData = payload;
+                originalData.voucherTypeCode = form.value.voucherTypeCode;
             } else {
                 router.push({ path: "/user", query: { created: "true" } });
             }

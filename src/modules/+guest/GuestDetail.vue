@@ -102,6 +102,7 @@
                                 size="small"
                                 variant="flat"
                                 label
+                                rounded="xl"
                                 class="text-white font-weight-bold"
                             >
                                 {{ detail?.foodSelection }}

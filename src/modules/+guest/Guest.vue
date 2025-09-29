@@ -47,6 +47,18 @@
                     :model-value="item.isActive"
                 />
             </template>
+            <template #item.foodSelection="{ item }">
+                <v-chip
+                    :color="getChipColor(item.foodSelection)"
+                    size="small"
+                    variant="flat"
+                    rounded="xl"
+                    label
+                    class="text-white font-weight-bold"
+                >
+                    {{ item.foodSelection }}
+                </v-chip>
+            </template>
             <template #item.action="{ item }">
                 <v-tooltip text="View" location="top">
                     <template v-slot:activator="{ props }">
@@ -186,7 +198,6 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import ExportList from "../../components/ExportList.vue";
 import Snackbar from "../../components/Snackbar.vue";
 import { useRoute, useRouter } from "vue-router";
 import { deactivateOrActivateGuest, deleteGuest, getGuests } from "../../api/guest";
@@ -240,6 +251,19 @@ async function loadItems({ page, itemsPerPage, sortBy }) {
         console.error("Failed to fetch guests.", error);
     } finally {
         loading.value = false;
+    }
+}
+
+function getChipColor(selection) {
+    switch (selection) {
+        case "Vegetarian":
+            return "green";
+        case "Halal":
+            return "purple";
+        case "Normal":
+            return "blue";
+        default:
+            return "grey";
     }
 }
 
