@@ -355,9 +355,11 @@
                                 </v-sheet>
                             </template>
                             <v-card-text class="pa-0 mt-5">
-                                <div class="text-body-1 text-justify text-medium-emphasis">
-                                    {{ formatEmpty(form.voucherTypeDesc) }}
-                                </div>
+                                <template v-if="form?.voucherTypeDesc">
+                                    <div class="text-body-1 text-justify text-medium-emphasis">
+                                        {{ formatEmpty(form.voucherTypeDesc) }}
+                                    </div>
+                                </template>
 
                                 <div class="text-subtitle-1 font-weight-bold text-left mt-6">Validity</div>
                                 <div class="text-body-2 text-justify text-medium-emphasis">
@@ -561,6 +563,12 @@ async function submitForm() {
                     const params = new URL(originalData.previewUrl).searchParams;
                     const deleteImage = await deleteFile({ filename: params.get("filename") });
                 }
+
+                originalData = payload;
+                originalData.previewUrl = payload.image;
+                originalData.image = null;
+                originalData.startDate = new Date(payload.startDate).toISOString().slice(0, 10);
+                originalData.endDate = new Date(payload.endDate).toISOString().slice(0, 10);
             } else {
                 router.push({ path: "/voucher-type", query: { created: "true" } });
             }

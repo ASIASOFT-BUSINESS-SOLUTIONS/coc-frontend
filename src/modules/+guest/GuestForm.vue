@@ -30,7 +30,7 @@
             </v-card-title>
             <v-divider thickness="2"></v-divider>
             <v-card-text class="text-left">
-                <v-form>
+                <v-form @submit.prevent="submitForm">
                     <v-row dense class="align-center">
                         <v-col cols="12" sm="6">
                             <div class="text-subtitle-1 text-medium-emphasis">Full Name</div>
@@ -94,7 +94,7 @@
                                 color="#FFD700"
                                 size="large"
                                 :loading="loading"
-                                @click="submitForm"
+                                type="submit"
                             >
                                 Save Changes
                             </v-btn>
@@ -260,7 +260,6 @@ async function submitForm() {
             emailAddress: form.value.emailAddress,
             mobileNo: form.value.mobileNo,
             foodSelection: form.value.foodSelection,
-            password: undefined,
             isActive: form.value.isActive,
         };
 
@@ -269,6 +268,9 @@ async function submitForm() {
             isSuccess.value = true;
             successTitle.value = "Guest detail updated successfully!";
             snackbar.value = true;
+
+            const detail = originalData.details;
+            originalData = { ...payload, details: detail };
         } else {
             isSuccess.value = false;
             errorTitle.value = `Status ${response.status}: ${response.message}`;

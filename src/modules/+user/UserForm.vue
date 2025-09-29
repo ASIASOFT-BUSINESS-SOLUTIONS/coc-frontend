@@ -98,7 +98,7 @@
                     </v-card-title>
                     <v-divider thickness="2"></v-divider>
                     <v-card-text class="text-left align-center">
-                        <v-form ref="formRef">
+                        <v-form @submit.prevent="submitForm">
                             <v-row dense>
                                 <v-col>
                                     <div class="text-subtitle-2 font-weight-bold">Login ID</div>
@@ -194,7 +194,7 @@
                                         size="large"
                                         :loading="loading"
                                         :disabled="!isFormValid"
-                                        @click="submitForm"
+                                        type="submit"
                                     >
                                         {{ isEdit ? "Save Changes" : "Create" }}
                                     </v-btn>
@@ -296,6 +296,9 @@ onMounted(async () => {
             const response = await getUser(route.params.id);
             if (response) {
                 form.value = response.data;
+                form.value.voucherTypeCode = response.data.voucherTypeCode
+                    ? response.data.voucherTypeCode.split(",").map((s) => s.trim())
+                    : [];
                 originalData = { ...response.data };
             } else notFound.value = true;
         } catch (err) {
@@ -334,7 +337,7 @@ async function submitForm() {
             userID: form.value.userID,
             userName: form.value.userName,
             userTypeCode: form.value.userTypeCode,
-            voucherTypeCode: form.value.voucherTypeCode.join(","),
+            voucherTypeCode: form.value.voucherTypeCode ? form.value.voucherTypeCode.join(",") : undefined,
             password: form.value.password || undefined, // skip empty password on edit
             ...(isEdit.value && { userKey: route.params.id }), // add only in edit
         };
@@ -345,6 +348,7 @@ async function submitForm() {
                 isSuccess.value = true;
                 successTitle.value = "User detail updated successfully!";
                 snackbar.value = true;
+                originalData = payload;
             } else {
                 router.push({ path: "/user", query: { created: "true" } });
             }

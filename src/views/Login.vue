@@ -9,7 +9,7 @@
                 <v-card class="pa-6 pb-3 pa-sm-4 mb-8" rounded="xl">
                     <v-card-title class="font-weight-bold text-left text-h5 text-sm-h4">Login</v-card-title>
                     <v-card-text class="text-left">
-                        <v-form>
+                        <v-form @submit.prevent="onSubmit">
                             <div class="text-subtitle-1 text-medium-emphasis">User ID</div>
                             <v-text-field
                                 placeholder="User ID"
@@ -54,7 +54,7 @@
                                 size="large"
                                 class="mt-4"
                                 :loading="loading"
-                                @click="onSubmit()"
+                                type="submit"
                             >
                                 Login
                             </v-btn>

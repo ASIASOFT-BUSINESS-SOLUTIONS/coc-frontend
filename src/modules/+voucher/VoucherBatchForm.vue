@@ -28,7 +28,7 @@
             <v-col cols="12" md="8" order="2" order-md="1">
                 <v-card flat rounded="xl" class="ma-auto" style="border: 2px solid #e0e0e0">
                     <v-card-text class="text-left mb-3">
-                        <v-form ref="formValid" @submit.prevent="onSubmit">
+                        <v-form @submit.prevent="onSubmit">
                             <v-row dense class="align-center">
                                 <v-col cols="12" sm="6">
                                     <div class="text-subtitle-1 text-medium-emphasis">Voucher Type</div>
@@ -248,9 +248,11 @@
                                         </v-sheet>
                                     </template>
                                     <v-card-text class="pa-0 mt-5">
-                                        <div class="text-body-1 text-justify text-medium-emphasis">
-                                            {{ formatEmpty(form.voucherTypeDesc) }}
-                                        </div>
+                                        <template v-if="form?.voucherTypeDesc">
+                                            <div class="text-body-1 text-justify text-medium-emphasis">
+                                                {{ formatEmpty(form.voucherTypeDesc) }}
+                                            </div>
+                                        </template>
 
                                         <div class="text-subtitle-1 font-weight-bold text-left mt-6">Validity</div>
                                         <div class="text-body-2 text-justify text-medium-emphasis">
@@ -402,7 +404,6 @@ function previewImage(file) {
     previewUrl.value = URL.createObjectURL(selected);
 }
 
-const formValid = ref(null);
 const form = ref({
     voucherTypeKey: null,
     voucherTypeCode: null,
