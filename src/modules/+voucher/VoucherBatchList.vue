@@ -36,8 +36,8 @@
             show-current-page
             @update:options="loadItems"
         >
-            <template #item.startDate="{ item }"> {{ formatDate(item.startDate) }} </template>
-            <template #item.endDate="{ item }"> {{ formatDate(item.endDate) }} </template>
+            <template #item.startDate="{ item }"> {{ convertDatetime(item.startDate) }} </template>
+            <template #item.endDate="{ item }"> {{ convertDatetime(item.endDate) }} </template>
             <template #item.voucherTypeDesc="{ item }"> {{ formatEmpty(item.voucherTypeDesc) }} </template>
             <template #item.action="{ item }">
                 <v-tooltip text="View" location="top">
@@ -141,7 +141,7 @@ import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Snackbar from "../../components/Snackbar.vue";
 import { deleteVoucher, getVouchers } from "../../api/voucher";
-import { formatDate, formatEmpty } from "../../utils/formatter";
+import { convertDatetime, formatDate, formatEmpty } from "../../utils/formatter";
 import { loadDatatable } from "../../utils/loader";
 
 const route = useRoute();
@@ -172,8 +172,8 @@ onMounted(() => {
 const headers = ref([
     { title: "Voucher Type", key: "voucherTypeCode", align: "start", minWidth: 150 },
     { title: "Voucher Description", key: "voucherTypeDesc", sortable: false, minWidth: 250 },
-    { title: "Start Date", key: "startDate", minWidth: 120 },
-    { title: "End Date", key: "endDate", minWidth: 120 },
+    { title: "Start Date", key: "startDate", minWidth: 150 },
+    { title: "End Date", key: "endDate", minWidth: 150 },
     { title: "Action", key: "action", sortable: false, minWidth: 130, fixed: "end" },
 ]);
 

@@ -158,17 +158,29 @@
                                             color="#D9D9D9"
                                             class="pt-3 voucher-card text-center"
                                         >
-                                            <v-container>
-                                                <v-row dense>
-                                                    <v-col>
-                                                        <v-icon color="#9E9E9E" size="60"> mdi-note-remove </v-icon>
+                                            <v-container style="height: 100%">
+                                                <v-row dense align="center" style="height: 100%">
+                                                    <v-col cols="5">
+                                                        <template v-if="detail?.image">
+                                                            <v-img :src="detail?.image"></v-img>
+                                                        </template>
+                                                        <template v-else>
+                                                            <v-icon size="100" color="white"
+                                                                >mdi-file-image-remove</v-icon
+                                                            >
+                                                        </template>
                                                     </v-col>
-                                                </v-row>
-                                                <v-row dense>
-                                                    <v-col>
-                                                        <span class="text-subtitle-2 text-disabled font-weight-medium"
-                                                            >No Voucher Color Selected
-                                                        </span>
+                                                    <v-col cols="7" class="text-left">
+                                                        <v-row dense justify="stretch">
+                                                            <v-col cols="12">
+                                                                <div
+                                                                    class="text-white font-weight-bold text-sm-h2 text-md-h4"
+                                                                    :class="smAndDown ? 'text-h4' : 'text-h5'"
+                                                                >
+                                                                    {{ detail?.voucherTypeCode }}
+                                                                </div>
+                                                            </v-col>
+                                                        </v-row>
                                                     </v-col>
                                                 </v-row>
                                             </v-container>
@@ -184,7 +196,9 @@
                             </v-col>
                             <v-col cols="12" sm="6" order="2" order-sm="2">
                                 <div class="text-subtitle-1 text-medium-emphasis">Start Date</div>
-                                <div class="text-subtitle-2 font-weight-bold">{{ formatDate(detail?.startDate) }}</div>
+                                <div class="text-subtitle-2 font-weight-bold">
+                                    {{ formatDatetime(detail?.startDate) }}
+                                </div>
                             </v-col>
                         </v-row>
                         <v-row class="pl-2 pr-2 text-left">
@@ -196,7 +210,9 @@
                             </v-col>
                             <v-col cols="12" sm="6" order="1" order-sm="2">
                                 <div class="text-subtitle-1 text-medium-emphasis">End Date</div>
-                                <div class="text-subtitle-2 font-weight-bold">{{ formatDate(detail?.endDate) }}</div>
+                                <div class="text-subtitle-2 font-weight-bold">
+                                    {{ formatDatetime(detail?.endDate) }}
+                                </div>
                             </v-col>
                         </v-row>
                         <v-row class="pl-2 pr-2 text-left">
@@ -307,7 +323,7 @@
 import { onMounted, ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { editVoucher, getVoucher } from "../../api/voucher";
-import { formatDate, formatEmpty, statusColor } from "../../utils/formatter";
+import { formatDatetime, formatEmpty, statusColor } from "../../utils/formatter";
 import NotFound from "../../views/NotFound.vue";
 import logo from "../../assets/logo.svg";
 import { getGuests } from "../../api/guest";

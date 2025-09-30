@@ -9,6 +9,7 @@ export function formatDate(value) {
     const d = new Date(value);
     if (isNaN(d)) return "-";
     return d.toLocaleDateString("en-GB", {
+        timeZone: "Asia/Kuala_Lumpur",
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
@@ -17,13 +18,35 @@ export function formatDate(value) {
 
 export function formatDatetime(value) {
     if (!value) return "-";
-    const clean = value.replace(/Z$/, "");
+    const clean = value.replace(/Z{2}$/, "Z");
+
     const d = new Date(clean);
     if (isNaN(d)) return "-";
+
     return new Intl.DateTimeFormat("en-GB", {
-        dateStyle: "long",
-        timeStyle: "short",
+        timeZone: "Asia/Kuala_Lumpur",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
     }).format(d);
+}
+
+export function convertDatetime(value) {
+    const options = {
+        timeZone: "Asia/Kuala_Lumpur",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+    };
+
+    const malaysia = new Intl.DateTimeFormat("en-GB", options).format(new Date(value));
+    return malaysia;
 }
 
 /** Format a date to DD MM YYYY (from ISO or Date object) */
@@ -31,6 +54,7 @@ export function convertDate(value) {
     if (!value) return "-";
     const date = new Date(value);
     const formatter = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Kuala_Lumpur",
         day: "numeric",
         month: "long",
         year: "numeric",

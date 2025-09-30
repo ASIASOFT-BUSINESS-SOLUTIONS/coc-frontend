@@ -34,9 +34,9 @@
             show-current-page
             @update:options="loadItems"
         >
-            <template #item.startDate="{ item }"> {{ formatDate(item.startDate) }} </template>
-            <template #item.endDate="{ item }"> {{ formatDate(item.endDate) }} </template>
-            <template #item.createdAt="{ item }"> {{ formatDatetime(item.createdAt) }} </template>
+            <template #item.startDate="{ item }"> {{ convertDatetime(item.startDate) }} </template>
+            <template #item.endDate="{ item }"> {{ convertDatetime(item.endDate) }} </template>
+            <template #item.createdAt="{ item }"> {{ convertDatetime(item.createdAt) }} </template>
             <template #item.remark="{ item }"> {{ formatEmpty(item.remark) }} </template>
             <template #item.voucherTypeDesc="{ item }"> {{ formatEmpty(item.voucherTypeDesc) }} </template>
             <template #item.status="{ item }">
@@ -153,7 +153,7 @@ import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Snackbar from "../../components/Snackbar.vue";
 import { deleteVoucherType, getVoucherTypes } from "../../api/voucher-type";
-import { formatDate, formatDatetime, formatEmpty } from "../../utils/formatter";
+import { convertDatetime, formatDate, formatDatetime, formatEmpty } from "../../utils/formatter";
 import { deleteFile } from "../../api/upload";
 import { loadDatatable } from "../../utils/loader";
 
@@ -186,9 +186,9 @@ const headers = ref([
     { title: "Voucher Type", key: "voucherTypeCode", align: "start", minWidth: 150 },
     { title: "Description", key: "voucherTypeDesc", sortable: false, minWidth: 300 },
     { title: "Remark", key: "remark", sortable: false, minWidth: 300 },
-    { title: "Start Date", key: "startDate", minWidth: 120 },
-    { title: "End Date", key: "endDate", minWidth: 120 },
-    { title: "Created At", key: "createdAt", minWidth: 150 },
+    { title: "Start Date", key: "startDate", minWidth: 150 },
+    { title: "End Date", key: "endDate", minWidth: 150 },
+    { title: "Created At", key: "createdAt", minWidth: 200 },
     { title: "Action", key: "action", sortable: false, minWidth: 130, fixed: "end" },
 ]);
 

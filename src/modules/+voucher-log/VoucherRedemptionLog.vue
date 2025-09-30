@@ -32,7 +32,7 @@
         >
             <template #item.guestCode="{ item }"> {{ formatEmpty(item.guestCode) }} </template>
             <template #item.emailAddress="{ item }"> {{ formatEmpty(item.emailAddress) }} </template>
-            <template #item.createdAt="{ item }"> {{ formatDate(item.createdAt) }} </template>
+            <template #item.createdAt="{ item }"> {{ convertDatetime(item.createdAt) }} </template>
             <template #item.action="{ item }">
                 <v-tooltip text="View" location="top">
                     <template v-slot:activator="{ props }">
@@ -91,7 +91,7 @@
                     <v-row dense class="mt-1">
                         <v-col cols="4" class="opacity-60">Issued Datetime:</v-col>
                         <v-col cols="8" class="font-weight-medium text-right">{{
-                            formatDatetime(selectedItem.createdAt)
+                            convertDatetime(selectedItem.createdAt)
                         }}</v-col>
                     </v-row>
 
@@ -114,7 +114,7 @@
 <script setup>
 import { ref } from "vue";
 import { getVoucherLog } from "../../api/voucher";
-import { formatDatetime, formatEmpty, formatDate } from "../../utils/formatter";
+import { formatEmpty, convertDatetime } from "../../utils/formatter";
 import { loadDatatable } from "../../utils/loader";
 
 const modal = ref(false);
