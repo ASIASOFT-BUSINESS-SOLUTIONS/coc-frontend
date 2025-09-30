@@ -165,8 +165,8 @@
                     <td style="width: 120px">{{ item.voucherTypeCode }}</td>
                     <td style="width: 120px">{{ formatDate(item.startDate) }}</td>
                     <td style="width: 120px">{{ formatDate(item.endDate) }}</td>
-                    <td style="width: 250px">{{ convertDatetime(item.issueAt) }}</td>
-                    <td style="width: 250px">{{ convertDatetime(item.redeemAt) }}</td>
+                    <td style="width: 250px">{{ formatDatetime(item.issueAt) }}</td>
+                    <td style="width: 250px">{{ formatDatetime(item.redeemAt) }}</td>
                     <td style="width: 80px">
                         <v-chip
                             variant="flat"
@@ -204,7 +204,7 @@ import ConfirmDialog from "../../components/ConfirmDialog.vue";
 import { foodSelection } from "../../constants/selection.constant";
 import NotFound from "../../views/NotFound.vue";
 import logo from "../../assets/logo.svg";
-import { convertDatetime, formatDate, statusColor } from "../../utils/formatter";
+import { convertDatetime, formatDate, formatDatetime, statusColor } from "../../utils/formatter";
 
 // Breadcrumbs
 const breadcrumbs = [
