@@ -34,7 +34,7 @@
             show-current-page
             @update:options="loadItems"
         >
-            <template #item.createdAt="{ item }"> {{ formatDatetime(item.createdAt) }} </template>
+            <template #item.createdAt="{ item }"> {{ convertDatetime(item.createdAt) }} </template>
             <template #item.status="{ item }">
                 <v-switch
                     density="compact"
@@ -148,7 +148,7 @@ import { onMounted, ref } from "vue";
 import Snackbar from "../../components/Snackbar.vue";
 import { deleteUser, getUsers } from "../../api/user";
 import { useRoute, useRouter } from "vue-router";
-import { formatDatetime } from "../../utils/formatter";
+import { convertDatetime } from "../../utils/formatter";
 import { loadDatatable } from "../../utils/loader";
 
 // The Datatable
@@ -156,7 +156,7 @@ const headers = ref([
     { title: "User Name", key: "userName", minWidth: 200 },
     { title: "User Type", key: "userTypeCode", minWidth: 120 },
     { title: "User Type Description", key: "userTypeDesc", sortable: false, minWidth: 200 },
-    { title: "Created Date", key: "createdAt", minWidth: 200 },
+    { title: "Created Date", key: "createdAt", minWidth: 150 },
     { title: "Action", key: "action", sortable: false, minWidth: 130, fixed: "end" },
 ]);
 

@@ -37,7 +37,7 @@
             <template #item.status="{ item }">
                 <v-chip color="green" size="small" label class="text-white font-weight-bold"> Present </v-chip>
             </template>
-            <template #item.createdAt="{ item }"> {{ formatDatetime(item.createdAt) }} </template>
+            <template #item.createdAt="{ item }"> {{ convertDatetime(item.createdAt) }} </template>
             <template #item.action="{ item }">
                 <v-tooltip text="View" location="top">
                     <template v-slot:activator="{ props }">
@@ -84,7 +84,7 @@
                     <v-row dense class="mt-1">
                         <v-col cols="4" class="opacity-60">Check In Datetime:</v-col>
                         <v-col cols="8" class="font-weight-medium text-right">{{
-                            formatDatetime(selectedItem.createdAt) ?? "-"
+                            convertDatetime(selectedItem.createdAt) ?? "-"
                         }}</v-col>
                     </v-row>
 
@@ -125,7 +125,7 @@ import { getAttendance } from "../../api/attendance";
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Snackbar from "../../components/Snackbar.vue";
-import { formatDatetime, formatEmpty } from "../../utils/formatter";
+import { convertDatetime, formatEmpty } from "../../utils/formatter";
 import { loadDatatable } from "../../utils/loader";
 
 // The Datatable

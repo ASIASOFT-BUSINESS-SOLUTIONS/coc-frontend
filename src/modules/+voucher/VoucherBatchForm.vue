@@ -31,7 +31,9 @@
                         <v-form @submit.prevent="onSubmit">
                             <v-row dense class="align-center">
                                 <v-col cols="12" sm="6">
-                                    <div class="text-subtitle-1 text-medium-emphasis">Voucher Type</div>
+                                    <div class="text-subtitle-1 text-medium-emphasis">
+                                        <strong class="text-red">*</strong> Voucher Type
+                                    </div>
                                     <v-select
                                         v-model="form.voucherTypeKey"
                                         density="compact"
@@ -45,7 +47,12 @@
                                     </v-select>
                                 </v-col>
                                 <v-col cols="12" sm="6">
-                                    <div class="text-subtitle-1 text-medium-emphasis">Voucher Color</div>
+                                    <div class="text-subtitle-1 text-medium-emphasis">
+                                        <template v-if="!form.forFoodSelection">
+                                            <strong class="text-red">*</strong>
+                                        </template>
+                                        Voucher Color
+                                    </div>
                                     <v-select
                                         v-model="form.colourSchema"
                                         density="compact"
@@ -54,6 +61,7 @@
                                         :items="voucherColorType"
                                         item-title="id"
                                         item-value="code"
+                                        :disabled="form.forFoodSelection"
                                     >
                                         <template v-slot:item="{ props, item }">
                                             <v-list-item v-bind="props">
@@ -71,40 +79,43 @@
                             </v-row>
                             <v-row dense class="align-center">
                                 <v-col cols="12" sm="6">
-                                    <div class="text-subtitle-1 text-medium-emphasis">Start Date</div>
-                                    <v-date-input
-                                        placeholder="Start Date"
-                                        v-model="form.startDate"
-                                        density="compact"
-                                        :rules="[validation.required]"
-                                        :max="form.endDate"
-                                        display-format="fullDateWithWeekday"
-                                    >
-                                    </v-date-input>
+                                    <div class="text-subtitle-1 text-medium-emphasis">
+                                        <strong class="text-red">*</strong> Start Date
+                                    </div>
+                                    <Datepicker v-model="form.startDate" class="mb-4" :maxDate="form.endDate">
+                                        <template #trigger>
+                                            <v-text-field
+                                                type="text"
+                                                density="compact"
+                                                placeholder="Start Date"
+                                                :value="form.startDate ? convertDatetime(form.startDate) : null"
+                                            /> </template
+                                    ></Datepicker>
                                 </v-col>
                                 <v-col cols="12" sm="6">
-                                    <div class="text-subtitle-1 text-medium-emphasis">End Date</div>
-                                    <v-date-input
-                                        placeholder="End Date"
+                                    <div class="text-subtitle-1 text-medium-emphasis">
+                                        <strong class="text-red">*</strong> End Date
+                                    </div>
+                                    <Datepicker
+                                        :minDate="form.startDate ?? today"
+                                        :required="true"
                                         v-model="form.endDate"
-                                        density="compact"
-                                        :rules="[validation.required]"
-                                        :min="form.startDate ?? today"
-                                        display-format="fullDateWithWeekday"
-                                    ></v-date-input>
+                                        class="mb-4"
+                                    >
+                                        <template #trigger>
+                                            <v-text-field
+                                                placeholder="End Date"
+                                                type="text"
+                                                density="compact"
+                                                :value="form.endDate ? convertDatetime(form.endDate) : null"
+                                            />
+                                        </template>
+                                    </Datepicker>
                                 </v-col>
                             </v-row>
                             <v-row dense class="align-center">
                                 <v-col>
-                                    <div class="text-subtitle-1 text-medium-emphasis">Image Url</div>
-                                    <!-- <v-text-field
-                                        placeholder="Enter Image Url"
-                                        v-model="form.image"
-                                        hint="Suggestion: Image with transparent background."
-                                        persistent-hint="true"
-                                        class="mb-2"
-                                        density="compact"
-                                    ></v-text-field> -->
+                                    <div class="text-subtitle-1 text-medium-emphasis">Image</div>
                                     <v-file-upload
                                         class="mb-6"
                                         color="#F4F4F4"
@@ -238,17 +249,29 @@
                                             color="#D9D9D9"
                                             class="pt-3 voucher-card"
                                         >
-                                            <v-container>
-                                                <v-row dense>
-                                                    <v-col>
-                                                        <v-icon color="#9E9E9E" size="60"> mdi-note-remove </v-icon>
+                                            <v-container style="height: 100%">
+                                                <v-row dense align="center" style="height: 100%">
+                                                    <v-col cols="5">
+                                                        <template v-if="previewUrl">
+                                                            <v-img :src="previewUrl"></v-img>
+                                                        </template>
+                                                        <template v-else>
+                                                            <v-icon size="100" color="white"
+                                                                >mdi-file-image-remove</v-icon
+                                                            >
+                                                        </template>
                                                     </v-col>
-                                                </v-row>
-                                                <v-row dense>
-                                                    <v-col>
-                                                        <span class="text-subtitle-2 text-disabled font-weight-medium"
-                                                            >No Voucher Color Selected
-                                                        </span>
+                                                    <v-col cols="7" class="text-left">
+                                                        <v-row dense justify="stretch">
+                                                            <v-col cols="12">
+                                                                <div
+                                                                    class="text-white font-weight-bold text-sm-h2 text-md-h4"
+                                                                    :class="smAndDown ? 'text-h4' : 'text-h5'"
+                                                                >
+                                                                    {{ form.voucherTypeCode ?? "N/A" }}
+                                                                </div>
+                                                            </v-col>
+                                                        </v-row>
                                                     </v-col>
                                                 </v-row>
                                             </v-container>
@@ -374,10 +397,13 @@ import Snackbar from "../../components/Snackbar.vue";
 import NotFound from "../../views/NotFound.vue";
 import logo from "../../assets/logo.svg";
 import { voucherColorType } from "../../constants/selection.constant";
-import { formatEmpty, convertDate, compressImageToWebP, toMidnightUTC } from "../../utils/formatter";
+import { formatEmpty, convertDate, compressImageToWebP, toMidnightUTC, convertDatetime } from "../../utils/formatter";
 import ConfirmDialog from "../../components/ConfirmDialog.vue";
 import { deleteFile, uploadFile } from "../../api/upload";
 import { useDisplay } from "vuetify";
+import Datepicker from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
+import dayjs from "dayjs";
 
 // Breadcrumbs
 const breadcrumbs = [
@@ -457,12 +483,11 @@ watch(
             form.value.voucherTypeDesc = response.data.voucherTypeDesc;
             form.value.colourSchema = response.data.colourSchema;
             form.value.termCondition = response.data.termCondition;
-            form.value.startDate = new Date(response.data.startDate).toISOString().slice(0, 10);
-            form.value.endDate = new Date(response.data.endDate).toISOString().slice(0, 10);
+            form.value.startDate = response.data.startDate;
+            form.value.endDate = response.data.endDate;
+            form.value.forFoodSelection = response.data.forFoodSelection;
 
             originalData = { ...response.data };
-            originalData.startDate = new Date(response.data.startDate).toISOString().slice(0, 10);
-            originalData.endDate = new Date(response.data.endDate).toISOString().slice(0, 10);
             originalData.image = null;
             originalData.previewUrl = response.data.image;
 
@@ -540,12 +565,13 @@ async function onSubmit() {
         const payload = {
             voucherTypeKey: form.value.voucherTypeKey,
             voucherTypeCode: form.value.voucherTypeCode,
-            startDate: toMidnightUTC(new Date(form.value.startDate)),
-            endDate: toMidnightUTC(new Date(form.value.endDate)),
+            startDate: new Date(form.value.startDate).toISOString(),
+            endDate: new Date(form.value.endDate).toISOString(),
             voucherTypeDesc: form.value.voucherTypeDesc,
             termCondition: form.value.termCondition,
             image: fileUrl,
             colourSchema: form.value.colourSchema,
+            forFoodSelection: form.value.forFoodSelection ?? false,
             details: form.value.guestList.map((email) => ({ emailAddress: email })),
         };
         // console.log("%c Payload: ", "background: #222; color: #bada55", payload);

@@ -204,7 +204,7 @@ import ConfirmDialog from "../../components/ConfirmDialog.vue";
 import { foodSelection } from "../../constants/selection.constant";
 import NotFound from "../../views/NotFound.vue";
 import logo from "../../assets/logo.svg";
-import { formatDate, formatDatetime, statusColor } from "../../utils/formatter";
+import { convertDatetime, formatDate, formatDatetime, statusColor } from "../../utils/formatter";
 
 // Breadcrumbs
 const breadcrumbs = [

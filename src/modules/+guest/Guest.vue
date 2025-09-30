@@ -36,7 +36,7 @@
             show-current-page
             @update:options="loadItems"
         >
-            <template #item.createdAt="{ item }"> {{ formatDatetime(item.createdAt) }} </template>
+            <template #item.createdAt="{ item }"> {{ convertDatetime(item.createdAt) }} </template>
             <template #item.isActive="{ item }">
                 <v-switch
                     density="compact"
@@ -201,7 +201,7 @@ import { ref, onMounted } from "vue";
 import Snackbar from "../../components/Snackbar.vue";
 import { useRoute, useRouter } from "vue-router";
 import { deactivateOrActivateGuest, deleteGuest, getGuests } from "../../api/guest";
-import { formatDatetime } from "../../utils/formatter";
+import { convertDatetime } from "../../utils/formatter";
 import { loadDatatable } from "../../utils/loader";
 
 // The Datatable
@@ -211,7 +211,7 @@ const headers = ref([
     { title: "Email", key: "emailAddress", sortable: false, minWidth: 200 },
     { title: "Mobile No.", key: "mobileNo", sortable: false, minWidth: 120 },
     { title: "Food Selection", key: "foodSelection", minWidth: 150 },
-    { title: "Registration Date", key: "createdAt", minWidth: 220 },
+    { title: "Registration Date", key: "createdAt", minWidth: 180 },
     { title: "Status", key: "isActive", sortable: false },
     { title: "Action", key: "action", sortable: false, minWidth: 130, fixed: "end" },
 ]);

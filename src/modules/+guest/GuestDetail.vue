@@ -115,7 +115,7 @@
                     </v-col>
                     <v-col cols="12" sm="6">
                         <div class="text-subtitle-1 text-medium-emphasis">Registration Date</div>
-                        <div class="text-subtitle-2 font-weight-bold">{{ convertDate(detail?.createdAt) }}</div>
+                        <div class="text-subtitle-2 font-weight-bold">{{ formatDatetime(detail?.createdAt) }}</div>
                     </v-col>
                     <v-col cols="12" sm="6">
                         <div class="text-subtitle-1 text-medium-emphasis">Email</div>
