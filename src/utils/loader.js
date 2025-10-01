@@ -24,18 +24,26 @@ export async function loadDatatable({
     }
 
     // Sorting
-    if (sortBy?.length) {
-        const { key, order } = sortBy[0];
-        data.sort((a, b) => {
+    const effectiveSort = sortBy?.length
+        ? [...sortBy, { key: "createdAt", order: "desc" }]
+        : [{ key: "createdAt", order: "desc" }];
+
+    data.sort((a, b) => {
+        for (const { key, order } of effectiveSort) {
             let aVal = a[key];
             let bVal = b[key];
+
             if (key.toLowerCase().includes("date")) {
                 aVal = new Date(aVal);
                 bVal = new Date(bVal);
             }
-            return order === "asc" ? (aVal > bVal ? 1 : -1) : aVal < bVal ? 1 : -1;
-        });
-    }
+
+            if (aVal > bVal) return order === "asc" ? 1 : -1;
+            if (aVal < bVal) return order === "asc" ? -1 : 1;
+            // if equal → go to next key
+        }
+        return 0;
+    });
 
     // Pagination (support -1 to show all)
     const total = data.length;

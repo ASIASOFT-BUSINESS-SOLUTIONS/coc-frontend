@@ -18,7 +18,11 @@
             placeholder="Type and press Enter to search"
             rounded="lg"
             prepend-inner-icon="mdi-magnify"
-            variant="outlined"
+            variant="solo"
+            flat
+            hide-details
+            class="mb-4"
+            style="border: 1px solid #e0e0e0; border-radius: 10px"
             density="compact"
             bg-color="#ffffff"
             clearable
