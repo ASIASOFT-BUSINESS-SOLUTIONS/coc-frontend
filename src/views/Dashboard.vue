@@ -221,8 +221,10 @@ onMounted(async () => {
     data.value.guestsNumber = totalCount;
     const attendanceApi = await getAttendance();
     if (attendanceApi) {
-        const rate = (attendanceApi.data.length / totalCount) * 100;
-        data.value.attendanceRate = rate;
+        if (attendanceApi.data.length) {
+            const rate = (attendanceApi.data.length / totalCount) * 100;
+            data.value.attendanceRate = rate;
+        }
     }
 });
 
