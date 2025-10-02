@@ -243,7 +243,7 @@ const chipColor = computed(() => {
             return "green";
         case "Halal":
             return "purple";
-        case "Normal":
+        case "Non-Halal":
             return "blue";
         default:
             return "grey";

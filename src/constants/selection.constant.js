@@ -1,4 +1,4 @@
-export const foodSelection = ["Normal", "Halal", "Vegetarian"];
+export const foodSelection = ["Non-Halal", "Halal", "Vegetarian"];
 
 export const voucherColorType = [
     { id: "Purple", code: "#C72052, #8B278C, #4B0A82" },
