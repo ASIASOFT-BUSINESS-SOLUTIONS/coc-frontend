@@ -14,7 +14,7 @@ const openDialog = (type) => {
     showDialog.value = true;
 };
 
-document.title = import.meta.env.VITE_APP_NAME;
+document.title = "OWO";
 
 const handleSubmit = async (data) => {};
 </script>
