@@ -145,12 +145,6 @@
                         </v-row>
                         <v-row>
                             <v-col cols="12">
-                                <div class="text-subtitle-1 text-medium-emphasis">Image Url</div>
-                                <div class="text-body-2">{{ formatEmpty(detail?.image) }}</div>
-                            </v-col>
-                        </v-row>
-                        <v-row>
-                            <v-col cols="12">
                                 <div class="text-subtitle-1 text-medium-emphasis">Description</div>
                                 <div class="text-body-2">{{ formatEmpty(detail?.voucherTypeDesc) }}</div>
                             </v-col>

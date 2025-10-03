@@ -43,6 +43,19 @@
             <template #item.startDate="{ item }"> {{ convertDatetime(item.startDate) }} </template>
             <template #item.endDate="{ item }"> {{ convertDatetime(item.endDate) }} </template>
             <template #item.voucherTypeDesc="{ item }"> {{ formatEmpty(item.voucherTypeDesc) }} </template>
+            <template #item.forFoodSelection="{ item }">
+                <div class="text-center">
+                    <v-chip :color="item.forFoodSelection ? 'green' : 'red'" class="pl-4 pr-3">
+                        <v-icon
+                            :icon="item.forFoodSelection ? 'mdi-check-circle' : 'mdi-close-circle'"
+                            :color="item.forFoodSelection ? 'green' : 'red'"
+                            size="small"
+                            start
+                        />
+                        {{ item.forFoodSelection == true ? "Yes" : "No" }}
+                    </v-chip>
+                </div>
+            </template>
             <template #item.action="{ item }">
                 <v-tooltip text="View" location="top">
                     <template v-slot:activator="{ props }">
@@ -175,9 +188,10 @@ onMounted(() => {
 // The Datatable
 const headers = ref([
     { title: "Voucher Type", key: "voucherTypeCode", align: "start", minWidth: 150 },
-    { title: "Voucher Description", key: "voucherTypeDesc", sortable: false, minWidth: 250 },
+    { title: "Description", key: "voucherTypeDesc", sortable: false, minWidth: 250 },
     { title: "Start Date", key: "startDate", minWidth: 150 },
     { title: "End Date", key: "endDate", minWidth: 150 },
+    { title: "Is Food?", key: "forFoodSelection", sortable: false, minWidth: 50 },
     { title: "Action", key: "action", sortable: false, minWidth: 130, fixed: "end" },
 ]);
 

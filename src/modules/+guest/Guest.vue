@@ -36,6 +36,7 @@
             show-current-page
             @update:options="loadItems"
         >
+            <template #item.companyName="{ item }"> {{ formatEmpty(item.companyName) }} </template>
             <template #item.createdAt="{ item }"> {{ convertDatetime(item.createdAt) }} </template>
             <template #item.isActive="{ item }">
                 <v-switch
@@ -201,7 +202,7 @@ import { ref, onMounted } from "vue";
 import Snackbar from "../../components/Snackbar.vue";
 import { useRoute, useRouter } from "vue-router";
 import { deactivateOrActivateGuest, deleteGuest, getGuests } from "../../api/guest";
-import { convertDatetime } from "../../utils/formatter";
+import { convertDatetime, formatEmpty } from "../../utils/formatter";
 import { loadDatatable } from "../../utils/loader";
 
 // The Datatable
