@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Login from "../views/Login.vue";
 import Dashboard from "../views/Dashboard.vue";
-import VoucherRedemptionLog from "../modules/+voucher-log/VoucherRedemptionLog.vue";
+import VoucherLog from "../modules/+voucher-log/VoucherLog.vue";
 import Guest from "../modules/+guest/Guest.vue";
 import Attendance from "../modules/+attendance/Attendance.vue";
 import User from "../modules/+user/User.vue";
@@ -48,7 +48,7 @@ const routes = [
             { path: "batch-generate", name: "Voucher Batch Generate", component: VoucherBatchForm },
         ],
     },
-    { path: "/voucher-redemption-log", component: VoucherRedemptionLog, meta: { requiresAuth: true } },
+    { path: "/voucher-log", component: VoucherLog, meta: { requiresAuth: true } },
     {
         path: "/guest",
         meta: { requiresAuth: true },

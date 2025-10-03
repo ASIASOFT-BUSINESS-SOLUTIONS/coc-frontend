@@ -2,7 +2,7 @@
     <div class="pa-8">
         <v-row class="align-center mb-4">
             <v-col cols="12" sm="8">
-                <h4 class="text-h4 font-weight-bold text-left pt-1">Voucher Redemption Log</h4>
+                <h4 class="text-h4 font-weight-bold text-left pt-1">Voucher Log</h4>
                 <div class="text-grey-darken-1 text-left pt-1">Create and manage existing vouchers</div>
             </v-col>
         </v-row>
@@ -38,6 +38,12 @@
             <template #item.emailAddress="{ item }"> {{ formatEmpty(item.emailAddress) }} </template>
             <template #item.createdAt="{ item }"> {{ convertDatetime(item.createdAt) }} </template>
             <template #item.action="{ item }">
+                <v-chip :color="getChipColor(item.action)" class="pl-4 pr-3">
+                    <v-icon :icon="getIcon(item.action)" :color="getChipColor(item.action)" size="small" start />
+                    {{ item.action }}
+                </v-chip>
+            </template>
+            <template #item.actions="{ item }">
                 <v-tooltip text="View" location="top">
                     <template v-slot:activator="{ props }">
                         <v-btn
@@ -65,8 +71,13 @@
                 </v-card-title>
                 <v-card-text>
                     <div class="text-center mb-12">
-                        <v-icon class="mb-5" color="success" icon="mdi-check-circle" size="80"></v-icon>
-                        <h3 class="text-h4 font-weight-bold mb-3">Redeemed</h3>
+                        <v-icon
+                            class="mb-5"
+                            :color="getChipColor(selectedItem.action)"
+                            :icon="getIcon(selectedItem.action)"
+                            size="80"
+                        ></v-icon>
+                        <h3 class="text-h4 font-weight-bold mb-3">{{ formatEmpty(selectedItem.action) }}</h3>
                         <div class="mb-4 justify-center">{{ formatEmpty(selectedItem.voucherTypeCode) }}</div>
                         <!-- <v-chip color="#6A0DAD" size="large" label class="text-white font-weight-bold" variant="flat"
                             >Halal</v-chip
@@ -93,7 +104,7 @@
                     </v-row>
 
                     <v-row dense class="mt-1">
-                        <v-col cols="4" class="opacity-60">Issued Datetime:</v-col>
+                        <v-col cols="4" class="opacity-60">{{ selectedItem.action }} Datetime:</v-col>
                         <v-col cols="8" class="font-weight-medium text-right">{{
                             convertDatetime(selectedItem.createdAt)
                         }}</v-col>
@@ -132,9 +143,40 @@ const headers = ref([
     { title: "Voucher No.", key: "voucherNo", minWidth: 150 },
     { title: "Guest Code", key: "guestCode", minWidth: 200 },
     { title: "Email Address", key: "emailAddress", minWidth: 150 },
-    { title: "Redemption Date", key: "createdAt", minWidth: 150 },
-    { title: "Action", key: "action", sortable: false, fixed: "end" },
+    { title: "Created Date", key: "createdAt", minWidth: 150 },
+    { title: "Type", key: "action", minWidth: 80 },
+    { title: "Action", key: "actions", sortable: false, fixed: "end" },
 ]);
+
+function getChipColor(action) {
+    switch (action) {
+        case "Redeem":
+            return "green";
+        case "Issue":
+            return "orange";
+        case "Expired":
+            return "red";
+        case "Void":
+            return "purple";
+        default:
+            return "grey";
+    }
+}
+
+function getIcon(action) {
+    switch (action) {
+        case "Redeem":
+            return "mdi-check-circle";
+        case "Issue":
+            return "mdi-alert-circle";
+        case "Expired":
+            return "mdi-close-circle";
+        case "Void":
+            return "mdi-cancel-circle";
+        default:
+            return "grey";
+    }
+}
 
 const loading = ref(false);
 const search = ref("");
