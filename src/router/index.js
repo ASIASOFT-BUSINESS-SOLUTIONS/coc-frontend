@@ -88,20 +88,7 @@ router.beforeEach((to, from, next) => {
         if (!userStore.token) {
             next({ path: "/login" });
         } else {
-            const myHeaders = new Headers();
-            myHeaders.append("Accept", "application/json");
-            myHeaders.append("Authorization", `Bearer ${userStore.token}`);
-
-            const requestOptions = {
-                method: "GET",
-                headers: myHeaders,
-                redirect: "follow",
-            };
-
-            fetch(`${API_BACKOFFICE}/auth`, requestOptions)
-                .then((response) => response.json())
-                .then((result) => next())
-                .catch((error) => next({ path: "/login" }));
+            next();
         }
     } else {
         next();
