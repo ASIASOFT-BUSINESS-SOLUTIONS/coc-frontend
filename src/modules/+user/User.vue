@@ -158,8 +158,7 @@ import { loadDatatable } from "../../utils/loader";
 // The Datatable
 const headers = ref([
     { title: "User Name", key: "userName", minWidth: 200 },
-    { title: "User Type", key: "userTypeCode", minWidth: 120 },
-    { title: "User Type Description", key: "userTypeDesc", sortable: false, minWidth: 200 },
+    { title: "User Type", key: "userTypeDesc", sortable: false, minWidth: 200 },
     { title: "Created Date", key: "createdAt", minWidth: 150 },
     { title: "Action", key: "action", sortable: false, minWidth: 130, fixed: "end" },
 ]);

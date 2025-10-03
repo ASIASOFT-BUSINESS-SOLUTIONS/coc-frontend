@@ -176,12 +176,27 @@
                                         density="compact"
                                         class="mb-2"
                                         multiple
+                                        chips
                                         placeholder="Voucher Type Code Selection"
                                         :disabled="form.userTypeCode !== 'K'"
                                         :items="voucherTypes"
                                         item-title="code"
                                         item-value="code"
-                                    ></v-select>
+                                    >
+                                        <template v-slot:prepend-item>
+                                            <v-list-item @click="toggle">
+                                                <template v-slot:prepend>
+                                                    <v-checkbox
+                                                        hide-details
+                                                        :model-value="isAllSelected"
+                                                        :indeterminate="isIndeterminate"
+                                                    ></v-checkbox>
+                                                </template>
+                                                <v-list-item-title>Select All</v-list-item-title>
+                                            </v-list-item>
+                                            <v-divider></v-divider>
+                                        </template>
+                                    </v-select>
                                 </v-col>
                             </v-row>
                             <v-row class="mt-1" dense>
@@ -312,6 +327,20 @@ onMounted(async () => {
 
     loading.value = false;
 });
+
+const toggle = () => {
+    if (isAllSelected.value) {
+        form.value.voucherTypeCode = [];
+    } else {
+        form.value.voucherTypeCode = voucherTypes.value.map((v) => v.code);
+    }
+};
+
+const isAllSelected = computed(() => form.value.voucherTypeCode.length === voucherTypes.value.length);
+
+const isIndeterminate = computed(
+    () => form.value.voucherTypeCode.length > 0 && form.value.voucherTypeCode.length < voucherTypes.value.length
+);
 
 const validation = rules;
 

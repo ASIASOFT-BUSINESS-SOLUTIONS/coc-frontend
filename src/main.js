@@ -15,6 +15,7 @@ import { VDateInput } from "vuetify/labs/VDateInput";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 
 const vuetify = createVuetify({ components, directives });
+
 const app = createApp(App);
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
