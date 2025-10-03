@@ -19,8 +19,6 @@ const app = createApp(App);
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
-document.title = import.meta.env.VITE_APP_NAME;
-
 app.use(router)
     .use(vuetify)
     .component("VFileUpload", VFileUpload)
