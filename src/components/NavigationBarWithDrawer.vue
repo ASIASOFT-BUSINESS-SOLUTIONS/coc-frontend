@@ -51,7 +51,7 @@
                         </v-icon>
                     </template>
                 </v-list-item>
-                <v-list-item :to="{ path: '/voucher-redemption-log' }" title="Redemption Log">
+                <v-list-item :to="{ path: '/voucher-log' }" title="Log">
                     <template v-slot:prepend="{ isActive }">
                         <v-icon class="pl-8 pr-3">
                             {{ isActive ? "mdi-tag-search" : "mdi-tag-search-outline" }}
