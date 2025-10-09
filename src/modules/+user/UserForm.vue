@@ -101,10 +101,15 @@
                         <v-form @submit.prevent="submitForm">
                             <v-row dense>
                                 <v-col>
-                                    <div class="text-subtitle-2 font-weight-bold">Login ID</div>
+                                    <div class="text-subtitle-2 font-weight-bold">
+                                        <strong class="text-red">*</strong> Login ID
+                                    </div>
                                     <v-text-field
                                         v-model="form.userID"
                                         class="mb-2"
+                                        variant="outlined"
+                                        rounded="lg"
+                                        bg-color="#F9F9F9"
                                         placeholder="Login ID"
                                         :rules="[validation.required, validation.maxLength(13)]"
                                         density="compact"
@@ -113,11 +118,16 @@
                             </v-row>
                             <v-row dense v-if="!isEdit">
                                 <v-col>
-                                    <div class="text-subtitle-2 font-weight-bold">Password</div>
+                                    <div class="text-subtitle-2 font-weight-bold">
+                                        <strong class="text-red">*</strong> Password
+                                    </div>
                                     <v-text-field
                                         placeholder="Password"
                                         v-model="form.password"
                                         class="mb-2"
+                                        variant="outlined"
+                                        rounded="lg"
+                                        bg-color="#F9F9F9"
                                         :rules="[validation.required]"
                                         density="compact"
                                         :type="visible ? 'text' : 'password'"
@@ -129,13 +139,18 @@
                             </v-row>
                             <v-row dense v-if="!isEdit">
                                 <v-col>
-                                    <div class="text-subtitle-2 font-weight-bold">Confirm Password</div>
+                                    <div class="text-subtitle-2 font-weight-bold">
+                                        <strong class="text-red">*</strong> Confirm Password
+                                    </div>
                                     <v-text-field
                                         placeholder="Password"
                                         v-model="form.confirmPassword"
                                         class="mb-2"
                                         :rules="[validation.required, validation.confirmPassword(form.password)]"
                                         density="compact"
+                                        variant="outlined"
+                                        rounded="lg"
+                                        bg-color="#F9F9F9"
                                         :type="visible ? 'text' : 'password'"
                                         :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
                                         @click:append-inner="visible = !visible"
@@ -150,16 +165,24 @@
                                         v-model="form.userName"
                                         placeholder="User Name"
                                         class="mb-2"
+                                        variant="outlined"
+                                        rounded="lg"
+                                        bg-color="#F9F9F9"
                                         density="compact"
                                         :rules="[validation.maxLength(50)]"
                                     ></v-text-field>
                                 </v-col>
                                 <v-col cols="12" md="6">
-                                    <div class="text-subtitle-2 font-weight-bold">Role</div>
+                                    <div class="text-subtitle-2 font-weight-bold">
+                                        <strong class="text-red">*</strong> Role
+                                    </div>
                                     <v-select
                                         v-model="form.userTypeCode"
                                         density="compact"
                                         class="mb-2"
+                                        variant="outlined"
+                                        rounded="lg"
+                                        bg-color="#F9F9F9"
                                         placeholder="Role Selection"
                                         :rules="[rules.required]"
                                         :items="userRoles"
@@ -170,15 +193,20 @@
                             </v-row>
                             <v-row>
                                 <v-col cols="12">
-                                    <div class="text-subtitle-2 font-weight-bold">Voucher Type Code</div>
+                                    <div class="text-subtitle-2 font-weight-bold">
+                                        <strong class="text-red">*</strong> Voucher Type Code
+                                    </div>
                                     <v-select
                                         v-model="form.voucherTypeCode"
                                         density="compact"
                                         class="mb-2"
                                         multiple
                                         chips
+                                        variant="outlined"
+                                        rounded="lg"
+                                        bg-color="#F9F9F9"
                                         placeholder="Voucher Type Code Selection"
-                                        :disabled="form.userTypeCode !== 'K'"
+                                        :disabled="form.userTypeCode !== 'K' && form.userTypeCode !== 'Represent'"
                                         :items="voucherTypes"
                                         item-title="code"
                                         item-value="code"
@@ -207,6 +235,7 @@
                                         rounded="lg"
                                         color="#FFD700"
                                         size="large"
+                                        class="hover-lift"
                                         :loading="loading"
                                         :disabled="!isFormValid"
                                         type="submit"
@@ -216,7 +245,7 @@
                                 </v-col>
                                 <v-col md="3">
                                     <v-btn
-                                        class="text-none text-body-1"
+                                        class="text-none text-body-1 hover-lift"
                                         flat
                                         block
                                         rounded="lg"
@@ -241,7 +270,9 @@
                 </v-card>
             </v-col>
         </v-row>
-        <v-btn class="ma-auto mt-6" rounded="lg" prepend-icon="mdi-arrow-left" @click="router.back()" flat>Back</v-btn>
+        <v-btn class="ma-auto mt-6 hover-lift" rounded="lg" prepend-icon="mdi-arrow-left" @click="router.back()" flat
+            >Back</v-btn
+        >
         <Snackbar
             v-model="snackbar"
             :title="isSuccess ? successTitle : errorTitle"
@@ -283,7 +314,7 @@ const form = ref({
     password: null,
     confirmPassword: null,
     userTypeCode: null,
-    voucherTypeCode: null,
+    voucherTypeCode: [],
 });
 
 const isEdit = ref(false);
@@ -348,7 +379,7 @@ const isFormValid = computed(() => {
     const f = form.value;
 
     // always required
-    const baseChecks = f.userID && f.userTypeCode !== null;
+    const baseChecks = !!f.userID?.trim() && !!f.userTypeCode?.trim();
 
     if (isEdit.value) {
         // ✅ In edit mode: no password or confirmPassword check
@@ -413,8 +444,8 @@ function resetForm() {
 watch(
     () => form.value.userTypeCode,
     (newVal) => {
-        if (newVal !== "K") {
-            form.value.voucherTypeCode = null; // clear it so stale values don’t stay
+        if (newVal !== "K" && newVal !== "Represent") {
+            form.value.voucherTypeCode = []; // clear it so stale values don’t stay
         }
     }
 );

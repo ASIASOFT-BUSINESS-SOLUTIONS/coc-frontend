@@ -51,11 +51,12 @@
             <template #item.foodSelection="{ item }">
                 <v-chip
                     :color="getChipColor(item.foodSelection)"
+                    :prepend-icon="getIcon(item.foodSelection)"
                     size="small"
                     variant="flat"
                     rounded="xl"
                     label
-                    class="text-white font-weight-bold"
+                    class="text-white font-weight-bold pl-4"
                 >
                     {{ item.foodSelection }}
                 </v-chip>
@@ -264,7 +265,20 @@ function getChipColor(selection) {
         case "Non-Halal":
             return "blue";
         default:
-            return "grey";
+            return "blue";
+    }
+}
+
+function getIcon(selection) {
+    switch (selection) {
+        case "Vegetarian":
+            return "mdi-leaf";
+        case "Halal":
+            return "mdi-food-halal";
+        case "Non-Halal":
+            return "mdi-silverware-fork-knife";
+        default:
+            return "mdi-silverware-variant";
     }
 }
 

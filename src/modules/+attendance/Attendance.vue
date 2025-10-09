@@ -7,7 +7,9 @@
             </v-col>
             <v-col cols="12" sm="4" class="text-sm-right text-left mt-2 mt-md-0">
                 <!-- <ExportList type="attendance" /> -->
-                <v-btn flat rounded="lg" style="border: 2px solid #ffd700" @click="exportCsv">Export List</v-btn>
+                <v-btn flat rounded="lg" class="hover-lift" style="border: 2px solid #ffd700" @click="exportFile()"
+                    >Export List</v-btn
+                >
             </v-col>
         </v-row>
 
@@ -75,9 +77,11 @@
                     </div>
                     <v-row dense class="mt-1">
                         <v-col cols="4" class="opacity-60">Guest Name:</v-col>
-                        <v-col cols="8" class="font-weight-medium text-right">{{
-                            formatEmpty(selectedItem.guestName)
-                        }}</v-col>
+                        <v-col cols="8" class="font-weight-medium text-right"
+                            >{{ formatEmpty(selectedItem.guestName) }} ({{
+                                formatEmpty(selectedItem.guestCode)
+                            }})</v-col
+                        >
                     </v-row>
 
                     <v-row dense class="mt-1">
@@ -112,15 +116,6 @@
                 </v-card-text>
             </v-card>
         </v-dialog>
-
-        <Snackbar
-            v-model="snackbar"
-            :title="isSuccess ? successTitle : errorTitle"
-            :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
-            :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
-            :iconColor="isSuccess ? '#388E3C' : '#F44336'"
-            :timeout="2500"
-        ></Snackbar>
     </div>
 </template>
 
@@ -128,14 +123,12 @@
 import { getAttendance } from "../../api/attendance";
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import Snackbar from "../../components/Snackbar.vue";
 import { convertDatetime, formatEmpty } from "../../utils/formatter";
-import { loadDatatable } from "../../utils/loader";
+import { exportCsv, loadDatatable } from "../../utils/loader";
 
 // The Datatable
 const headers = ref([
     { title: "Guest Name", key: "guestName", minWidth: 250 },
-    { title: "Guest Code", key: "guestCode", minWidth: 200 },
     { title: "Company Name", key: "companyName", minWidth: 180 },
     { title: "Email Address", key: "emailAddress", minWidth: 200 },
     { title: "Mobile No.", key: "mobileNo", minWidth: 150 },
@@ -191,49 +184,12 @@ async function loadItems({ page, itemsPerPage, sortBy }) {
 
 const route = useRoute();
 const router = useRouter();
-onMounted(() => {
-    if (route.query.created === "true") {
-        successTitle.value = "New guest attendance added successfully!";
-        isSuccess.value = true;
-        snackbar.value = true;
-        router.replace({ query: {} });
-    }
-});
 
-function exportCsv() {
-    if (!items.value.length) {
-        alert("No data to export");
-        return;
-    }
-
-    // 1. Pick the keys/columns you want
-    const activeHeaders = headers.value.filter((h) => h.key && h.key !== "action");
-    const headerRow = activeHeaders.map((h) => `"${h.title}"`).join(",");
-
-    // 2. Build CSV rows
-    const rows = items.value.map((item) =>
-        activeHeaders
-            .map((h) => {
-                const cell = item[h.key] ?? "";
-                const escaped = String(cell).replace(/"/g, '""');
-                return `"${escaped}"`;
-            })
-            .join(",")
-    );
-
-    const csv = [headerRow, ...rows].join("\r\n");
-
-    // 3. Create a Blob and download
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `Attendance(${new Date().toISOString().split("T")[0]}).csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    URL.revokeObjectURL(url);
+function exportFile() {
+    return exportCsv({
+        fileTitle: "AttendanceLog",
+        items: items.value,
+        headers: headers.value.filter((h) => h.key !== "status"),
+    });
 }
 </script>

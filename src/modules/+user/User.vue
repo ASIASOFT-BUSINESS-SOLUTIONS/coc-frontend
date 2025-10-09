@@ -7,7 +7,7 @@
             </v-col>
 
             <v-col cols="12" sm="4" class="text-sm-right text-left mt-2 mt-md-0">
-                <v-btn flat :to="{ path: 'user/create' }" rounded="lg" color="#FFD700">New</v-btn>
+                <v-btn flat :to="{ path: 'user/create' }" rounded="lg" color="#FFD700" class="hover-lift">New</v-btn>
             </v-col>
         </v-row>
 

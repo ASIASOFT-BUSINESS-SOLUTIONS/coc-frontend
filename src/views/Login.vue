@@ -14,9 +14,12 @@
                             <v-text-field
                                 placeholder="User ID"
                                 v-model="userID"
-                                class="mb-2"
+                                class="mb-2 custom-field"
                                 :rules="[rules.required]"
                                 density="compact"
+                                variant="outlined"
+                                rounded="lg"
+                                bg-color="#F9F9F9"
                                 clearable
                             ></v-text-field>
 
@@ -39,20 +42,23 @@
                                 class="mb-2"
                                 :rules="[rules.required]"
                                 density="compact"
+                                variant="outlined"
+                                rounded="lg"
+                                bg-color="#F9F9F9"
                                 :type="visible ? 'text' : 'password'"
                                 :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
                                 @click:append-inner="visible = !visible"
                                 clearable
                             ></v-text-field>
 
-                            <v-checkbox v-model="remember" label="Remember me" density="compact" />
+                            <v-checkbox v-model="remember" label="Remember me" density="compact" color="info" />
                             <v-btn
                                 flat
                                 block
                                 rounded="lg"
                                 color="#FFD700"
                                 size="large"
-                                class="mt-4"
+                                class="hover-lift"
                                 :loading="loading"
                                 type="submit"
                             >
@@ -133,6 +139,5 @@ useHotkey("Enter", onSubmit);
 <style scoped>
 .v-btn:focus,
 .v-btn:active {
-    outline: none !important;
 }
 </style>

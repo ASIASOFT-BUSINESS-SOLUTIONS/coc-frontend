@@ -1,3 +1,5 @@
+import { convertDatetime } from "./formatter";
+
 export async function loadDatatable({
     fetchFn, // async () => { data: [...] }
     searchTerm = "",
@@ -50,4 +52,49 @@ export async function loadDatatable({
     const items = itemsPerPage === -1 ? data : data.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
     return { items, total };
+}
+
+export function exportCsv({ fileTitle, items = [], headers = [] }) {
+    if (!items.length) {
+        alert("No data to export");
+        return;
+    }
+
+    // 1. Pick the keys/columns you want
+    const activeHeaders = headers.filter((h) => h.key && h.key !== "action");
+    const headerRow = activeHeaders.map((h) => `"${h.title}"`).join(",");
+
+    // 2. Build CSV rows
+    const rows = items.map((item) =>
+        activeHeaders
+            .map((h) => {
+                let cell = item[h.key] ?? "";
+
+                // 🕓 Format datetime fields (Malaysia timezone)
+                if (h.key.toLowerCase().includes("createdat")) {
+                    if (cell) {
+                        cell = convertDatetime(cell);
+                    }
+                }
+
+                const escaped = String(cell).replace(/"/g, '""');
+                return `"${escaped}"`;
+            })
+            .join(",")
+    );
+
+    const csv = [headerRow, ...rows].join("\r\n");
+
+    // 3. Create a Blob and download
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `${fileTitle}(${Date.now()}).csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
 }

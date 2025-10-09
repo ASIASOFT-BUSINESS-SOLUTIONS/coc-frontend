@@ -26,7 +26,12 @@
             <v-col cols="12" sm="4" class="text-sm-right text-left mt-2 mt-md-0">
                 <v-dialog v-model="modal" width="400">
                     <template v-slot:activator="{ props: activatorProps }">
-                        <v-btn flat rounded="lg" style="border: 2px solid #f44336; color: red" v-bind="activatorProps"
+                        <v-btn
+                            flat
+                            class="mr-2 hover-lift"
+                            rounded="lg"
+                            style="border: 2px solid #f44336; color: red"
+                            v-bind="activatorProps"
                             >Delete</v-btn
                         >
                     </template>
@@ -69,7 +74,12 @@
                         </v-card-text>
                     </v-card>
                 </v-dialog>
-                <v-btn flat rounded="lg" color="#ffd700" :to="{ path: `/guest/${route.params.id}/edit` }" class="ml-1"
+                <v-btn
+                    flat
+                    rounded="lg"
+                    color="#ffd700"
+                    :to="{ path: `/guest/${route.params.id}/edit` }"
+                    class="ml-1 hover-lift"
                     >Edit</v-btn
                 >
             </v-col>

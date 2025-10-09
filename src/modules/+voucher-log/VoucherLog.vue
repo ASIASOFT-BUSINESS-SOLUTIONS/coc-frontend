@@ -84,9 +84,9 @@
                         > -->
                     </div>
                     <v-row dense class="mt-1">
-                        <v-col cols="4" class="opacity-60">Guest Code:</v-col>
+                        <v-col cols="4" class="opacity-60">Guest Name:</v-col>
                         <v-col cols="8" class="font-weight-medium text-right">{{
-                            formatEmpty(selectedItem.guestCode)
+                            formatEmpty(selectedItem.guestName)
                         }}</v-col>
                     </v-row>
                     <v-row dense class="mt-1">
@@ -141,7 +141,7 @@ function viewItem(item) {
 
 const headers = ref([
     { title: "Voucher No.", key: "voucherNo", minWidth: 150 },
-    { title: "Guest Code", key: "guestCode", minWidth: 200 },
+    { title: "Guest Name", key: "guestName", minWidth: 200 },
     { title: "Email Address", key: "emailAddress", minWidth: 150 },
     { title: "Created Date", key: "createdAt", minWidth: 150 },
     { title: "Type", key: "action", minWidth: 80 },

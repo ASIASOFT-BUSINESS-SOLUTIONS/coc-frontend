@@ -33,13 +33,19 @@
                         rounded="lg"
                         color="#ffd700"
                         :to="{ path: `/voucher-batch-list/${id}/edit` }"
-                        class="ml-1"
+                        class="ml-1 hover-lift"
                     >
                         Edit
                     </v-btn>
                 </template>
                 <template v-else>
-                    <v-btn flat rounded="lg" @click="cancelModal = true" :style="{ border: `2px solid red` }">
+                    <v-btn
+                        flat
+                        rounded="lg"
+                        class="mr-1 hover-lift"
+                        @click="cancelModal = true"
+                        style="border: 2px solid #f44336; color: red"
+                    >
                         Discard Changes
                     </v-btn>
                     <ConfirmDialog
@@ -52,7 +58,7 @@
 
                     <v-dialog v-model="submitModal" width="500">
                         <template v-slot:activator="{ props: activatorProps }">
-                            <v-btn flat color="#ffd700" rounded="lg" class="ml-2" v-bind="activatorProps">
+                            <v-btn flat color="#ffd700" rounded="lg" class="ml-2 hover-lift" v-bind="activatorProps">
                                 Save Changes
                             </v-btn>
                         </template>
@@ -111,81 +117,48 @@
                         <v-row>
                             <v-col>
                                 <v-card flat rounded="lg" class="pa-2 ma-auto">
-                                    <template v-if="detail?.colourSchema !== null">
-                                        <v-img
-                                            rounded="lg"
-                                            class="voucher-card"
-                                            min-height="150"
-                                            :gradient="`to right, ${detail?.colourSchema}`"
-                                        >
-                                            <v-container min-height="150" style="height: 100%">
-                                                <v-row dense align="center" style="height: 100%">
-                                                    <v-col cols="5">
-                                                        <template v-if="detail?.image">
-                                                            <v-img :src="detail?.image"></v-img>
-                                                        </template>
-                                                        <template v-else>
-                                                            <v-icon size="100" color="white" class="text-center"
-                                                                >mdi-file-image-remove</v-icon
-                                                            >
-                                                        </template>
-                                                    </v-col>
-                                                    <v-col cols="7" class="text-left">
-                                                        <v-row dense justify="stretch">
-                                                            <v-col cols="12">
-                                                                <div
-                                                                    class="text-white font-weight-bold text-sm-h2 text-md-h4"
-                                                                    :class="smAndDown ? 'text-h4' : 'text-h5'"
-                                                                >
-                                                                    {{ formatEmpty(detail?.voucherTypeCode) }}
-                                                                </div>
-                                                            </v-col>
-                                                        </v-row>
+                                    <v-img
+                                        ref="voucherCardRef"
+                                        class="voucher-card"
+                                        rounded="lg"
+                                        :aspect-ratio="30 / 9"
+                                        v-bind="
+                                            detail?.colourSchema
+                                                ? { gradient: `to right, ${detail.colourSchema}` }
+                                                : { color: '#D9D9D9' }
+                                        "
+                                    >
+                                        <v-row dense align="center" class="pl-5 pr-5" style="height: 100%">
+                                            <v-col cols="5">
+                                                <template v-if="detail?.image">
+                                                    <v-img :src="detail?.image"></v-img>
+                                                </template>
+                                                <template v-else>
+                                                    <v-icon :size="iconSize" color="white"
+                                                        >mdi-file-image-remove</v-icon
+                                                    >
+                                                </template>
+                                            </v-col>
+                                            <v-col cols="7" class="text-left">
+                                                <v-row dense justify="stretch">
+                                                    <v-col cols="12">
+                                                        <div
+                                                            class="text-white font-weight-bold text-truncate"
+                                                            :style="{ fontSize }"
+                                                        >
+                                                            {{ formatEmpty(detail?.voucherTypeCode) }}
+                                                        </div>
                                                     </v-col>
                                                 </v-row>
-                                            </v-container>
-                                        </v-img>
-                                        <div class="status-badge__wrapper active">
-                                            <div class="pl-3 pr-3 pt-1 pb-1 font-weight-bold status-badge active">
-                                                Active
-                                            </div>
+                                            </v-col>
+                                        </v-row>
+                                    </v-img>
+
+                                    <div class="status-badge__wrapper active" v-if="detail">
+                                        <div class="pl-3 pr-3 pt-1 pb-1 font-weight-bold status-badge active">
+                                            Active
                                         </div>
-                                    </template>
-                                    <template v-else>
-                                        <v-sheet
-                                            min-height="150"
-                                            rounded="lg"
-                                            color="#D9D9D9"
-                                            class="pt-3 voucher-card text-center"
-                                        >
-                                            <v-container style="height: 100%">
-                                                <v-row dense align="center" style="height: 100%">
-                                                    <v-col cols="5">
-                                                        <template v-if="detail?.image">
-                                                            <v-img :src="detail?.image"></v-img>
-                                                        </template>
-                                                        <template v-else>
-                                                            <v-icon size="100" color="white"
-                                                                >mdi-file-image-remove</v-icon
-                                                            >
-                                                        </template>
-                                                    </v-col>
-                                                    <v-col cols="7" class="text-left">
-                                                        <v-row dense justify="stretch">
-                                                            <v-col cols="12">
-                                                                <div
-                                                                    class="text-white font-weight-bold text-sm-h2 text-md-h4"
-                                                                    :class="smAndDown ? 'text-h4' : 'text-h5'"
-                                                                >
-                                                                    {{ detail?.voucherTypeCode }}
-                                                                </div>
-                                                            </v-col>
-                                                        </v-row>
-                                                    </v-col>
-                                                </v-row>
-                                            </v-container>
-                                        </v-sheet>
-                                    </template>
+                                    </div>
                                 </v-card>
                             </v-col>
                         </v-row>
@@ -237,6 +210,7 @@
                                 placeholder="Search guest"
                                 rounded="lg"
                                 hide-details
+                                color="info"
                                 prepend-inner-icon="mdi-magnify"
                                 variant="outlined"
                                 density="compact"
@@ -306,7 +280,9 @@
                 </v-card>
             </v-col>
         </v-row>
-        <v-btn class="ma-auto mt-6" rounded="lg" prepend-icon="mdi-arrow-left" @click="router.back()" flat>Back</v-btn>
+        <v-btn class="ma-auto mt-6 hover-lift" rounded="lg" prepend-icon="mdi-arrow-left" @click="router.back()" flat
+            >Back</v-btn
+        >
 
         <Snackbar
             v-model="snackbar"
@@ -320,7 +296,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { editVoucher, getVoucher } from "../../api/voucher";
 import { formatDatetime, formatEmpty, statusColor } from "../../utils/formatter";
@@ -344,10 +320,17 @@ const errorTitle = ref(null);
 const snackbar = ref(false);
 
 // Breadcrumbs
-const breadcrumbs = [
-    { title: "Voucher Batch List", disabled: false, to: "/voucher-batch-list" },
-    { title: "View Detail", disabled: false },
-];
+const breadcrumbs = computed(() => {
+    const base = [{ title: "Voucher Batch List", to: "/voucher-batch-list", disabled: false }];
+
+    if (isEdit.value) {
+        base.push({ title: "Edit Voucher", disabled: false });
+    } else {
+        base.push({ title: "View Detail", disabled: false });
+    }
+
+    return base;
+});
 
 const loading = ref(true);
 const notFound = ref(false);
@@ -365,6 +348,10 @@ function resetForm() {
     form.value.guestList = originalData;
     cancelModal.value = false;
 }
+
+const voucherCardRef = ref(null);
+const fontSize = ref("1.5rem");
+const iconSize = ref(60);
 
 onMounted(async () => {
     try {
@@ -394,6 +381,26 @@ onMounted(async () => {
     } finally {
         loading.value = false;
     }
+
+    const observer = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+            const { width, height } = entry.contentRect;
+            const ratio = width / height;
+
+            // Adjust font size
+            if (ratio < 1.2) fontSize.value = "1rem";
+            else if (ratio < 2) fontSize.value = "1.5rem";
+            else fontSize.value = "2rem";
+
+            // Adjust icon size (you can tweak scaling)
+            iconSize.value = Math.min(100, Math.max(50, height * 0.6));
+            // means: 60% of card height, capped between 50–100px
+        }
+    });
+
+    if (voucherCardRef.value?.$el) observer.observe(voucherCardRef.value.$el);
+
+    onBeforeUnmount(() => observer.disconnect());
 });
 
 const search = ref("");

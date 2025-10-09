@@ -7,7 +7,13 @@
             </v-col>
 
             <v-col cols="12" sm="4" class="text-sm-right text-left mt-2 mt-sm-0">
-                <v-btn flat rounded="lg" color="#ffd700" :to="{ path: `/voucher-batch-list/batch-generate` }">
+                <v-btn
+                    flat
+                    class="hover-lift"
+                    rounded="lg"
+                    color="#ffd700"
+                    :to="{ path: `/voucher-batch-list/batch-generate` }"
+                >
                     Batch Generate
                 </v-btn>
             </v-col>

@@ -69,7 +69,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import Snackbar from "./Snackbar.vue";
 import QrScanner from "./QrScanner.vue";
 import { redeemVoucher } from "../api/voucher";
@@ -89,6 +89,18 @@ const emit = defineEmits(["update:modelValue", "submit"]);
 const isOpen = computed({
     get: () => props.modelValue,
     set: (val) => emit("update:modelValue", val),
+});
+
+watch(isOpen, (val) => {
+    if (val) {
+        if (props.formData) {
+            form.value = { ...props.formData };
+        } else {
+            resetForm();
+        }
+    } else {
+        resetForm();
+    }
 });
 
 const form = ref(false);

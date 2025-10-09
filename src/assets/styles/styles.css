@@ -58,7 +58,7 @@
     position: absolute;
     top: 4px;
     right: 3px;
-    border-top-right-radius: 20%;
+    border-top-right-radius: 10%;
     border-bottom-left-radius: 20%;
 
     &::before {
@@ -161,4 +161,13 @@
         background: var(--colors-state-infoLight);
         color: var(--colors-state-info);
     }
+}
+
+.hover-lift {
+    transition: all 0.25s ease;
+}
+
+.hover-lift:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 1.5px 1.5px 0px rgba(0, 0, 0);
 }

@@ -39,6 +39,10 @@
                                         density="compact"
                                         class="mb-2"
                                         placeholder="Select Voucher Type"
+                                        variant="outlined"
+                                        rounded="lg"
+                                        color="info"
+                                        bg-color="#F9F9F9"
                                         :rules="[validation.required]"
                                         :items="voucherType"
                                         item-title="code"
@@ -57,6 +61,10 @@
                                         v-model="form.colourSchema"
                                         density="compact"
                                         class="mb-2"
+                                        variant="outlined"
+                                        rounded="lg"
+                                        color="info"
+                                        bg-color="#F9F9F9"
                                         placeholder="Select Color"
                                         :items="voucherColorType"
                                         item-title="id"
@@ -86,6 +94,10 @@
                                         <template #trigger>
                                             <v-text-field
                                                 type="text"
+                                                variant="outlined"
+                                                rounded="lg"
+                                                color="info"
+                                                bg-color="#F9F9F9"
                                                 density="compact"
                                                 placeholder="Start Date"
                                                 :value="form.startDate ? convertDatetime(form.startDate) : null"
@@ -106,6 +118,10 @@
                                             <v-text-field
                                                 placeholder="End Date"
                                                 type="text"
+                                                variant="outlined"
+                                                rounded="lg"
+                                                color="info"
+                                                bg-color="#F9F9F9"
                                                 density="compact"
                                                 :value="form.endDate ? convertDatetime(form.endDate) : null"
                                             />
@@ -118,7 +134,7 @@
                                     <div class="text-subtitle-1 text-medium-emphasis">Image</div>
                                     <v-file-upload
                                         class="mb-6"
-                                        color="#F4F4F4"
+                                        color="#F9F9F9"
                                         hide-browse
                                         title="Choose File or drag and drop"
                                         divider-text="JPG or PNG formats, up to 10MB"
@@ -137,6 +153,10 @@
                                     <div class="text-subtitle-1 text-medium-emphasis">Description</div>
                                     <v-textarea
                                         density="compact"
+                                        variant="outlined"
+                                        rounded="lg"
+                                        color="info"
+                                        bg-color="#F9F9F9"
                                         placeholder="Enter Description"
                                         v-model="form.voucherTypeDesc"
                                         class="mb-2"
@@ -148,6 +168,10 @@
                                     <div class="text-subtitle-1 text-medium-emphasis">Terms and Conditions</div>
                                     <v-textarea
                                         density="compact"
+                                        variant="outlined"
+                                        rounded="lg"
+                                        color="info"
+                                        bg-color="#F9F9F9"
                                         placeholder="Enter Terms and Conditions"
                                         v-model="form.termCondition"
                                         class="mb-2"
@@ -164,13 +188,14 @@
                                         color="#FFD700"
                                         size="large"
                                         type="submit"
+                                        class="hover-lift"
                                     >
                                         Submit</v-btn
                                     >
                                 </v-col>
                                 <v-col sm="6" cols="12">
                                     <v-btn
-                                        class="text-none text-body-1"
+                                        class="text-none text-body-1 hover-lift"
                                         flat
                                         block
                                         rounded="lg"
@@ -201,82 +226,48 @@
                             <v-card-title class="text-left">Preview</v-card-title>
                             <v-card-text>
                                 <v-card flat rounded="lg" class="pa-2 ma-auto" style="border: 2px solid #e0e0e0">
-                                    <template v-if="form.colourSchema">
-                                        <v-img
-                                            rounded="lg"
-                                            aspect-ratio="16/9"
-                                            min-height="150"
-                                            class="voucher-card"
-                                            :gradient="`to right, ${form.colourSchema}`"
-                                        >
-                                            <v-container style="height: 100%">
-                                                <v-row dense align="center" style="height: 100%">
-                                                    <v-col cols="5">
-                                                        <template v-if="previewUrl">
-                                                            <v-img :src="previewUrl"></v-img>
-                                                        </template>
-                                                        <template v-else>
-                                                            <v-icon size="100" color="white"
-                                                                >mdi-file-image-remove</v-icon
-                                                            >
-                                                        </template>
-                                                    </v-col>
-                                                    <v-col cols="7" class="text-left">
-                                                        <v-row dense justify="stretch">
-                                                            <v-col cols="12">
-                                                                <div
-                                                                    class="text-white font-weight-bold text-sm-h2 text-md-h4"
-                                                                    :class="smAndDown ? 'text-h4' : 'text-h5'"
-                                                                >
-                                                                    {{ form.voucherTypeCode }}
-                                                                </div>
-                                                            </v-col>
-                                                        </v-row>
+                                    <v-img
+                                        ref="voucherCardRef"
+                                        class="voucher-card"
+                                        rounded="lg"
+                                        :aspect-ratio="30 / 9"
+                                        v-bind="
+                                            form.colourSchema
+                                                ? { gradient: `to right, ${form.colourSchema}` }
+                                                : { color: '#D9D9D9' }
+                                        "
+                                    >
+                                        <v-row dense align="center" class="pl-5 pr-5" style="height: 100%">
+                                            <v-col cols="5">
+                                                <template v-if="previewUrl">
+                                                    <v-img :src="previewUrl"></v-img>
+                                                </template>
+                                                <template v-else>
+                                                    <v-icon :size="iconSize" color="white"
+                                                        >mdi-file-image-remove</v-icon
+                                                    >
+                                                </template>
+                                            </v-col>
+                                            <v-col cols="7" class="text-left">
+                                                <v-row dense justify="stretch">
+                                                    <v-col cols="12">
+                                                        <div
+                                                            class="text-white font-weight-bold text-truncate"
+                                                            :style="{ fontSize }"
+                                                        >
+                                                            {{ formatEmpty(form.voucherTypeCode) }}
+                                                        </div>
                                                     </v-col>
                                                 </v-row>
-                                            </v-container>
-                                        </v-img>
-                                        <div class="status-badge__wrapper active">
-                                            <div class="pl-3 pr-3 pt-1 pb-1 font-weight-bold status-badge active">
-                                                Active
-                                            </div>
+                                            </v-col>
+                                        </v-row>
+                                    </v-img>
+
+                                    <div class="status-badge__wrapper active">
+                                        <div class="pl-3 pr-3 pt-1 pb-1 font-weight-bold status-badge active">
+                                            Active
                                         </div>
-                                    </template>
-                                    <template v-else>
-                                        <v-sheet
-                                            min-height="150"
-                                            rounded="lg"
-                                            color="#D9D9D9"
-                                            class="pt-3 voucher-card"
-                                        >
-                                            <v-container style="height: 100%">
-                                                <v-row dense align="center" style="height: 100%">
-                                                    <v-col cols="5">
-                                                        <template v-if="previewUrl">
-                                                            <v-img :src="previewUrl"></v-img>
-                                                        </template>
-                                                        <template v-else>
-                                                            <v-icon size="100" color="white"
-                                                                >mdi-file-image-remove</v-icon
-                                                            >
-                                                        </template>
-                                                    </v-col>
-                                                    <v-col cols="7" class="text-left">
-                                                        <v-row dense justify="stretch">
-                                                            <v-col cols="12">
-                                                                <div
-                                                                    class="text-white font-weight-bold text-sm-h2 text-md-h4"
-                                                                    :class="smAndDown ? 'text-h4' : 'text-h5'"
-                                                                >
-                                                                    {{ form.voucherTypeCode ?? "N/A" }}
-                                                                </div>
-                                                            </v-col>
-                                                        </v-row>
-                                                    </v-col>
-                                                </v-row>
-                                            </v-container>
-                                        </v-sheet>
-                                    </template>
+                                    </div>
                                     <v-card-text class="pa-0 mt-5">
                                         <template v-if="form?.voucherTypeDesc">
                                             <div class="text-body-1 text-justify text-medium-emphasis">
@@ -375,7 +366,9 @@
             </v-col>
         </v-row>
 
-        <v-btn class="ma-auto mt-6" rounded="lg" prepend-icon="mdi-arrow-left" @click="router.back()" flat>Back</v-btn>
+        <v-btn class="ma-auto mt-6 hover-lift" rounded="lg" prepend-icon="mdi-arrow-left" @click="router.back()" flat
+            >Back</v-btn
+        >
         <Snackbar
             v-model="snackbar"
             :title="isSuccess ? successTitle : errorTitle"
@@ -388,7 +381,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { rules } from "../../constants/validation.constant";
 import { createVoucher, getVoucherTypesAndGuests } from "../../api/voucher";
@@ -499,6 +492,10 @@ watch(
     }
 );
 
+const voucherCardRef = ref(null);
+const fontSize = ref("1.5rem");
+const iconSize = ref(60);
+
 onMounted(async () => {
     const voucherTypeAndGuest = await getVoucherTypesAndGuests({ includeVoucherTypes: true, includeGuests: true });
     if (voucherTypeAndGuest) {
@@ -506,6 +503,26 @@ onMounted(async () => {
         voucherType.value = voucherTypeAndGuest.data.voucherTypes;
         loading.value = false;
     }
+
+    const observer = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+            const { width, height } = entry.contentRect;
+            const ratio = width / height;
+
+            // Adjust font size
+            if (ratio < 1.2) fontSize.value = "1rem";
+            else if (ratio < 2) fontSize.value = "1.5rem";
+            else fontSize.value = "2rem";
+
+            // Adjust icon size (you can tweak scaling)
+            iconSize.value = Math.min(100, Math.max(50, height * 0.6));
+            // means: 60% of card height, capped between 50–100px
+        }
+    });
+
+    if (voucherCardRef.value?.$el) observer.observe(voucherCardRef.value.$el);
+
+    onBeforeUnmount(() => observer.disconnect());
 });
 
 function resetForm() {

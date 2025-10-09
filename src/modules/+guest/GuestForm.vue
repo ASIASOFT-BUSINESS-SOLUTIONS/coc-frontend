@@ -38,6 +38,9 @@
                                 placeholder="Full Name"
                                 v-model="form.guestName"
                                 class="mb-2"
+                                variant="outlined"
+                                rounded="lg"
+                                bg-color="#F9F9F9"
                                 :rules="[rules.required]"
                                 density="compact"
                             ></v-text-field>
@@ -48,6 +51,9 @@
                                 placeholder="Company Name"
                                 v-model="form.companyName"
                                 class="mb-2"
+                                variant="outlined"
+                                rounded="lg"
+                                bg-color="#F9F9F9"
                                 density="compact"
                             ></v-text-field>
                         </v-col>
@@ -59,6 +65,9 @@
                                 placeholder="Email Address"
                                 v-model="form.emailAddress"
                                 class="mb-2"
+                                variant="outlined"
+                                rounded="lg"
+                                bg-color="#F9F9F9"
                                 :rules="[rules.required, rules.email]"
                                 density="compact"
                             ></v-text-field>
@@ -69,6 +78,9 @@
                                 placeholder="Mobile No."
                                 v-model="form.mobileNo"
                                 class="mb-2"
+                                variant="outlined"
+                                rounded="lg"
+                                bg-color="#F9F9F9"
                                 :rules="[rules.required, rules.maxLength(20)]"
                                 density="compact"
                             ></v-text-field>
@@ -79,6 +91,9 @@
                                 v-model="form.foodSelection"
                                 density="compact"
                                 class="mb-2"
+                                variant="outlined"
+                                rounded="lg"
+                                bg-color="#F9F9F9"
                                 placeholder="Food Selection"
                                 :rules="[rules.required]"
                                 :items="foodSelection"
@@ -95,13 +110,14 @@
                                 size="large"
                                 :loading="loading"
                                 type="submit"
+                                class="hover-lift custom-field"
                             >
                                 Save Changes
                             </v-btn>
                         </v-col>
                         <v-col md="3">
                             <v-btn
-                                class="text-none text-body-1"
+                                class="text-none text-body-1 hover-lift"
                                 flat
                                 block
                                 rounded="lg"
@@ -130,7 +146,9 @@
                 <h4 class="text-h6 font-weight-bold text-left">Voucher Detail</h4>
             </v-col>
             <v-col cols="4" class="text-right">
-                <v-btn flat rounded="lg" color="#ffd700" :to="{ name: `Voucher Batch Generate` }">New</v-btn>
+                <v-btn flat class="hover-lift" rounded="lg" color="#ffd700" :to="{ name: `VoucherBatchGenerate` }"
+                    >New</v-btn
+                >
             </v-col>
         </v-row>
         <v-text-field

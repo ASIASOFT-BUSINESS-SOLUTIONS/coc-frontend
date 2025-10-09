@@ -80,7 +80,7 @@ export async function createVoucher(data) {
             return { success: false, status: res.status, message: errorMsg };
         }
     } catch (error) {
-        return { success: false, status: null, message: networkErr.message || "Network error" };
+        return { success: false, status: null, message: error.message || "Network error" };
     }
 }
 
@@ -116,7 +116,7 @@ export async function editVoucher(data) {
             return { success: false, status: res.status, message: errorMsg };
         }
     } catch (error) {
-        return { success: false, status: null, message: networkErr.message || "Network error" };
+        return { success: false, status: null, message: error.message || "Network error" };
     }
 }
 
@@ -149,7 +149,7 @@ export async function redeemVoucher(code) {
             return { success: false, status: res.status, message: data.message };
         }
     } catch (error) {
-        return { success: false, status: null, message: networkErr.message || "Network error" };
+        return { success: false, status: null, message: error.message || "Network error" };
     }
 }
 
@@ -184,6 +184,6 @@ export async function voucherInquiry() {
             return { success: false, status: res.status, message: data.message };
         } else return res.json();
     } catch (error) {
-        return { success: false, status: null, message: networkErr.message || "Network error" };
+        return { success: false, status: null, message: error.message || "Network error" };
     }
 }
