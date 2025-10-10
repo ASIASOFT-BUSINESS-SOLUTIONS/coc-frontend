@@ -60,6 +60,7 @@
                                 size="large"
                                 class="hover-lift"
                                 :loading="loading"
+                                :disabled="!isFormValid"
                                 type="submit"
                             >
                                 Login
@@ -82,7 +83,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import logo from "../assets/reward-admin.png";
 import Snackbar from "../components/Snackbar.vue";
 import { useRouter } from "vue-router";
@@ -133,11 +134,7 @@ async function onSubmit() {
     }
 }
 
-useHotkey("Enter", onSubmit);
+const isFormValid = computed(() => {
+    return userID.value && password.value !== null;
+});
 </script>
-
-<style scoped>
-.v-btn:focus,
-.v-btn:active {
-}
-</style>

@@ -76,7 +76,7 @@
                                                 variant="outlined"
                                                 rounded="lg"
                                                 bg-color="#F9F9F9"
-                                                :rules="[validation.required, validation.maxLength(100)]"
+                                                :rules="[validation.required]"
                                             ></v-text-field>
                                         </v-col>
                                         <v-col cols="12" sm="3" class="float-right">
@@ -218,6 +218,7 @@
                                                 bg-color="#F9F9F9"
                                                 placeholder="Enter Description"
                                                 v-model="form.voucherTypeDesc"
+                                                :rules="[validation.required]"
                                                 class="mb-2"
                                             ></v-textarea>
                                         </v-col>
@@ -235,6 +236,7 @@
                                                 placeholder="Enter Terms and Conditions"
                                                 v-model="form.termCondition"
                                                 class="mb-2"
+                                                :rules="[validation.required]"
                                             ></v-textarea>
                                         </v-col>
                                     </v-row>
@@ -248,7 +250,6 @@
                                                 variant="outlined"
                                                 rounded="lg"
                                                 bg-color="#F9F9F9"
-                                                :rules="[validation.maxLength(100)]"
                                                 density="compact"
                                             ></v-text-field>
                                         </v-col>
@@ -383,7 +384,7 @@
                                 </v-row>
                             </v-img>
 
-                            <div class="status-badge__wrapper active">
+                            <div class="status-badge__wrapper active" v-if="form.colourSchema">
                                 <div class="pl-3 pr-3 pt-1 pb-1 font-weight-bold status-badge active">Active</div>
                             </div>
                             <v-card-text class="pa-0 mt-5">
@@ -514,7 +515,14 @@ function previewImage(file) {
 
 const isFormValid = computed(() => {
     return (
-        form.value.voucherTypeCode && form.value.startDate && form.value.endDate !== null // allow 0 or 1
+        form.value.voucherTypeCode &&
+        form.value.startDate &&
+        form.value.endDate &&
+        form.value.voucherTypeDesc &&
+        form.value.termCondition &&
+        previewUrl.value !== null &&
+        (form.value.forFoodSelection || form.value.colourSchema)
+        // allow 0 or 1
     );
 });
 
@@ -662,6 +670,8 @@ function resetForm() {
             forNewUser: false,
             forFoodSelection: false,
         };
+
+        previewUrl.value = null;
     }
     cancelModal.value = false;
 }

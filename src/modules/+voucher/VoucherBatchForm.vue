@@ -131,7 +131,9 @@
                             </v-row>
                             <v-row dense class="align-center">
                                 <v-col>
-                                    <div class="text-subtitle-1 text-medium-emphasis">Image</div>
+                                    <div class="text-subtitle-1 text-medium-emphasis">
+                                        <strong class="text-red">*</strong> Image
+                                    </div>
                                     <v-file-upload
                                         class="mb-6"
                                         color="#F9F9F9"
@@ -150,7 +152,9 @@
                             </v-row>
                             <v-row dense class="align-center">
                                 <v-col cols="12">
-                                    <div class="text-subtitle-1 text-medium-emphasis">Description</div>
+                                    <div class="text-subtitle-1 text-medium-emphasis">
+                                        <strong class="text-red">*</strong> Description
+                                    </div>
                                     <v-textarea
                                         density="compact"
                                         variant="outlined"
@@ -159,13 +163,16 @@
                                         bg-color="#F9F9F9"
                                         placeholder="Enter Description"
                                         v-model="form.voucherTypeDesc"
+                                        :rules="[validation.required]"
                                         class="mb-2"
                                     ></v-textarea>
                                 </v-col>
                             </v-row>
                             <v-row dense class="align-center">
                                 <v-col cols="12">
-                                    <div class="text-subtitle-1 text-medium-emphasis">Terms and Conditions</div>
+                                    <div class="text-subtitle-1 text-medium-emphasis">
+                                        <strong class="text-red">*</strong> Terms and Conditions
+                                    </div>
                                     <v-textarea
                                         density="compact"
                                         variant="outlined"
@@ -174,6 +181,7 @@
                                         bg-color="#F9F9F9"
                                         placeholder="Enter Terms and Conditions"
                                         v-model="form.termCondition"
+                                        :rules="[validation.required]"
                                         class="mb-2"
                                     ></v-textarea>
                                 </v-col>
@@ -263,7 +271,7 @@
                                         </v-row>
                                     </v-img>
 
-                                    <div class="status-badge__wrapper active">
+                                    <div class="status-badge__wrapper active" v-if="form.voucherTypeCode">
                                         <div class="pl-3 pr-3 pt-1 pb-1 font-weight-bold status-badge active">
                                             Active
                                         </div>
@@ -330,6 +338,19 @@
                                             clearable
                                             @keyup.enter=""
                                         />
+                                        <div class="text-body-1 mt-4">Filter by food selection</div>
+                                        <v-chip-group v-model="filterByFoodSelection" multiple>
+                                            <v-chip text="Normal" value="Normal" color="info" filter></v-chip>
+                                            <v-chip
+                                                text="Vegetarian"
+                                                value="Vegetarian"
+                                                color="success"
+                                                filter
+                                            ></v-chip>
+                                            <v-chip text="Halal" value="Halal" color="purple" filter></v-chip>
+                                        </v-chip-group>
+                                        <v-divider class="mb-4 mt-2"></v-divider>
+
                                         <v-checkbox
                                             v-if="filteredGuests.length"
                                             color="info"
@@ -439,6 +460,7 @@ const form = ref({
     image: null,
     voucherTypeDesc: null,
     termCondition: null,
+    forFoodSelection: false,
     guestList: [],
 });
 
@@ -453,7 +475,11 @@ const isFormValid = computed(() => {
         form.value.voucherTypeKey &&
         form.value.voucherTypeCode &&
         form.value.startDate &&
-        form.value.endDate !== null
+        form.value.endDate &&
+        form.value.termCondition &&
+        form.value.voucherTypeDesc &&
+        previewUrl.value !== null &&
+        (form.value.forFoodSelection || form.value.colourSchema)
     );
 });
 
@@ -536,15 +562,25 @@ function resetForm() {
         voucherTypeDesc: null,
         termCondition: null,
         guestList: [],
+        forFoodSelection: false,
     };
 
     cancelModal.value = false;
 }
 
 const search = ref("");
+
+const filterByFoodSelection = ref([]);
 const filteredGuests = computed(() => {
-    if (!search.value) return guests.value;
-    return guests.value.filter((g) => g.name.toLowerCase().includes(search.value.toLowerCase()));
+    return guests.value.filter((g) => {
+        const matchesSearch = !search.value || g.name.toLowerCase().includes(search.value.toLowerCase());
+
+        const matchesFoodSelection =
+            !filterByFoodSelection.value.length ||
+            filterByFoodSelection.value.some((selection) => g.foodSelection === selection);
+
+        return matchesSearch && matchesFoodSelection;
+    });
 });
 
 const selectAll = computed({
@@ -588,7 +624,7 @@ async function onSubmit() {
             termCondition: form.value.termCondition,
             image: fileUrl,
             colourSchema: form.value.colourSchema,
-            forFoodSelection: form.value.forFoodSelection ?? false,
+            forFoodSelection: form.value.forFoodSelection,
             details: form.value.guestList.map((email) => ({ emailAddress: email })),
         };
         // console.log("%c Payload: ", "background: #222; color: #bada55", payload);

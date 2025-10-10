@@ -58,7 +58,14 @@
 
                     <v-dialog v-model="submitModal" width="500">
                         <template v-slot:activator="{ props: activatorProps }">
-                            <v-btn flat color="#ffd700" rounded="lg" class="ml-2 hover-lift" v-bind="activatorProps">
+                            <v-btn
+                                flat
+                                color="#ffd700"
+                                rounded="lg"
+                                class="ml-2 hover-lift"
+                                :disabled="!form.guestList.length"
+                                v-bind="activatorProps"
+                            >
                                 Save Changes
                             </v-btn>
                         </template>
@@ -218,6 +225,13 @@
                                 clearable
                                 @keyup.enter=""
                             />
+                            <div class="text-body-1 mt-4">Filter by food selection</div>
+                            <v-chip-group v-model="filterByFoodSelection" multiple>
+                                <v-chip text="Normal" value="Normal" color="info" filter></v-chip>
+                                <v-chip text="Vegetarian" value="Vegetarian" color="success" filter></v-chip>
+                                <v-chip text="Halal" value="Halal" color="purple" filter></v-chip>
+                            </v-chip-group>
+                            <v-divider class="mb-4 mt-2"></v-divider>
                             <v-checkbox
                                 v-if="filteredGuests.length"
                                 color="info"
@@ -404,9 +418,18 @@ onMounted(async () => {
 });
 
 const search = ref("");
+
+const filterByFoodSelection = ref([]);
 const filteredGuests = computed(() => {
-    if (!search.value) return allGuests.value;
-    return allGuests.value.filter((g) => g.guestName.toLowerCase().includes(search.value.toLowerCase()));
+    return allGuests.value.filter((g) => {
+        const matchesSearch = !search.value || g.name.toLowerCase().includes(search.value.toLowerCase());
+
+        const matchesFoodSelection =
+            !filterByFoodSelection.value.length ||
+            filterByFoodSelection.value.some((selection) => g.foodSelection === selection);
+
+        return matchesSearch && matchesFoodSelection;
+    });
 });
 
 const selectAll = computed({

@@ -135,7 +135,7 @@ const headers = ref([
     { title: "Company Name", key: "companyName", minWidth: 200 },
     { title: "Email Address", key: "emailAddress", minWidth: 180 },
     { title: "Mobile No.", key: "mobileNo", minWidth: 130 },
-    { title: "Remark", key: "remark", minWidth: 350 },
+    { title: "Remark", key: "remark", minWidth: 200, nowrap: true },
     { title: "Created Date", key: "createdAt", minWidth: 150 },
     { title: "Creator", key: "createdBy", minWidth: 100 },
     { title: "Action", key: "action", minWidth: 100, sortable: false, fixed: "end" },

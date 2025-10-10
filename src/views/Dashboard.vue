@@ -5,31 +5,40 @@
 
         <v-row justify="center" align="center" class="mt-6">
             <v-col v-for="(card, index) in cards" :key="index" cols="12" sm="6" md="3">
-                <v-card class="position-relative pa-2 fade-card" rounded="lg" style="border: 1px solid #e0e0e0" flat>
-                    <v-card-item>
-                        <v-card-subtitle class="text-left font-weight-bold">{{ card.title }}</v-card-subtitle>
-                        <v-card-title
-                            class="text-left text-h4 font-weight-bold"
-                            :style="
-                                card.type === 'positive'
-                                    ? 'color: #388E3C'
-                                    : card.type === 'negative'
-                                    ? 'color: #F24E29'
-                                    : ''
-                            "
-                        >
-                            {{ card.data }}<span v-if="card.title === 'Attendance Rate'">%</span>
-                        </v-card-title>
+                <v-scroll-y-reverse-transition>
+                    <v-card
+                        class="position-relative pa-2 fade-card"
+                        rounded="lg"
+                        style="border: 1px solid #e0e0e0"
+                        v-if="showCards"
+                        :style="{ transitionDelay: `${index * 120}ms`, transition: 'opacity 1s ease' }"
+                        flat
+                    >
+                        <v-card-item>
+                            <v-card-subtitle class="text-left font-weight-bold">{{ card.title }}</v-card-subtitle>
+                            <v-card-title
+                                class="text-left text-h4 font-weight-bold"
+                                :style="
+                                    card.type === 'positive'
+                                        ? 'color: #388E3C'
+                                        : card.type === 'negative'
+                                        ? 'color: #F24E29'
+                                        : ''
+                                "
+                            >
+                                {{ card.data }}<span v-if="card.title === 'Attendance Rate'">%</span>
+                            </v-card-title>
 
-                        <v-icon class="position-absolute top-0 right-0 ma-4" color="#888888">
-                            {{ card.icon }}
-                        </v-icon>
-                    </v-card-item>
+                            <v-icon class="position-absolute top-0 right-0 ma-4" color="#888888">
+                                {{ card.icon }}
+                            </v-icon>
+                        </v-card-item>
 
-                    <v-card-text>
-                        <div class="text-medium-emphasis text-left">{{ card.subtitle }}</div>
-                    </v-card-text>
-                </v-card>
+                        <v-card-text>
+                            <div class="text-medium-emphasis text-left">{{ card.subtitle }}</div>
+                        </v-card-text>
+                    </v-card>
+                </v-scroll-y-reverse-transition>
             </v-col>
         </v-row>
 

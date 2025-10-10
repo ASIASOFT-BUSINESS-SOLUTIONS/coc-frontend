@@ -194,7 +194,11 @@
                             <v-row>
                                 <v-col cols="12">
                                     <div class="text-subtitle-2 font-weight-bold">
-                                        <strong class="text-red">*</strong> Voucher Type Code
+                                        <template v-if="form.userTypeCode === 'K' || form.userTypeCode === 'Represent'"
+                                            ><strong class="text-red">*</strong></template
+                                        >
+
+                                        Voucher Type Code
                                     </div>
                                     <v-select
                                         v-model="form.voucherTypeCode"
