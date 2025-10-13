@@ -1,12 +1,5 @@
 <template>
-    <v-container v-if="loading" class="d-flex flex-column justify-center align-center pa-4 fill-height">
-        <div class="d-flex justify-center" style="width: 100px">
-            <v-img :src="logo" alt="Logo"></v-img>
-        </div>
-        <span class="text-body-1 text-uppercase font-weight-medium text-center pb-5 pt-3">Loading</span>
-        <v-progress-linear color="amber" height="6" indeterminate rounded></v-progress-linear>
-    </v-container>
-    <NotFound v-else-if="notFound" />
+    <NotFound v-if="notFound" />
     <div v-else class="pa-8">
         <v-row class="align-center mb-4">
             <v-col cols="12" sm="8">
@@ -100,19 +93,14 @@
                         </v-col>
                         <v-col cols="12" sm="6">
                             <div class="text-subtitle-1 text-medium-emphasis">User Role Type</div>
-                            <div class="text-subtitle-2 font-weight-bold">{{ formatEmpty(detail?.userTypeCode) }}</div>
+                            <div class="text-subtitle-2 font-weight-bold">{{ formatEmpty(detail?.userTypeDesc) }}</div>
                         </v-col>
 
                         <v-col cols="12" sm="6">
                             <div class="text-subtitle-1 text-medium-emphasis">Display Name</div>
                             <div class="text-subtitle-2 font-weight-bold">{{ formatEmpty(detail?.userName) }}</div>
                         </v-col>
-                        <v-col cols="12" sm="6">
-                            <div class="text-subtitle-1 text-medium-emphasis">User Voucher Type</div>
-                            <div class="text-subtitle-2 font-weight-bold">
-                                {{ formatEmpty(detail?.voucherTypeCode) }}
-                            </div>
-                        </v-col>
+
                         <v-col cols="12" sm="6">
                             <div class="text-subtitle-1 text-medium-emphasis">Registration Date</div>
                             <div class="text-subtitle-2 font-weight-bold">{{ formatDate(detail?.createdAt) }}</div>
@@ -123,6 +111,31 @@
                                 <v-chip color="green" size="small" label class="text-white font-weight-bold">
                                     Active
                                 </v-chip>
+                            </div>
+                        </v-col>
+                    </v-row>
+                </v-card>
+
+                <v-card rounded="lg" flat v-if="detail?.voucherTypeCode" class="pa-5 mt-5">
+                    <v-row class="text-left">
+                        <v-col cols="12">
+                            <div class="text-subtitle-1 text-medium-emphasis">User Voucher Type</div>
+                            <div class="text-subtitle-2 font-weight-bold">
+                                <template v-if="detail?.voucherTypeCode">
+                                    <v-chip
+                                        v-for="(type, index) in detail.voucherTypeCode.split(',')"
+                                        :key="index"
+                                        class="ma-1"
+                                        rounded="xl"
+                                        size="small"
+                                        label
+                                    >
+                                        {{ type.trim() }}
+                                    </v-chip>
+                                </template>
+                                <template v-else>
+                                    {{ formatEmpty(detail?.voucherTypeCode) }}
+                                </template>
                             </div>
                         </v-col>
                     </v-row>
@@ -139,8 +152,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Dashboard</td>
+                        <tr v-for="module in modules" :key="module">
+                            <td>{{ module }}</td>
                             <td>
                                 <v-switch
                                     v-model="alwaysOn"
@@ -151,82 +164,7 @@
                                     :false-value="0"
                                     color="success"
                                     value="true"
-                                ></v-switch>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Guest</td>
-                            <td>
-                                <v-switch
-                                    v-model="alwaysOn"
-                                    inset
-                                    readonly
-                                    hide-details
-                                    :true-value="1"
-                                    :false-value="0"
-                                    color="success"
-                                    value="true"
-                                ></v-switch>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Voucher Type</td>
-                            <td>
-                                <v-switch
-                                    v-model="alwaysOn"
-                                    inset
-                                    readonly
-                                    hide-details
-                                    :true-value="1"
-                                    :false-value="0"
-                                    color="success"
-                                    value="true"
-                                ></v-switch>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Voucher Batch List</td>
-                            <td>
-                                <v-switch
-                                    v-model="alwaysOn"
-                                    inset
-                                    readonly
-                                    hide-details
-                                    :true-value="1"
-                                    :false-value="0"
-                                    color="success"
-                                    value="true"
-                                ></v-switch>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Voucher Redemption Log</td>
-                            <td>
-                                <v-switch
-                                    v-model="alwaysOn"
-                                    inset
-                                    readonly
-                                    hide-details
-                                    :true-value="1"
-                                    :false-value="0"
-                                    color="success"
-                                    value="true"
-                                ></v-switch>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Attendance Log</td>
-                            <td>
-                                <v-switch
-                                    v-model="alwaysOn"
-                                    inset
-                                    readonly
-                                    hide-details
-                                    :true-value="1"
-                                    :false-value="0"
-                                    color="success"
-                                    value="true"
-                                ></v-switch>
+                                />
                             </td>
                         </tr>
                     </tbody>
@@ -237,26 +175,17 @@
         <v-btn class="ma-auto mt-6 hover-lift" rounded="lg" prepend-icon="mdi-arrow-left" @click="goBack()" flat
             >Back</v-btn
         >
-
-        <Snackbar
-            v-model="snackbar"
-            :title="isSuccess ? successTitle : errorTitle"
-            :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
-            :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
-            :iconColor="isSuccess ? '#388E3C' : '#F44336'"
-            :timeout="2500"
-        ></Snackbar>
     </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import Snackbar from "../../components/Snackbar.vue";
-import { getRolesAndVoucherTypes, getUser } from "../../api/user";
+import { getRolesAndVoucherTypes, getUser, deleteUser } from "../../api/user";
 import { formatDate, formatEmpty } from "../../utils/formatter";
 import NotFound from "../../views/NotFound.vue";
-import logo from "../../assets/logo.svg";
+import { useSnackbarStore } from "../../stores/snackbarStore";
+import { withMinLoading } from "../../utils/loader";
 
 // Breadcrumbs
 const breadcrumbs = [
@@ -266,6 +195,16 @@ const breadcrumbs = [
 
 const tab = ref(null);
 const alwaysOn = ref(1);
+const modules = [
+    "Dashboard",
+    "Guest",
+    "Voucher Type",
+    "Voucher Batch List",
+    "Voucher Log",
+    "Attendance Log",
+    "Enquiry Log",
+];
+
 const detail = ref(null);
 const route = useRoute();
 const router = useRouter();
@@ -292,29 +231,21 @@ onMounted(async () => {
     } catch (err) {
         console.error(err);
         notFound.value = true;
-    } finally {
-        loading.value = false;
     }
 });
 
 const modal = ref(false);
 
-const snackbar = ref(false);
-const isSuccess = ref(false);
-const successTitle = ref(null);
-const errorTitle = ref(null);
+const snackbar = useSnackbarStore();
 
 async function confirmDelete(id) {
     loading.value = true;
     try {
-        const response = await deleteUser(id);
+        const response = await withMinLoading(deleteUser(id));
         if (response.success) {
             router.push({ path: "/user", query: { deleted: "true" } });
         } else {
-            isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: Failed to delete user`;
-            modal.value = false;
-            snackbar.value = true;
+            snackbar.openSnackbar({ text: `Status ${response.status}: Failed to delete user`, success: false });
         }
     } catch (error) {
         console.error("Failed to delete user", error);

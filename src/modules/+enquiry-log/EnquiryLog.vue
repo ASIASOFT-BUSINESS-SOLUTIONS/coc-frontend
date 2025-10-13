@@ -108,24 +108,17 @@
             @submit="handleSubmit"
         ></EnquiryForm>
         <EnquiryDetail v-model="modal" :detailData="selectedItem"></EnquiryDetail>
-        <Snackbar
-            v-model="snackbar"
-            :title="isSuccess ? successTitle : errorTitle"
-            :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
-            :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
-            :iconColor="isSuccess ? '#388E3C' : '#F44336'"
-            :timeout="3000"
-        ></Snackbar>
     </div>
 </template>
 <script setup>
 import { ref } from "vue";
 import EnquiryForm from "./EnquiryForm.vue";
-import { exportCsv, loadDatatable } from "../../utils/loader";
+import { exportCsv, loadDatatable, withMinLoading } from "../../utils/loader";
 import { convertDatetime } from "../../utils/formatter";
 import EnquiryDetail from "./EnquiryDetail.vue";
 import { createGuestEnquiry, editGuestEnquiry, getGuestEnquiries } from "../../api/enquiry";
-import Snackbar from "../../components/Snackbar.vue";
+import { useSnackbarStore } from "../../stores/snackbarStore";
+import { useLoader } from "../../stores/loaderStore";
 
 const createDialog = ref(false);
 
@@ -156,7 +149,7 @@ function editItem(item) {
     isEdit = true;
 }
 
-const loading = ref(false);
+const { loading } = useLoader();
 const search = ref("");
 const items = ref([]);
 const totalItems = ref(0);
@@ -177,13 +170,15 @@ async function loadItems({ page, itemsPerPage, sortBy }) {
     loading.value = true;
 
     try {
-        const { items: result, total } = await loadDatatable({
-            fetchFn: getGuestEnquiries,
-            searchTerm: search.value,
-            page: page,
-            itemsPerPage: itemsPerPage,
-            sortBy: sortBy,
-        });
+        const { items: result, total } = await withMinLoading(
+            loadDatatable({
+                fetchFn: getGuestEnquiries,
+                searchTerm: search.value,
+                page: page,
+                itemsPerPage: itemsPerPage,
+                sortBy: sortBy,
+            })
+        );
 
         totalItems.value = total;
         items.value = result;
@@ -194,32 +189,35 @@ async function loadItems({ page, itemsPerPage, sortBy }) {
     }
 }
 
-const isSuccess = ref(false);
-const successTitle = ref(null);
-const errorTitle = ref(null);
-const snackbar = ref(false);
+const snackbar = useSnackbarStore();
 
 const handleSubmit = async (formData) => {
+    loading.value = true;
     try {
         let response;
 
-        if (!isEdit) response = await createGuestEnquiry({ guestCode: formData.guestCode, remark: formData.remark });
+        if (!isEdit)
+            response = await withMinLoading(
+                createGuestEnquiry({ guestCode: formData.guestCode, remark: formData.remark })
+            );
         else
-            response = await editGuestEnquiry({ followUpKey: selectedItem.value.followUpKey, remark: formData.remark });
+            response = await withMinLoading(
+                editGuestEnquiry({ followUpKey: selectedItem.value.followUpKey, remark: formData.remark })
+            );
 
         if (response.success) {
-            isSuccess.value = true;
-            successTitle.value = `Enquiry from ${
-                !isEdit ? response.data.guestName : selectedItem.value.guestName
-            } successfully ${!isEdit ? "submitted" : "updated"}!`;
+            snackbar.openSnackbar({
+                text: `Enquiry from ${!isEdit ? response.data.guestName : selectedItem.value.guestName} successfully ${
+                    !isEdit ? "submitted" : "updated"
+                }!`,
+                success: true,
+            });
             reload();
-        } else {
-            isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: ${response.message}`;
-        }
-        snackbar.value = true;
+        } else snackbar.openSnackbar({ text: `Status ${response.status}: ${response.message}`, success: false });
     } catch (error) {
         console.error(error);
+    } finally {
+        loading.value = false;
     }
 };
 

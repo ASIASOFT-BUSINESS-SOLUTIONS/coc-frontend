@@ -6,6 +6,13 @@ import { ref, computed } from "vue";
 import EnquiryForm from "./modules/+enquiry-log/EnquiryForm.vue";
 import { createGuestEnquiry } from "./api/enquiry";
 import Snackbar from "./components/Snackbar.vue";
+import { useRouter } from "vue-router";
+import Loader from "./views/Loader.vue";
+import loadingAnimation from "./assets/animations/Loading.json";
+import { useLoader } from "./stores/loaderStore";
+import { useSnackbarStore } from "./stores/snackbarStore";
+
+const snackbar = useSnackbarStore();
 
 const fabOpen = ref(false);
 
@@ -20,25 +27,21 @@ const openDialog = (type) => {
 
 document.title = import.meta.env.VITE_APP_TITLE;
 
-const isSuccess = ref(false);
-const successTitle = ref(null);
-const errorTitle = ref(null);
-const snackbar = ref(false);
-
 const handleSubmit = async (data) => {
     try {
         const response = await createGuestEnquiry({ guestCode: data.guestCode, remark: data.remark });
 
         if (response.success) {
-            isSuccess.value = true;
-            successTitle.value = `Enquiry from ${response.data.guestName} successfully submitted!`;
+            snackbar.openSnackbar({
+                text: `Enquiry from ${response.data.guestName} successfully submitted!`,
+                success: true,
+            });
         } else {
-            isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: ${response.message}`;
+            snackbar.openSnackbar({ text: `Status ${response.status}: ${response.message}`, success: false });
         }
         snackbar.value = true;
     } catch (error) {
-        console.error(error);
+        snackbar.openSnackbar({ text: "Network error, please try again!", success: false });
     }
 };
 
@@ -53,6 +56,17 @@ const iconStyle = computed(() => ({
     transform: `rotate(${rotation.value}deg)`,
     transition: "transform 0.4s ease",
 }));
+
+const { loading } = useLoader();
+const router = useRouter();
+router.beforeEach((to, from, next) => {
+    loading.value = true;
+    next();
+});
+
+router.afterEach(() => {
+    setTimeout(() => (loading.value = false), 1000);
+});
 </script>
 
 <template>
@@ -65,6 +79,18 @@ const iconStyle = computed(() => ({
             <v-scroll-x-transition mode="in" hide-on-leave="true">
                 <router-view></router-view>
             </v-scroll-x-transition>
+            <v-overlay v-model="loading" persistent class="d-flex align-center justify-center" style="z-index: 9999">
+                <v-card
+                    flat
+                    class="pa-6 pb-4 d-flex flex-column align-center justify-center glass-card"
+                    elevation="1"
+                    rounded="xl"
+                    width="180"
+                >
+                    <Loader :src="loadingAnimation" size="100px" />
+                    <div class="font-weight-medium pt-3">Loading...</div>
+                </v-card>
+            </v-overlay>
         </v-main>
 
         <template v-if="!$route.meta.hideLayout">
@@ -115,15 +141,15 @@ const iconStyle = computed(() => ({
 
             <ScanQrCode v-model="showDialog" :type="dialogType" />
             <EnquiryForm v-model="enquiryDialog" :formData="null" @submit="handleSubmit"></EnquiryForm>
-            <Snackbar
-                v-model="snackbar"
-                :title="isSuccess ? successTitle : errorTitle"
-                :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
-                :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
-                :iconColor="isSuccess ? '#388E3C' : '#F44336'"
-                :timeout="3000"
-            ></Snackbar>
         </template>
+        <Snackbar
+            v-model="snackbar.show"
+            :title="snackbar.message"
+            :color="snackbar.color"
+            :icon="snackbar.icon"
+            :iconColor="snackbar.iconColor"
+            :timeout="3000"
+        ></Snackbar>
         <Footer />
     </v-app>
 </template>
@@ -140,5 +166,13 @@ const iconStyle = computed(() => ({
 .fab-hover:hover .v-icon {
     transition: transform 0.3s ease;
     transform: rotate(90deg);
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.2); /* semi-transparent */
+    backdrop-filter: blur(8px); /* frosted effect */
+    -webkit-backdrop-filter: blur(12px); /* Safari support */
+    border: 1px solid rgba(255, 255, 255, 0.3); /* subtle white border */
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 </style>

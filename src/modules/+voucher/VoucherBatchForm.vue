@@ -1,13 +1,5 @@
 <template>
-    <v-container v-if="loading" class="d-flex flex-column justify-center align-center pa-4 fill-height">
-        <div class="d-flex justify-center" style="width: 100px">
-            <v-img :src="logo" alt="Logo"></v-img>
-        </div>
-        <span class="text-body-1 text-uppercase font-weight-medium text-center pb-5 pt-3">Loading</span>
-        <v-progress-linear color="amber" height="6" indeterminate rounded></v-progress-linear>
-    </v-container>
-
-    <NotFound v-else-if="notFound" />
+    <NotFound v-if="notFound" />
     <div v-else class="pa-8">
         <v-row class="align-center">
             <v-col>
@@ -390,14 +382,6 @@
         <v-btn class="ma-auto mt-6 hover-lift" rounded="lg" prepend-icon="mdi-arrow-left" @click="router.back()" flat
             >Back</v-btn
         >
-        <Snackbar
-            v-model="snackbar"
-            :title="isSuccess ? successTitle : errorTitle"
-            :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
-            :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
-            :iconColor="isSuccess ? '#388E3C' : '#F44336'"
-            :timeout="2500"
-        ></Snackbar>
     </div>
 </template>
 
@@ -407,9 +391,7 @@ import { useRoute, useRouter } from "vue-router";
 import { rules } from "../../constants/validation.constant";
 import { createVoucher, getVoucherTypesAndGuests } from "../../api/voucher";
 import { getVoucherType } from "../../api/voucher-type";
-import Snackbar from "../../components/Snackbar.vue";
 import NotFound from "../../views/NotFound.vue";
-import logo from "../../assets/logo.svg";
 import { voucherColorType } from "../../constants/selection.constant";
 import { formatEmpty, convertDate, compressImageToWebP, toMidnightUTC, convertDatetime } from "../../utils/formatter";
 import ConfirmDialog from "../../components/ConfirmDialog.vue";
@@ -418,6 +400,9 @@ import { useDisplay } from "vuetify";
 import Datepicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import dayjs from "dayjs";
+import { useLoader } from "../../stores/loaderStore";
+import { useSnackbarStore } from "../../stores/snackbarStore";
+import { withMinLoading } from "../../utils/loader";
 
 // Breadcrumbs
 const breadcrumbs = [
@@ -466,7 +451,7 @@ const form = ref({
 
 const router = useRouter();
 const route = useRoute();
-const loading = ref(true);
+const { loading } = useLoader();
 const notFound = ref(false);
 
 const isFormValid = computed(() => {
@@ -527,7 +512,6 @@ onMounted(async () => {
     if (voucherTypeAndGuest) {
         guests.value = voucherTypeAndGuest.data.guests;
         voucherType.value = voucherTypeAndGuest.data.voucherTypes;
-        loading.value = false;
     }
 
     const observer = new ResizeObserver((entries) => {
@@ -594,10 +578,7 @@ const selectAll = computed({
     },
 });
 
-const isSuccess = ref(false);
-const successTitle = ref(null);
-const errorTitle = ref(null);
-const snackbar = ref(false);
+const snackbar = useSnackbarStore();
 
 // Form Submission
 async function onSubmit() {
@@ -629,16 +610,14 @@ async function onSubmit() {
         };
         // console.log("%c Payload: ", "background: #222; color: #bada55", payload);
 
-        const response = await createVoucher(payload);
+        const response = await withMinLoading(createVoucher(payload), 1500);
         if (response.success) router.push({ path: "/voucher-batch-list", query: { created: "true" } });
         else {
             if (payload.image !== originalData.previewUrl) {
                 const params = new URL(payload.image).searchParams;
                 const deleteImage = await deleteFile({ filename: params.get("filename") });
             }
-            isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: ${response.message}`;
-            snackbar.value = true;
+            snackbar.openSnackbar({ text: `Status ${response.status}: ${response.message}`, success: false });
         }
     } catch (error) {
         console.error(error);

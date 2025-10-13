@@ -1,13 +1,5 @@
 <template>
-    <v-container v-if="loading" class="d-flex flex-column justify-center align-center pa-4 fill-height">
-        <div class="d-flex justify-center" style="width: 100px">
-            <v-img :src="logo" alt="Logo"></v-img>
-        </div>
-        <span class="text-body-1 text-uppercase font-weight-medium text-center pb-5 pt-3">Loading</span>
-        <v-progress-linear color="amber" height="6" indeterminate rounded></v-progress-linear>
-    </v-container>
-
-    <NotFound v-else-if="notFound" />
+    <NotFound v-if="notFound" />
 
     <div v-else class="pa-8">
         <v-row class="align-center">
@@ -277,6 +269,7 @@
                                         <td>{{ item.voucherNo }}</td>
                                         <td>
                                             <v-chip
+                                                rounded="xl"
                                                 variant="flat"
                                                 :color="statusColor(item.status)"
                                                 size="small"
@@ -297,15 +290,6 @@
         <v-btn class="ma-auto mt-6 hover-lift" rounded="lg" prepend-icon="mdi-arrow-left" @click="router.back()" flat
             >Back</v-btn
         >
-
-        <Snackbar
-            v-model="snackbar"
-            :title="isSuccess ? successTitle : errorTitle"
-            :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
-            :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
-            :iconColor="isSuccess ? '#388E3C' : '#F44336'"
-            :timeout="2500"
-        ></Snackbar>
     </div>
 </template>
 
@@ -315,11 +299,12 @@ import { useRoute, useRouter } from "vue-router";
 import { editVoucher, getVoucher } from "../../api/voucher";
 import { formatDatetime, formatEmpty, statusColor } from "../../utils/formatter";
 import NotFound from "../../views/NotFound.vue";
-import logo from "../../assets/logo.svg";
 import { getGuests } from "../../api/guest";
 import ConfirmDialog from "../../components/ConfirmDialog.vue";
-import Snackbar from "../../components/Snackbar.vue";
 import { useDisplay } from "vuetify";
+import { useLoader } from "../../stores/loaderStore";
+import { useSnackbarStore } from "../../stores/snackbarStore";
+import { withMinLoading } from "../../utils/loader";
 
 const detail = ref(null);
 const route = useRoute();
@@ -328,10 +313,7 @@ const { smAndDown } = useDisplay();
 const id = route.params.id;
 const isEdit = computed(() => route.path.endsWith("/edit"));
 
-const isSuccess = ref(false);
-const successTitle = ref(null);
-const errorTitle = ref(null);
-const snackbar = ref(false);
+const snackbar = useSnackbarStore();
 
 // Breadcrumbs
 const breadcrumbs = computed(() => {
@@ -346,7 +328,7 @@ const breadcrumbs = computed(() => {
     return base;
 });
 
-const loading = ref(true);
+const { loading } = useLoader();
 const notFound = ref(false);
 
 const allGuests = ref([]);
@@ -392,8 +374,6 @@ onMounted(async () => {
     } catch (err) {
         console.error(err);
         notFound.value = true;
-    } finally {
-        loading.value = false;
     }
 
     const observer = new ResizeObserver((entries) => {
@@ -470,19 +450,16 @@ async function submitForm() {
             details: buildPayload(),
         };
 
-        const response = await editVoucher(payload);
+        submitModal.value = false;
+        const response = await withMinLoading(editVoucher(payload), 1500);
         if (response.success) {
-            isSuccess.value = true;
-            successTitle.value = "Voucher updated successfully!";
-            snackbar.value = true;
+            snackbar.openSnackbar({ text: `Voucher updated successfully!`, success: true });
+
             const resetData = await getVoucher(id);
             originalData = resetData.data.details.map((g) => g.emailAddress);
         } else {
-            isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: ${response.message}`;
-            snackbar.value = true;
+            snackbar.openSnackbar({ text: `Status ${response.status}: ${response.message}`, success: false });
         }
-        submitModal.value = false;
     } catch (error) {
         console.error(error);
     } finally {

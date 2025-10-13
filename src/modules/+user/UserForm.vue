@@ -1,13 +1,5 @@
 <template>
-    <v-container v-if="loading" class="d-flex flex-column justify-center align-center pa-4 fill-height">
-        <div class="d-flex justify-center" style="width: 100px">
-            <v-img :src="logo" alt="Logo"></v-img>
-        </div>
-        <span class="text-body-1 text-uppercase font-weight-medium text-center pb-5 pt-3">Loading</span>
-        <v-progress-linear color="amber" height="6" indeterminate rounded></v-progress-linear>
-    </v-container>
-
-    <NotFound v-else-if="notFound" />
+    <NotFound v-if="notFound" />
     <div v-else class="pa-8">
         <v-row class="align-center">
             <v-col cols="12" md="8">
@@ -111,7 +103,7 @@
                                         rounded="lg"
                                         bg-color="#F9F9F9"
                                         placeholder="Login ID"
-                                        :rules="[validation.required, validation.maxLength(13)]"
+                                        :rules="[validation.required]"
                                         density="compact"
                                     ></v-text-field>
                                 </v-col>
@@ -160,7 +152,9 @@
                             </v-row>
                             <v-row dense>
                                 <v-col cols="12" md="6">
-                                    <div class="text-subtitle-2 font-weight-bold">User Name</div>
+                                    <div class="text-subtitle-2 font-weight-bold">
+                                        <strong class="text-red">*</strong> User Name
+                                    </div>
                                     <v-text-field
                                         v-model="form.userName"
                                         placeholder="User Name"
@@ -169,7 +163,7 @@
                                         rounded="lg"
                                         bg-color="#F9F9F9"
                                         density="compact"
-                                        :rules="[validation.maxLength(50)]"
+                                        :rules="[validation.maxLength(50), validation.required]"
                                     ></v-text-field>
                                 </v-col>
                                 <v-col cols="12" md="6">
@@ -184,14 +178,14 @@
                                         rounded="lg"
                                         bg-color="#F9F9F9"
                                         placeholder="Role Selection"
-                                        :rules="[rules.required]"
+                                        :rules="[validation.required]"
                                         :items="userRoles"
                                         item-title="description"
                                         item-value="code"
                                     ></v-select>
                                 </v-col>
                             </v-row>
-                            <v-row>
+                            <v-row dense>
                                 <v-col cols="12">
                                     <div class="text-subtitle-2 font-weight-bold">
                                         <template v-if="form.userTypeCode === 'K' || form.userTypeCode === 'Represent'"
@@ -231,7 +225,7 @@
                                     </v-select>
                                 </v-col>
                             </v-row>
-                            <v-row class="mt-1" dense>
+                            <v-row class="mt-3" dense>
                                 <v-col md="3">
                                     <v-btn
                                         block
@@ -277,14 +271,6 @@
         <v-btn class="ma-auto mt-6 hover-lift" rounded="lg" prepend-icon="mdi-arrow-left" @click="router.back()" flat
             >Back</v-btn
         >
-        <Snackbar
-            v-model="snackbar"
-            :title="isSuccess ? successTitle : errorTitle"
-            :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
-            :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
-            :iconColor="isSuccess ? '#388E3C' : '#F44336'"
-            :timeout="2500"
-        ></Snackbar>
     </div>
 </template>
 
@@ -292,14 +278,16 @@
 import { useRoute, useRouter } from "vue-router";
 import { onMounted, ref, watch, computed } from "vue";
 import { createUser, editUser, getRolesAndVoucherTypes, getUser } from "../../api/user";
-import Snackbar from "../../components/Snackbar.vue";
 import { rules } from "../../constants/validation.constant";
 import ConfirmDialog from "../../components/ConfirmDialog.vue";
 import NotFound from "../../views/NotFound.vue";
-import logo from "../../assets/logo.svg";
+import { useLoader } from "../../stores/loaderStore";
+import { withMinLoading } from "../../utils/loader";
+import { useSnackbarStore } from "../../stores/snackbarStore";
 
 const route = useRoute();
 const router = useRouter();
+const { loading } = useLoader();
 
 // Breadcrumbs
 const breadcrumbs = [
@@ -323,16 +311,12 @@ const form = ref({
 
 const isEdit = ref(false);
 const visible = ref(false);
-const loading = ref(true);
 const notFound = ref(false);
 
-const isSuccess = ref(false);
-const successTitle = ref(null);
-const errorTitle = ref(null);
-const snackbar = ref(false);
+const snackbar = useSnackbarStore();
 
-const userRoles = ref(null);
-const voucherTypes = ref(null);
+const userRoles = ref([]);
+const voucherTypes = ref([]);
 
 onMounted(async () => {
     const response = await getRolesAndVoucherTypes({ includeUserTypes: true, includeVoucherTypes: true });
@@ -354,13 +338,9 @@ onMounted(async () => {
         } catch (err) {
             console.error(err);
             notFound.value = true;
-        } finally {
-            loading.value = false;
         }
         isEdit.value = true;
     }
-
-    loading.value = false;
 });
 
 const toggle = () => {
@@ -406,22 +386,18 @@ async function submitForm() {
             ...(isEdit.value && { userKey: route.params.id }), // add only in edit
         };
 
-        const response = isEdit.value ? await editUser(payload) : await createUser(payload);
+        const response = isEdit.value
+            ? await withMinLoading(editUser(payload), 1500)
+            : await withMinLoading(createUser(payload), 1500);
         if (response.success) {
             if (isEdit.value) {
-                isSuccess.value = true;
-                successTitle.value = "User detail updated successfully!";
-                snackbar.value = true;
+                snackbar.openSnackbar({ text: `User detail updated successfully!`, success: true });
                 originalData = payload;
                 originalData.voucherTypeCode = form.value.voucherTypeCode;
             } else {
                 router.push({ path: "/user", query: { created: "true" } });
             }
-        } else {
-            isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: ${response.message}`;
-            snackbar.value = true;
-        }
+        } else snackbar.openSnackbar({ text: `Status ${response.status}: ${response.message}`, success: false });
     } catch (error) {
         console.error(error);
     } finally {

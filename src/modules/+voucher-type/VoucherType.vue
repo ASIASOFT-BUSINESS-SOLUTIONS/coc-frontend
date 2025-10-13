@@ -155,46 +155,32 @@
                 </v-card-text>
             </v-card>
         </v-dialog>
-        <Snackbar
-            v-model="snackbar"
-            :title="isSuccess ? successTitle : errorTitle"
-            :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
-            :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
-            :iconColor="isSuccess ? '#388E3C' : '#F44336'"
-            :timeout="2500"
-        ></Snackbar>
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import Snackbar from "../../components/Snackbar.vue";
 import { deleteVoucherType, getVoucherTypes } from "../../api/voucher-type";
 import { convertDatetime, formatDate, formatDatetime, formatEmpty } from "../../utils/formatter";
 import { deleteFile } from "../../api/upload";
-import { loadDatatable } from "../../utils/loader";
+import { loadDatatable, withMinLoading } from "../../utils/loader";
+import { useSnackbarStore } from "../../stores/snackbarStore";
+import { useLoader } from "../../stores/loaderStore";
 
 const route = useRoute();
 const router = useRouter();
-
-const isSuccess = ref(false);
-const successTitle = ref(null);
-const errorTitle = ref(null);
-const snackbar = ref(false);
+const { loading } = useLoader();
+const snackbar = useSnackbarStore();
 
 onMounted(() => {
     if (route.query.created === "true") {
-        isSuccess.value = true;
-        successTitle.value = "New voucher type created successfully!";
-        snackbar.value = true;
+        snackbar.openSnackbar({ text: `New voucher type created successfully!`, success: true });
         router.replace({ query: {} });
     }
 
     if (route.query.deleted === "true") {
-        successTitle.value = "The voucher type deleted successfully!";
-        isSuccess.value = true;
-        snackbar.value = true;
+        snackbar.openSnackbar({ text: `The voucher type deleted successfully!`, success: true });
         router.replace({ query: {} });
     }
 });
@@ -210,7 +196,6 @@ const headers = ref([
     { title: "Action", key: "action", sortable: false, minWidth: 130, fixed: "end" },
 ]);
 
-const loading = ref(true);
 const search = ref("");
 const items = ref([]); // Vouchers Data
 const totalItems = ref(0); // Total Vouchers Count (For Pagination)
@@ -231,20 +216,22 @@ async function loadItems({ page, itemsPerPage, sortBy }) {
     loading.value = true;
 
     try {
-        const { items: result, total } = await loadDatatable({
-            fetchFn: getVoucherTypes,
-            searchTerm: search.value,
-            page: page,
-            itemsPerPage: itemsPerPage,
-            sortBy: sortBy,
-        });
+        const { items: result, total } = await withMinLoading(
+            loadDatatable({
+                fetchFn: getVoucherTypes,
+                searchTerm: search.value,
+                page: page,
+                itemsPerPage: itemsPerPage,
+                sortBy: sortBy,
+            }),
+            1500
+        );
 
         totalItems.value = total;
         items.value = result;
+        loading.value = false;
     } catch (error) {
         console.error("Failed to fetch voucher type.", error);
-    } finally {
-        loading.value = false;
     }
 }
 
@@ -259,24 +246,30 @@ function deleteItem(item) {
 async function confirmDelete(id) {
     loading.value = true;
     try {
-        const response = await deleteVoucherType(id);
+        const response = await withMinLoading(deleteVoucherType(id), 1500);
         if (response.success) {
-            isSuccess.value = true;
-            successTitle.value = "The voucher type is successfully deleted!";
+            setTimeout(
+                () => snackbar.openSnackbar({ text: `The voucher type is successfully deleted!`, success: true }),
+                2200
+            );
             if (selectedItem.value.image) {
                 const params = new URL(selectedItem.value.image).searchParams;
                 const deleteImage = await deleteFile({ filename: params.get("filename") });
             }
         } else {
-            isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: Failed to delete voucher type`;
+            setTimeout(
+                () =>
+                    snackbar.openSnackbar({
+                        text: `Status ${response.status}: Failed to delete voucher type`,
+                        success: false,
+                    }),
+                2200
+            );
         }
         modal.value = false;
-        snackbar.value = true;
     } catch (error) {
         console.error("Failed to delete voucher type", error);
     } finally {
-        loading.value = false;
         reload();
     }
 }

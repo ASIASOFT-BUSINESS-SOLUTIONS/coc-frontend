@@ -136,24 +136,17 @@
                 </v-card-text>
             </v-card>
         </v-dialog>
-        <Snackbar
-            v-model="snackbar"
-            :title="isSuccess ? successTitle : errorTitle"
-            :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
-            :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
-            :iconColor="isSuccess ? '#388E3C' : '#F44336'"
-            :timeout="2500"
-        ></Snackbar>
     </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from "vue";
-import Snackbar from "../../components/Snackbar.vue";
 import { deleteUser, getUsers } from "../../api/user";
 import { useRoute, useRouter } from "vue-router";
 import { convertDatetime } from "../../utils/formatter";
-import { loadDatatable } from "../../utils/loader";
+import { loadDatatable, withMinLoading } from "../../utils/loader";
+import { useLoader } from "../../stores/loaderStore";
+import { useSnackbarStore } from "../../stores/snackbarStore";
 
 // The Datatable
 const headers = ref([
@@ -163,7 +156,8 @@ const headers = ref([
     { title: "Action", key: "action", sortable: false, minWidth: 130, fixed: "end" },
 ]);
 
-const loading = ref(false);
+const snackbar = useSnackbarStore();
+const { loading } = useLoader();
 const search = ref("");
 const items = ref([]); // Users Data
 const totalItems = ref(0); // Total Users Count (For Pagination)
@@ -184,13 +178,15 @@ async function loadItems({ page, itemsPerPage, sortBy }) {
     loading.value = true;
 
     try {
-        const { items: result, total } = await loadDatatable({
-            fetchFn: getUsers,
-            searchTerm: search.value,
-            page: page,
-            itemsPerPage: itemsPerPage,
-            sortBy: sortBy,
-        });
+        const { items: result, total } = await withMinLoading(
+            loadDatatable({
+                fetchFn: getUsers,
+                searchTerm: search.value,
+                page: page,
+                itemsPerPage: itemsPerPage,
+                sortBy: sortBy,
+            })
+        );
 
         totalItems.value = total;
         items.value = result;
@@ -204,11 +200,6 @@ async function loadItems({ page, itemsPerPage, sortBy }) {
 const modal = ref(false);
 const selectedItem = ref(null);
 
-const snackbar = ref(false);
-const isSuccess = ref(false);
-const successTitle = ref(null);
-const errorTitle = ref(null);
-
 function deleteItem(item) {
     selectedItem.value = item;
     modal.value = true;
@@ -217,20 +208,13 @@ function deleteItem(item) {
 async function confirmDelete(id) {
     loading.value = true;
     try {
-        const response = await deleteUser(id);
-        if (response.success) {
-            isSuccess.value = true;
-            successTitle.value = "The user is successfully deleted!";
-        } else {
-            isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: Failed to delete user`;
-        }
         modal.value = false;
-        snackbar.value = true;
+        const response = await withMinLoading(deleteUser(id));
+        if (response.success) snackbar.openSnackbar({ text: `The user is successfully deleted!`, success: true });
+        else snackbar.openSnackbar({ text: `Status ${response.status}: Failed to delete user`, success: false });
     } catch (error) {
         console.error("Failed to delete user", error);
     } finally {
-        loading.value = false;
         reload();
     }
 }
@@ -239,16 +223,12 @@ const route = useRoute();
 const router = useRouter();
 onMounted(() => {
     if (route.query.created === "true") {
-        successTitle.value = "New user created successfully!";
-        isSuccess.value = true;
-        snackbar.value = true;
+        snackbar.openSnackbar({ text: `New user created successfully!`, success: true });
         router.replace({ query: {} });
     }
 
     if (route.query.deleted === "true") {
-        successTitle.value = "The user deleted successfully!";
-        isSuccess.value = true;
-        snackbar.value = true;
+        snackbar.openSnackbar({ text: `The user is deleted successfully!`, success: true });
         router.replace({ query: {} });
     }
 });

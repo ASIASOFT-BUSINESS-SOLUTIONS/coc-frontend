@@ -1,13 +1,5 @@
 <template>
-    <v-container v-if="loading" class="d-flex flex-column justify-center align-center pa-4 fill-height">
-        <div class="d-flex justify-center" style="width: 100px">
-            <v-img :src="logo" alt="Logo"></v-img>
-        </div>
-        <span class="text-body-1 text-uppercase font-weight-medium text-center pb-5 pt-3">Loading</span>
-        <v-progress-linear color="amber" height="6" indeterminate rounded></v-progress-linear>
-    </v-container>
-
-    <NotFound v-else-if="notFound" />
+    <NotFound v-if="notFound" />
 
     <div v-else class="pa-8">
         <v-row class="align-center mb-4">
@@ -108,12 +100,13 @@
                         <div class="text-subtitle-1 text-medium-emphasis">Food Selection</div>
                         <div class="text-subtitle-2 font-weight-bold">
                             <v-chip
-                                :color="chipColor"
+                                :color="foodSelectionColor(detail?.foodSelection)"
+                                :prepend-icon="foodSelectionIcon(detail?.foodSelection)"
                                 size="small"
                                 variant="flat"
                                 label
                                 rounded="xl"
-                                class="text-white font-weight-bold"
+                                class="text-white font-weight-bold pl-3"
                             >
                                 {{ detail?.foodSelection }}
                             </v-chip>
@@ -199,15 +192,6 @@
         </v-table>
 
         <v-btn class="ma-auto mt-6" rounded="lg" prepend-icon="mdi-arrow-left" @click="router.back()" flat>Back</v-btn>
-
-        <Snackbar
-            v-model="snackbar"
-            :title="isSuccess ? successTitle : errorTitle"
-            :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
-            :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
-            :iconColor="isSuccess ? '#388E3C' : '#F44336'"
-            :timeout="2500"
-        ></Snackbar>
     </div>
 </template>
 
@@ -215,10 +199,18 @@
 import { onMounted, ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { deleteGuest, getGuest } from "../../api/guest";
-import Snackbar from "../../components/Snackbar.vue";
-import { convertDate, formatDate, formatDatetime, formatEmpty, statusColor } from "../../utils/formatter";
+import {
+    formatDate,
+    formatDatetime,
+    formatEmpty,
+    statusColor,
+    foodSelectionColor,
+    foodSelectionIcon,
+} from "../../utils/formatter";
 import NotFound from "../../views/NotFound.vue";
-import logo from "../../assets/logo.svg";
+import { useLoader } from "../../stores/loaderStore";
+import { withMinLoading } from "../../utils/loader";
+import { useSnackbarStore } from "../../stores/snackbarStore";
 
 // Breadcrumbs
 const breadcrumbs = [
@@ -231,7 +223,7 @@ const route = useRoute();
 const router = useRouter();
 const id = route.params.id;
 
-const loading = ref(true);
+const { loading } = useLoader();
 const notFound = ref(false);
 
 onMounted(async () => {
@@ -242,42 +234,20 @@ onMounted(async () => {
     } catch (err) {
         console.error(err);
         notFound.value = true;
-    } finally {
-        loading.value = false;
-    }
-});
-
-const chipColor = computed(() => {
-    switch (detail?.value.foodSelection) {
-        case "Vegetarian":
-            return "green";
-        case "Halal":
-            return "purple";
-        case "Non-Halal":
-            return "blue";
-        default:
-            return "grey";
     }
 });
 
 const modal = ref(false);
-const snackbar = ref(false);
-const isSuccess = ref(false);
-const successTitle = ref(null);
-const errorTitle = ref(null);
+const snackbar = useSnackbarStore();
 
 async function confirmDeleteGuest(id) {
     loading.value = true;
     try {
-        const response = await deleteGuest(id);
+        modal.value = false;
+        const response = await withMinLoading(deleteGuest(id));
         if (response.success) {
             router.push({ path: "/guest", query: { deleted: "true" } });
-        } else {
-            isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: Failed to delete guest`;
-        }
-        modal.value = false;
-        snackbar.value = true;
+        } else snackbar.openSnackbar({ text: `Status ${response.status}: Failed to delete guest`, success: false });
     } catch (error) {
         console.error("Failed to delete guest", error);
     } finally {
@@ -288,9 +258,9 @@ async function confirmDeleteGuest(id) {
 const search = ref("");
 const filteredDetails = computed(() => {
     const term = search.value.trim().toLowerCase();
-    if (!term) return detail.value.details; // nothing typed → show all
+    if (!term) return detail.value?.details; // nothing typed → show all
 
-    return detail.value.details.filter(
+    return detail.value?.details.filter(
         (item) =>
             item.voucherNo?.toLowerCase().includes(term) ||
             item.voucherTypeCode?.toLowerCase().includes(term) ||

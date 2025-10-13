@@ -100,7 +100,13 @@ const chartData = ref({
     datasets: [
         {
             data: [],
-            backgroundColor: ["#B3D8FF", "#D3B3E5", "#DBEFDC", "#bc5090", "#ffa600"],
+            backgroundColor: [
+                "rgba(244, 67, 54, 0.3)",
+                "rgba(255, 193, 7, 0.3)",
+                "rgba(139, 195, 74, 0.3)",
+                "#bc5090",
+                "#ffa600",
+            ],
             spacing: 0,
         },
     ],
@@ -132,8 +138,8 @@ const barData = ref({
         {
             label: "Guest",
             data: [],
-            backgroundColor: ["rgba(54, 162, 235, 0.2)", "rgba(153, 102, 255, 0.2)", "rgba(75, 192, 192, 0.2)"],
-            borderColor: ["rgb(54, 162, 235)", "rgb(153, 102, 255)", "rgb(75, 192, 192)"],
+            backgroundColor: ["rgba(255, 193, 7, 0.2)", "rgba(139, 195, 74, 0.2)", "rgba(244, 67, 54, 0.2)"],
+            borderColor: ["rgb(255, 193, 7)", "rgb(139, 195, 74)", "rgb(244, 67, 54)"],
             borderWidth: 1,
         },
     ],
@@ -233,6 +239,10 @@ watch(
                     foodSelection,
                     count,
                 }));
+
+                const order = ["Halal", "Vegetarian", "Normal"];
+
+                result.sort((a, b) => order.indexOf(a.foodSelection) - order.indexOf(b.foodSelection));
 
                 barData.value.labels = result.map((item) => item.foodSelection);
 

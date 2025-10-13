@@ -1,13 +1,5 @@
 <template>
-    <v-container v-if="loading" class="d-flex flex-column justify-center align-center pa-4 fill-height">
-        <div class="d-flex justify-center" style="width: 100px">
-            <v-img :src="logo" alt="Logo"></v-img>
-        </div>
-        <span class="text-body-1 text-uppercase font-weight-medium text-center pb-5 pt-3">Loading</span>
-        <v-progress-linear color="amber" height="6" indeterminate rounded></v-progress-linear>
-    </v-container>
-
-    <NotFound v-else-if="notFound" />
+    <NotFound v-if="notFound" />
     <div v-else class="pa-8">
         <v-row class="align-center mb-4">
             <v-col>
@@ -201,14 +193,6 @@
         </v-table>
 
         <v-btn class="ma-auto mt-6" rounded="lg" prepend-icon="mdi-arrow-left" @click="router.back()" flat>Back</v-btn>
-        <Snackbar
-            v-model="snackbar"
-            :title="isSuccess ? successTitle : errorTitle"
-            :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
-            :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
-            :iconColor="isSuccess ? '#388E3C' : '#F44336'"
-            :timeout="2500"
-        ></Snackbar>
     </div>
 </template>
 
@@ -217,12 +201,13 @@ import { onMounted, ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { rules } from "../../constants/validation.constant";
 import { editGuest, getGuest } from "../../api/guest";
-import Snackbar from "../../components/Snackbar.vue";
 import ConfirmDialog from "../../components/ConfirmDialog.vue";
 import { foodSelection } from "../../constants/selection.constant";
 import NotFound from "../../views/NotFound.vue";
-import logo from "../../assets/logo.svg";
 import { convertDatetime, formatDate, formatDatetime, statusColor } from "../../utils/formatter";
+import { useLoader } from "../../stores/loaderStore";
+import { withMinLoading } from "../../utils/loader";
+import { useSnackbarStore } from "../../stores/snackbarStore";
 
 // Breadcrumbs
 const breadcrumbs = [
@@ -232,7 +217,7 @@ const breadcrumbs = [
 
 const route = useRoute();
 const router = useRouter();
-
+const snackbar = useSnackbarStore();
 const cancelModal = ref(false);
 
 let originalData = null;
@@ -256,17 +241,10 @@ onMounted(async () => {
         } catch (err) {
             console.error(err);
             notFound.value = true;
-        } finally {
-            loading.value = false;
         }
         isEdit.value = true;
     }
 });
-
-const isSuccess = ref(false);
-const successTitle = ref(null);
-const errorTitle = ref(null);
-const snackbar = ref(false);
 
 async function submitForm() {
     loading.value = true;
@@ -281,19 +259,13 @@ async function submitForm() {
             isActive: form.value.isActive,
         };
 
-        const response = await editGuest(payload);
+        const response = await withMinLoading(editGuest(payload));
         if (response.success) {
-            isSuccess.value = true;
-            successTitle.value = "Guest detail updated successfully!";
-            snackbar.value = true;
+            snackbar.openSnackbar({ text: `Guest detail updated successfully!`, success: true });
 
             const detail = originalData.details;
             originalData = { ...payload, details: detail };
-        } else {
-            isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: ${response.message}`;
-            snackbar.value = true;
-        }
+        } else snackbar.openSnackbar({ text: `Status ${response.status}: ${response.message}`, success: false });
     } catch (error) {
         console.error(error);
     } finally {
@@ -307,7 +279,7 @@ function resetForm() {
 }
 
 /* Todo: Complete the datatable */
-const loading = ref(true);
+const { loading } = useLoader();
 const notFound = ref(false);
 
 const search = ref("");

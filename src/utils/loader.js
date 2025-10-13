@@ -98,3 +98,14 @@ export function exportCsv({ fileTitle, items = [], headers = [] }) {
 
     URL.revokeObjectURL(url);
 }
+
+export async function withMinLoading(promise, minTime = 1500) {
+    const start = Date.now();
+    const [result] = await Promise.all([
+        promise.catch((e) => {
+            throw e;
+        }),
+        new Promise((resolve) => setTimeout(resolve, minTime)),
+    ]);
+    return result;
+}

@@ -1,9 +1,11 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { rules } from "../../constants/validation.constant";
 import { changeUserPassword } from "../../api/user";
-import Snackbar from "../../components/Snackbar.vue";
 import { useUserStore } from "../../stores/userStore";
+import { useSnackbarStore } from "../../stores/snackbarStore";
+import { useLoader } from "../../stores/loaderStore";
+import { withMinLoading } from "../../utils/loader";
 
 const props = defineProps({
     modelValue: { type: Boolean, required: true },
@@ -24,10 +26,8 @@ const form = ref({
 
 const userStore = useUserStore();
 const visible = ref(false);
-const isSuccess = ref(false);
-const successTitle = ref(null);
-const errorTitle = ref(null);
-const snackbar = ref(false);
+const { loading } = useLoader();
+const snackbar = useSnackbarStore();
 
 const isFormValid = computed(() => {
     return (
@@ -47,24 +47,23 @@ function resetForm() {
 }
 
 const onSubmit = async () => {
+    loading.value = true;
     try {
         const payload = {
             userName: userStore.userName,
             currentPassword: form.value.currentPassword,
             newPassword: form.value.newPassword,
         };
-        const response = await changeUserPassword(payload);
-        isSuccess.value = response.success;
-        if (response.success) {
-            successTitle.value = "Password changed successfully!";
-            dialog.value = false;
-        } else {
-            errorTitle.value = `Status ${response.status}: ${response.message}`;
-        }
 
-        snackbar.value = true;
+        const response = await withMinLoading(changeUserPassword(payload));
+        if (response.success) {
+            isOpen.value = false;
+            snackbar.openSnackbar({ text: `Password changed successfully!`, success: true });
+        } else snackbar.openSnackbar({ text: `Status ${response.status}: ${response.message}`, success: false });
     } catch (error) {
         console.error(error);
+    } finally {
+        loading.value = false;
     }
 };
 </script>
@@ -164,12 +163,4 @@ const onSubmit = async () => {
             </v-card-text>
         </v-card>
     </v-dialog>
-    <Snackbar
-        v-model="snackbar"
-        :title="isSuccess ? successTitle : errorTitle"
-        :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
-        :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
-        :iconColor="isSuccess ? '#388E3C' : '#F44336'"
-        :timeout="2500"
-    ></Snackbar>
 </template>

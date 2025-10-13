@@ -1,13 +1,5 @@
 <template>
-    <v-container v-if="loading" class="d-flex flex-column justify-center align-center pa-4 fill-height">
-        <div class="d-flex justify-center" style="width: 100px">
-            <v-img :src="logo" alt="Logo"></v-img>
-        </div>
-        <span class="text-body-1 text-uppercase font-weight-medium text-center pb-5 pt-3">Loading</span>
-        <v-progress-linear color="amber" height="6" indeterminate rounded></v-progress-linear>
-    </v-container>
-
-    <NotFound v-else-if="notFound" />
+    <NotFound v-if="notFound" />
     <div v-else class="pa-8">
         <v-row class="align-center">
             <v-col cols="12" sm="8">
@@ -139,7 +131,7 @@
                             <v-col cols="12" sm="6">
                                 <div class="text-subtitle-1 text-medium-emphasis">Created Datetime</div>
                                 <div class="text-subtitle-2 font-weight-bold">
-                                    {{ convertDatetime(detail?.createdAt) }}
+                                    {{ formatDatetime(detail?.createdAt) }}
                                 </div>
                             </v-col>
                             <v-col cols="12" sm="6">
@@ -246,35 +238,26 @@
         <v-btn class="ma-auto mt-6 hover-lift" rounded="lg" prepend-icon="mdi-arrow-left" @click="goBack()" flat
             >Back</v-btn
         >
-
-        <Snackbar
-            v-model="snackbar"
-            :title="isSuccess ? successTitle : errorTitle"
-            :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
-            :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
-            :iconColor="isSuccess ? '#388E3C' : '#F44336'"
-            :timeout="2500"
-        ></Snackbar>
     </div>
 </template>
 <script setup>
 import { onMounted, ref, computed, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { deleteVoucherType, getVoucherType } from "../../api/voucher-type";
-import { voucherColorType } from "../../constants/selection.constant";
 import { convertDate, convertDatetime, formatDatetime, formatEmpty } from "../../utils/formatter";
-import Snackbar from "../../components/Snackbar.vue";
 import NotFound from "../../views/NotFound.vue";
-import logo from "../../assets/logo.svg";
 import { useDisplay } from "vuetify";
+import { useSnackbarStore } from "../../stores/snackbarStore";
+import { useLoader } from "../../stores/loaderStore";
 
 const detail = ref(null);
+const snackbar = useSnackbarStore();
 const route = useRoute();
 const router = useRouter();
 const { smAndDown } = useDisplay();
 const id = route.params.id;
 
-const loading = ref(true);
+const { loading } = useLoader();
 const notFound = ref(false);
 
 function goBack() {
@@ -299,8 +282,6 @@ onMounted(async () => {
     } catch (err) {
         console.error(err);
         notFound.value = true;
-    } finally {
-        loading.value = false;
     }
 
     const observer = new ResizeObserver((entries) => {
@@ -324,34 +305,21 @@ onMounted(async () => {
     onBeforeUnmount(() => observer.disconnect());
 });
 
-const voucherColor = voucherColorType;
-
-const selectedGradient = computed(() => {
-    if (!detail.value) return "";
-    const color = voucherColor.find((c) => c.id === detail.value.colourSchema);
-    return color ? color.code : "";
-});
-
 const modal = ref(false);
 
-const snackbar = ref(false);
-const isSuccess = ref(false);
-const successTitle = ref(null);
-const errorTitle = ref(null);
-
 async function confirmDelete(id) {
+    loading.value = true;
     try {
         const response = await deleteVoucherType(id);
         if (response.success) {
             router.push({ path: "/voucher-type", query: { deleted: "true" } });
         } else {
-            isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: Failed to delete voucher type`;
-            modal.value = false;
-            snackbar.value = true;
+            snackbar.openSnackbar({ text: `Status ${response.status}: Failed to delete voucher type`, success: false });
         }
     } catch (error) {
         console.error("Failed to delete voucher type", error);
+    } finally {
+        loading.value = false;
     }
 }
 </script>

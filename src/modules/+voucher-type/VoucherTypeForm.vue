@@ -1,13 +1,5 @@
 <template>
-    <v-container v-if="loading" class="d-flex flex-column justify-center align-center pa-4 fill-height">
-        <div class="d-flex justify-center" style="width: 100px">
-            <v-img :src="logo" alt="Logo"></v-img>
-        </div>
-        <span class="text-body-1 text-uppercase font-weight-medium text-center pb-5 pt-3">Loading</span>
-        <v-progress-linear color="amber" height="6" indeterminate rounded></v-progress-linear>
-    </v-container>
-
-    <NotFound v-else-if="notFound" />
+    <NotFound v-if="notFound" />
 
     <div v-else class="pa-8">
         <v-row class="align-center mb-4">
@@ -423,14 +415,6 @@
         <v-btn class="ma-auto mt-6 hover-lift" rounded="lg" prepend-icon="mdi-arrow-left" @click="router.back()" flat
             >Back</v-btn
         >
-        <Snackbar
-            v-model="snackbar"
-            :title="isSuccess ? successTitle : errorTitle"
-            :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
-            :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
-            :iconColor="isSuccess ? '#388E3C' : '#F44336'"
-            :timeout="3000"
-        ></Snackbar>
     </div>
 </template>
 
@@ -438,33 +422,31 @@
 import { ref, computed, onMounted, watch, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useDisplay } from "vuetify";
-import Snackbar from "../../components/Snackbar.vue";
 import { createVoucherType, editVoucherType, getVoucherType } from "../../api/voucher-type";
 import { rules } from "../../constants/validation.constant";
 import { convertDate, compressImageToWebP, formatEmpty, toMidnightUTC, convertDatetime } from "../../utils/formatter";
 import { voucherColorType } from "../../constants/selection.constant";
 import ConfirmDialog from "../../components/ConfirmDialog.vue";
 import NotFound from "../../views/NotFound.vue";
-import logo from "../../assets/logo.svg";
 import { deleteFile, uploadFile } from "../../api/upload";
 import Datepicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import dayjs from "dayjs";
+import { useSnackbarStore } from "../../stores/snackbarStore";
+import { useLoader } from "../../stores/loaderStore";
+import { withMinLoading } from "../../utils/loader";
+
+const snackbar = useSnackbarStore();
 
 const { smAndDown } = useDisplay();
 
 const route = useRoute();
 const router = useRouter();
 const isEdit = ref(false);
-const loading = ref(true);
+const { loading } = useLoader();
 const notFound = ref(false);
 
 const today = new Date().toISOString().split("T")[0];
-
-const isSuccess = ref(false);
-const successTitle = ref(null);
-const errorTitle = ref(null);
-const snackbar = ref(false);
 
 const validation = rules;
 
@@ -549,12 +531,9 @@ onMounted(async () => {
         } catch (err) {
             console.error(err);
             notFound.value = true;
-        } finally {
-            loading.value = false;
         }
         isEdit.value = true;
     }
-    loading.value = false;
 
     const observer = new ResizeObserver((entries) => {
         for (const entry of entries) {
@@ -615,13 +594,14 @@ async function submitForm() {
 
         // console.log("%c Payload: ", "background: #222; color: #bada55", payload);
 
-        const response = isEdit.value ? await editVoucherType(payload) : await createVoucherType(payload);
+        submitModal.value = false;
+        const response = isEdit.value
+            ? await withMinLoading(editVoucherType(payload), 1500)
+            : await withMinLoading(createVoucherType(payload), 1500);
+
         if (response.success) {
             if (isEdit.value) {
-                isSuccess.value = true;
-                successTitle.value = "Voucher type detail updated successfully!";
-                submitModal.value = false;
-                snackbar.value = true;
+                snackbar.openSnackbar({ text: `Voucher type updated successfully!`, success: true });
 
                 if (payload.image !== originalData.previewUrl) {
                     const params = new URL(originalData.previewUrl).searchParams;
@@ -640,16 +620,12 @@ async function submitForm() {
             if (form.value.image) {
                 const deleteImage = await deleteFile({ filename: compressedImage.lastModified });
             }
-            isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: ${response.message}`;
-            submitModal.value = false;
-            snackbar.value = true;
+            snackbar.openSnackbar({ text: `Status ${response.status}: ${response.message}`, success: false });
         }
     } catch (error) {
         console.error(error);
     } finally {
         loading.value = false;
-        submitModal.value = false;
     }
 }
 
