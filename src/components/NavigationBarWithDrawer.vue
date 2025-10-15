@@ -6,21 +6,21 @@
         <v-list density="compact" class="text-left" color="#FFD700" variant="flat" nav>
             <v-divider></v-divider>
             <br />
-            <v-list-item :to="{ path: '/dashboard' }" title="Dashboard" rounded="lg">
+            <v-list-item :to="{ path: '/dashboard' }" title="Dashboard" rounded="lg" class="drawer-item">
                 <template v-slot:prepend="{ isActive }">
                     <v-icon>
                         {{ isActive ? "mdi-home" : "mdi-home-outline" }}
                     </v-icon>
                 </template>
             </v-list-item>
-            <v-list-item :to="{ path: '/guest' }" title="Guest" rounded="lg">
+            <v-list-item :to="{ path: '/guest' }" title="Guest" rounded="lg" class="drawer-item">
                 <template v-slot:prepend="{ isActive }">
                     <v-icon>
                         {{ isActive ? "mdi-account-multiple" : "mdi-account-multiple-outline" }}
                     </v-icon>
                 </template>
             </v-list-item>
-            <v-list-item :to="{ path: '/user' }" title="User" rounded="lg">
+            <v-list-item :to="{ path: '/user' }" title="User" rounded="lg" class="drawer-item">
                 <template v-slot:prepend="{ isActive }">
                     <v-icon>
                         {{ isActive ? "mdi-shield-account" : "mdi-shield-account-outline" }}
@@ -37,21 +37,21 @@
                         </template>
                     </v-list-item>
                 </template>
-                <v-list-item :to="{ path: '/voucher-type' }" title="Type">
+                <v-list-item :to="{ path: '/voucher-type' }" title="Type" class="drawer-item">
                     <template v-slot:prepend="{ isActive }">
                         <v-icon class="pl-8 pr-3">
                             {{ isActive ? "mdi-shape-plus" : "mdi-shape-plus-outline" }}
                         </v-icon>
                     </template>
                 </v-list-item>
-                <v-list-item :to="{ path: '/voucher-batch-list' }" title="Batch List">
+                <v-list-item :to="{ path: '/voucher-batch-list' }" title="Batch List" class="drawer-item">
                     <template v-slot:prepend="{ isActive }">
                         <v-icon class="pl-8 pr-3">
                             {{ isActive ? "mdi-tag-multiple" : "mdi-tag-multiple-outline" }}
                         </v-icon>
                     </template>
                 </v-list-item>
-                <v-list-item :to="{ path: '/voucher-log' }" title="Log">
+                <v-list-item :to="{ path: '/voucher-log' }" title="Log" class="drawer-item">
                     <template v-slot:prepend="{ isActive }">
                         <v-icon class="pl-8 pr-3">
                             {{ isActive ? "mdi-tag-search" : "mdi-tag-search-outline" }}
@@ -59,10 +59,17 @@
                     </template>
                 </v-list-item>
             </v-list-group>
-            <v-list-item :to="{ path: '/attendance-log' }" title="Attendance Log" rounded="lg">
+            <v-list-item :to="{ path: '/attendance-log' }" title="Attendance Log" rounded="lg" class="drawer-item">
                 <template v-slot:prepend="{ isActive }">
                     <v-icon>
                         {{ isActive ? "mdi-clock" : "mdi-clock-outline" }}
+                    </v-icon>
+                </template>
+            </v-list-item>
+            <v-list-item :to="{ path: '/enquiry-log' }" title="Enquiry Log" rounded="lg" class="drawer-item">
+                <template v-slot:prepend="{ isActive }">
+                    <v-icon>
+                        {{ isActive ? "mdi-chat-question" : "mdi-chat-question-outline" }}
                     </v-icon>
                 </template>
             </v-list-item>
@@ -85,7 +92,7 @@
 
             <v-menu activator="parent" location="bottom end" transition="fade-transition">
                 <v-list density="compact" min-width="250" rounded="xl" elevation="4" slim>
-                    <v-list-item :title="userStore.userName" :subtitle="userStore.userID">
+                    <v-list-item :title="userStore.userName" :subtitle="userStore.userID" disabled="true">
                         <template v-slot:prepend>
                             <v-icon size="40" color="grey">mdi-account-circle</v-icon>
                         </template>
@@ -95,12 +102,14 @@
                         prepend-icon="mdi-lock-open-outline"
                         subtitle="Change Password"
                         @click="dialog = true"
+                        class="drawer-item"
                     ></v-list-item>
                     <v-list-item
                         prepend-icon="mdi-logout"
                         subtitle="Logout"
                         base-color="red"
                         @click="modal = true"
+                        class="drawer-item"
                     ></v-list-item>
                 </v-list>
             </v-menu>
@@ -114,117 +123,16 @@
         color="#ffd700"
         titleColor="text-black"
     />
-    <v-dialog v-model="dialog" width="500">
-        <v-card rounded="xl">
-            <v-card-title class="d-flex justify-space-between align-center" style="background-color: #ffd700">
-                <span class="text-h5 font-weight-bold pl-2">Change Password</span>
-                <v-btn
-                    icon
-                    variant="text"
-                    @click="
-                        dialog = false;
-                        resetForm();
-                    "
-                >
-                    <v-icon>mdi-close</v-icon>
-                </v-btn>
-            </v-card-title>
-            <v-card-text class="text-left mt-4">
-                <v-row dense>
-                    <v-col cols="12">
-                        <div class="text-subtitle-1 text-medium-emphasis">Current Password</div>
-                        <v-text-field
-                            v-model="form.currentPassword"
-                            rounded="lg"
-                            :rules="[rules.required]"
-                            placeholder="Current Password"
-                            density="compact"
-                            variant="outlined"
-                            :type="visible ? 'text' : 'password'"
-                            :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
-                            @click:append-inner="visible = !visible"
-                            clearable
-                        ></v-text-field>
-                    </v-col>
-                    <v-col cols="12">
-                        <div class="text-subtitle-1 text-medium-emphasis">New Password</div>
-                        <v-text-field
-                            v-model="form.newPassword"
-                            rounded="lg"
-                            :rules="[rules.required]"
-                            :type="visible ? 'text' : 'password'"
-                            :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
-                            @click:append-inner="visible = !visible"
-                            placeholder="New Password"
-                            density="compact"
-                            variant="outlined"
-                        ></v-text-field>
-                    </v-col>
-                    <v-col cols="12">
-                        <div class="text-subtitle-1 text-medium-emphasis">Confirm Password</div>
-                        <v-text-field
-                            v-model="form.confirmPassword"
-                            rounded="lg"
-                            :rules="[rules.required, rules.confirmPassword(form.newPassword)]"
-                            :type="visible ? 'text' : 'password'"
-                            :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
-                            @click:append-inner="visible = !visible"
-                            placeholder="Confirm Password"
-                            density="compact"
-                            variant="outlined"
-                        ></v-text-field>
-                    </v-col>
-                </v-row>
-                <v-row class="mt-6" dense>
-                    <v-col>
-                        <v-btn
-                            flat
-                            block
-                            rounded="lg"
-                            color="#FFD700"
-                            size="large"
-                            @click="onSubmit()"
-                            :disabled="!isFormValid"
-                            >Submit</v-btn
-                        >
-                    </v-col>
-                    <v-col>
-                        <v-btn
-                            class="text-none text-body-1"
-                            flat
-                            block
-                            rounded="lg"
-                            size="large"
-                            color="red"
-                            variant="outlined"
-                            @click="resetForm"
-                        >
-                            Discard Changes
-                        </v-btn>
-                    </v-col>
-                </v-row>
-            </v-card-text>
-        </v-card>
-    </v-dialog>
-    <Snackbar
-        v-model="snackbar"
-        :title="isSuccess ? successTitle : errorTitle"
-        :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
-        :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
-        :iconColor="isSuccess ? '#388E3C' : '#F44336'"
-        :timeout="2500"
-    ></Snackbar>
+    <UserResetPassword v-model="dialog"></UserResetPassword>
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { ref } from "vue";
 import ara from "../assets/reward-admin.png";
 import { useRouter } from "vue-router";
 import { useUserStore } from "../stores/userStore";
 import ConfirmDialog from "./ConfirmDialog.vue";
-import Snackbar from "./Snackbar.vue";
-import { rules } from "../constants/validation.constant";
-import { changeUserPassword } from "../api/user";
+import UserResetPassword from "../modules/+user/UserResetPassword.vue";
 
 const drawer = ref(false);
 const modal = ref(false);
@@ -234,61 +142,10 @@ const userStore = useUserStore();
 function logout() {
     const userStore = useUserStore();
     userStore.cleanUser();
-    router.push({ name: "Login" });
+    router.push({ name: "Login", query: { logout: "true" } });
 }
 
 const dialog = ref(false);
-const visible = ref(false);
-const form = ref({
-    currentPassword: null,
-    newPassword: null,
-    confirmPassword: null,
-});
-
-const isFormValid = computed(() => {
-    return (
-        form.value.currentPassword &&
-        form.value.newPassword &&
-        form.value.confirmPassword !== null &&
-        form.value.newPassword === form.value.confirmPassword
-    );
-});
-
-const isSuccess = ref(false);
-const successTitle = ref(null);
-const errorTitle = ref(null);
-const snackbar = ref(false);
-
-function resetForm() {
-    form.value = {
-        currentPassword: null,
-        newPassword: null,
-        confirmPassword: null,
-    };
-}
-
-async function onSubmit() {
-    const payload = {
-        userName: userStore.userName,
-        currentPassword: form.value.currentPassword,
-        newPassword: form.value.newPassword,
-    };
-
-    try {
-        const response = await changeUserPassword(payload);
-        isSuccess.value = response.success;
-        if (response.success) {
-            successTitle.value = "Password changed successfully!";
-            dialog.value = false;
-        } else {
-            errorTitle.value = `Status ${response.status}: ${response.message}`;
-        }
-    } catch (error) {
-        console.error(error);
-    } finally {
-        snackbar.value = true;
-    }
-}
 </script>
 
 <style>
@@ -298,7 +155,7 @@ async function onSubmit() {
 }
 
 .v-list-item:hover {
-    color: #000 !important;
+    color: #1b75bb !important;
 }
 
 .v-list-item__overlay {
@@ -327,5 +184,13 @@ async function onSubmit() {
 
 .v-list-item__prepend {
     padding-left: 12px;
+}
+
+.drawer-item {
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.drawer-item:hover {
+    transform: translateX(6px);
 }
 </style>

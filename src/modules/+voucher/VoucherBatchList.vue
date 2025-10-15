@@ -7,7 +7,13 @@
             </v-col>
 
             <v-col cols="12" sm="4" class="text-sm-right text-left mt-2 mt-sm-0">
-                <v-btn flat rounded="lg" color="#ffd700" :to="{ path: `/voucher-batch-list/batch-generate` }">
+                <v-btn
+                    flat
+                    class="hover-lift"
+                    rounded="lg"
+                    color="#ffd700"
+                    :to="{ path: `/voucher-batch-list/batch-generate` }"
+                >
                     Batch Generate
                 </v-btn>
             </v-col>
@@ -142,45 +148,31 @@
                 </v-card-text>
             </v-card>
         </v-dialog>
-        <Snackbar
-            v-model="snackbar"
-            :title="isSuccess ? successTitle : errorTitle"
-            :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
-            :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
-            :iconColor="isSuccess ? '#388E3C' : '#F44336'"
-            :timeout="2500"
-        ></Snackbar>
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import Snackbar from "../../components/Snackbar.vue";
 import { deleteVoucher, getVouchers } from "../../api/voucher";
 import { convertDatetime, formatDate, formatEmpty } from "../../utils/formatter";
-import { loadDatatable } from "../../utils/loader";
+import { loadDatatable, withMinLoading } from "../../utils/loader";
+import { useSnackbarStore } from "../../stores/snackbarStore";
+import { useLoader } from "../../stores/loaderStore";
 
 const route = useRoute();
 const router = useRouter();
-
-const isSuccess = ref(false);
-const successTitle = ref(null);
-const errorTitle = ref(null);
-const snackbar = ref(false);
+const { loading } = useLoader();
+const snackbar = useSnackbarStore();
 
 onMounted(() => {
     if (route.query.created === "true") {
-        successTitle.value = "Voucher batch generated successfully!";
-        isSuccess.value = true;
-        snackbar.value = true;
+        snackbar.openSnackbar({ text: `Voucher batch generated successfully!`, success: true });
         router.replace({ query: {} });
     }
 
     if (route.query.deleted === "true") {
-        successTitle.value = "The voucher batch deleted successfully!";
-        isSuccess.value = true;
-        snackbar.value = true;
+        snackbar.openSnackbar({ text: `The voucher batch deleted successfully!`, success: true });
         router.replace({ query: {} });
     }
 });
@@ -195,7 +187,6 @@ const headers = ref([
     { title: "Action", key: "action", sortable: false, minWidth: 130, fixed: "end" },
 ]);
 
-const loading = ref(true);
 const search = ref("");
 const items = ref([]); // Vouchers Data
 const totalItems = ref(0); // Total Vouchers Count (For Pagination)
@@ -216,13 +207,16 @@ async function loadItems({ page, itemsPerPage, sortBy }) {
     loading.value = true;
 
     try {
-        const { items: result, total } = await loadDatatable({
-            fetchFn: getVouchers,
-            searchTerm: search.value,
-            page: page,
-            itemsPerPage: itemsPerPage,
-            sortBy: sortBy,
-        });
+        const { items: result, total } = await withMinLoading(
+            loadDatatable({
+                fetchFn: getVouchers,
+                searchTerm: search.value,
+                page: page,
+                itemsPerPage: itemsPerPage,
+                sortBy: sortBy,
+            }),
+            1500
+        );
 
         totalItems.value = total;
         items.value = result;
@@ -244,20 +238,27 @@ function deleteItem(item) {
 async function confirmDelete(id) {
     loading.value = true;
     try {
-        const response = await deleteVoucher(id);
-        if (response.success) {
-            isSuccess.value = true;
-            successTitle.value = "All the assigned guests are successfully removed!";
-        } else {
-            isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: Failed to remove the assigned guests`;
-        }
         modal.value = false;
-        snackbar.value = true;
+        const response = await withMinLoading(deleteVoucher(id));
+        if (response.success) {
+            setTimeout(
+                () =>
+                    snackbar.openSnackbar({ text: `All the assigned guests are successfully removed!`, success: true }),
+                2200
+            );
+        } else {
+            setTimeout(
+                () =>
+                    snackbar.openSnackbar({
+                        text: `Status ${response.status}: Failed to remove the assigned guests`,
+                        success: false,
+                    }),
+                2200
+            );
+        }
     } catch (error) {
         console.error("Failed to delete voucher", error);
     } finally {
-        loading.value = false;
         reload();
     }
 }

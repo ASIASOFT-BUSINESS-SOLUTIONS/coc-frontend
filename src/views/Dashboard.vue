@@ -3,84 +3,54 @@
         <h4 class="text-h4 font-weight-bold text-left pt-1">Dashboard</h4>
         <div class="text-grey-darken-1 text-left pt-1">Overview of Asiasoft Reward System</div>
 
-        <v-row justify="center" align="center" class="mt-6" dense>
-            <v-col cols="12" sm="6" md="3">
-                <v-card class="position-relative pa-2" rounded="lg" style="border: 2px solid #e0e0e0" flat>
-                    <v-card-item>
-                        <v-card-subtitle class="text-left font-weight-bold">Total Registered Guests</v-card-subtitle>
-                        <v-card-title class="text-left text-h4 font-weight-bold">
-                            {{ formatEmpty(data.guestsNumber) }}
-                        </v-card-title>
-                        <v-icon class="position-absolute top-0 right-0 ma-4" color="grey-darken-1"
-                            >mdi-account-multiple</v-icon
-                        >
-                    </v-card-item>
-                    <v-card-text>
-                        <div class="text-medium-emphasis text-left">All Time</div>
-                    </v-card-text>
-                </v-card>
-            </v-col>
+        <v-row justify="center" align="center" class="mt-6">
+            <v-col v-for="(card, index) in cards" :key="index" cols="12" sm="6" md="3">
+                <v-scroll-y-reverse-transition>
+                    <v-card
+                        class="position-relative pa-2 fade-card"
+                        rounded="lg"
+                        style="border: 1px solid #e0e0e0"
+                        v-if="showCards"
+                        :style="{ transitionDelay: `${index * 120}ms`, transition: 'opacity 1s ease' }"
+                        flat
+                    >
+                        <v-card-item>
+                            <v-card-subtitle class="text-left font-weight-bold">{{ card.title }}</v-card-subtitle>
+                            <v-card-title
+                                class="text-left text-h4 font-weight-bold"
+                                :style="
+                                    card.type === 'positive'
+                                        ? 'color: #388E3C'
+                                        : card.type === 'negative'
+                                        ? 'color: #F24E29'
+                                        : ''
+                                "
+                            >
+                                {{ card.data }}<span v-if="card.title === 'Attendance Rate'">%</span>
+                            </v-card-title>
 
-            <v-col cols="12" sm="6" md="3">
-                <v-card class="position-relative pa-2" rounded="lg" style="border: 2px solid #e0e0e0" flat>
-                    <v-card-item>
-                        <v-card-subtitle class="text-left font-weight-bold">Total Voucher Types</v-card-subtitle>
-                        <v-card-title class="text-left text-h4 font-weight-bold">{{ data.totalVouchers }}</v-card-title>
-                        <v-icon class="position-absolute top-0 right-0 ma-4" color="grey-darken-1"
-                            >mdi-tag-check</v-icon
-                        >
-                    </v-card-item>
-                    <v-card-text>
-                        <div class="text-medium-emphasis text-left">All Time</div>
-                    </v-card-text>
-                </v-card>
-            </v-col>
+                            <v-icon class="position-absolute top-0 right-0 ma-4" color="#888888">
+                                {{ card.icon }}
+                            </v-icon>
+                        </v-card-item>
 
-            <v-col cols="12" sm="6" md="3">
-                <v-card class="position-relative pa-2" rounded="lg" style="border: 2px solid #e0e0e0" flat>
-                    <v-card-item>
-                        <v-card-subtitle class="text-left font-weight-bold">Attendance Rate</v-card-subtitle>
-                        <v-card-title
-                            class="text-left text-h4 font-weight-bold"
-                            :style="data.attendanceRate > 50 ? 'color: #388E3C' : 'color: #F24E29'"
-                            >{{ formatEmpty(data.attendanceRate.toFixed(2)) }}%</v-card-title
-                        >
-                        <v-icon class="position-absolute top-0 right-0 ma-4" color="grey-darken-1"
-                            >mdi-chart-line-variant</v-icon
-                        >
-                    </v-card-item>
-                    <v-card-text>
-                        <div class="text-medium-emphasis text-left">Last 7 Days</div>
-                    </v-card-text>
-                </v-card>
-            </v-col>
-
-            <v-col cols="12" sm="6" md="3">
-                <v-card class="position-relative pa-2" rounded="lg" style="border: 2px solid #e0e0e0" flat>
-                    <v-card-item>
-                        <v-card-subtitle class="text-left font-weight-bold">Redeemed Voucher</v-card-subtitle>
-                        <v-card-title class="text-left text-h4 font-weight-bold">{{
-                            data.redeemedVoucher
-                        }}</v-card-title>
-                        <v-icon class="position-absolute top-0 right-0 ma-4" color="grey-darken-1"
-                            >mdi-account-tag-outline</v-icon
-                        >
-                    </v-card-item>
-                    <v-card-text>
-                        <div class="text-medium-emphasis text-left">All Time</div>
-                    </v-card-text>
-                </v-card>
+                        <v-card-text>
+                            <div class="text-medium-emphasis text-left">{{ card.subtitle }}</div>
+                        </v-card-text>
+                    </v-card>
+                </v-scroll-y-reverse-transition>
             </v-col>
         </v-row>
+
         <h4 class="text-h4 font-weight-bold text-left pt-13">Data Trends</h4>
         <v-row>
             <v-col cols="12" md="6">
-                <v-sheet class="pa-6 mt-6" rounded="lg" style="border: 2px solid #e0e0e0" flat>
+                <v-sheet class="pa-6 mt-6" rounded="lg" style="border: 1px solid #e0e0e0" flat>
                     <DoughnutChart :chart-data="chartData" :options="chartOptions" />
                 </v-sheet>
             </v-col>
             <v-col cols="12" md="6">
-                <v-sheet class="pa-6 mt-6" rounded="lg" style="border: 2px solid #e0e0e0" flat>
+                <v-sheet class="pa-6 mt-6" rounded="lg" style="border: 1px solid #e0e0e0" flat>
                     <v-select
                         v-model="selectedVoucherType"
                         :items="vouchersList"
@@ -120,6 +90,8 @@ import { DoughnutChart, BarChart } from "vue-chart-3";
 import { formatDate, formatEmpty } from "../utils/formatter";
 import { getVoucher, getVoucherLog, getVouchers, voucherInquiry } from "../api/voucher";
 import { getVoucherTypes } from "../api/voucher-type";
+import { useRoute, useRouter } from "vue-router";
+import { useSnackbarStore } from "../stores/snackbarStore";
 
 ChartJS.register(Title, Tooltip, Legend, ArcElement, PieController);
 ChartJS.register(Title, Tooltip, Legend, CategoryScale, LinearScale, BarElement, BarController);
@@ -130,7 +102,13 @@ const chartData = ref({
     datasets: [
         {
             data: [],
-            backgroundColor: ["#B3D8FF", "#D3B3E5", "#DBEFDC", "#bc5090", "#ffa600"],
+            backgroundColor: [
+                "rgba(244, 67, 54, 0.3)",
+                "rgba(255, 193, 7, 0.3)",
+                "rgba(139, 195, 74, 0.3)",
+                "#bc5090",
+                "#ffa600",
+            ],
             spacing: 0,
         },
     ],
@@ -162,8 +140,8 @@ const barData = ref({
         {
             label: "Guest",
             data: [],
-            backgroundColor: ["rgba(54, 162, 235, 0.2)", "rgba(153, 102, 255, 0.2)", "rgba(75, 192, 192, 0.2)"],
-            borderColor: ["rgb(54, 162, 235)", "rgb(153, 102, 255)", "rgb(75, 192, 192)"],
+            backgroundColor: ["rgba(255, 193, 7, 0.2)", "rgba(139, 195, 74, 0.2)", "rgba(244, 67, 54, 0.2)"],
+            borderColor: ["rgb(255, 193, 7)", "rgb(139, 195, 74)", "rgb(244, 67, 54)"],
             borderWidth: 1,
         },
     ],
@@ -192,12 +170,29 @@ const data = ref({
     redeemedVoucher: 0,
 });
 
+const cards = ref([
+    { title: "Total Registered Guest", data: 0, icon: "mdi-account-multiple", subtitle: "All Time", type: "none" },
+    { title: "Total Voucher Types", data: 0, icon: "mdi-tag-check", subtitle: "All Time", type: "none" },
+    { title: "Attendance Rate", data: 0, icon: "mdi-chart-line-variant", subtitle: "Last 7 Days", type: "none" },
+    { title: "Redeemed Voucher", data: 0, icon: "mdi-account-tag-outline", subtitle: "All Time", type: "none" },
+]);
+
+const showCards = ref(false);
+const router = useRouter();
+const route = useRoute();
+const snackbar = useSnackbarStore();
+
 onMounted(async () => {
+    if (route.query.login === "true") {
+        snackbar.openSnackbar({ text: `Login successfully!`, success: true });
+        router.replace({ query: {} });
+    }
+
     const voucherTypesApi = await getVoucherTypes();
-    if (voucherTypesApi) data.value.totalVouchers = voucherTypesApi.data.length;
+    if (voucherTypesApi) cards.value[1].data = voucherTypesApi.data.length;
 
     const voucherLogApi = await getVoucherLog();
-    if (voucherLogApi) data.value.redeemedVoucher = voucherLogApi.data.length;
+    if (voucherLogApi) cards.value[3].data = voucherLogApi.data.filter((v) => v.action == "Redeem").length;
 
     const vouchersApi = await getVouchers();
     if (vouchersApi)
@@ -218,14 +213,20 @@ onMounted(async () => {
         totalCount = gInquiry.data.foodSelections.reduce((sum, s) => sum + s.count, 0);
     }
 
-    data.value.guestsNumber = totalCount;
+    cards.value[0].data = totalCount;
     const attendanceApi = await getAttendance();
     if (attendanceApi) {
         if (attendanceApi.data.length) {
             const rate = (attendanceApi.data.length / totalCount) * 100;
-            data.value.attendanceRate = rate;
+            cards.value[2].type = rate >= 50 ? "positive" : "negative";
+            cards.value[2].data = rate.toFixed(2);
         }
     }
+
+    showCards.value = false;
+    setTimeout(() => {
+        showCards.value = true;
+    }, 50);
 });
 
 watch(
@@ -248,6 +249,10 @@ watch(
                     foodSelection,
                     count,
                 }));
+
+                const order = ["Halal", "Vegetarian", "Normal"];
+
+                result.sort((a, b) => order.indexOf(a.foodSelection) - order.indexOf(b.foodSelection));
 
                 barData.value.labels = result.map((item) => item.foodSelection);
 

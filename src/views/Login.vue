@@ -14,9 +14,12 @@
                             <v-text-field
                                 placeholder="User ID"
                                 v-model="userID"
-                                class="mb-2"
+                                class="mb-2 custom-field"
                                 :rules="[rules.required]"
                                 density="compact"
+                                variant="outlined"
+                                rounded="lg"
+                                bg-color="#F9F9F9"
                                 clearable
                             ></v-text-field>
 
@@ -39,21 +42,25 @@
                                 class="mb-2"
                                 :rules="[rules.required]"
                                 density="compact"
+                                variant="outlined"
+                                rounded="lg"
+                                bg-color="#F9F9F9"
                                 :type="visible ? 'text' : 'password'"
                                 :append-inner-icon="visible ? 'mdi-eye-off' : 'mdi-eye'"
                                 @click:append-inner="visible = !visible"
                                 clearable
                             ></v-text-field>
 
-                            <v-checkbox v-model="remember" label="Remember me" density="compact" />
+                            <v-checkbox v-model="remember" label="Remember me" density="compact" color="info" />
                             <v-btn
                                 flat
                                 block
                                 rounded="lg"
                                 color="#FFD700"
                                 size="large"
-                                class="mt-4"
+                                class="hover-lift"
                                 :loading="loading"
+                                :disabled="!isFormValid"
                                 type="submit"
                             >
                                 Login
@@ -63,41 +70,35 @@
                 </v-card>
             </v-col>
         </v-row>
-
-        <Snackbar
-            v-model="snackbar"
-            :title="isSuccess ? successTitle : errorTitle"
-            :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
-            :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
-            :iconColor="isSuccess ? '#388E3C' : '#F44336'"
-            :timeout="2500"
-        ></Snackbar>
     </v-container>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import logo from "../assets/reward-admin.png";
-import Snackbar from "../components/Snackbar.vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { authLogin } from "../api/user";
 import { useUserStore } from "../stores/userStore";
 import { rules } from "../constants/validation.constant";
-import { useHotkey } from "vuetify";
+import { useLoader } from "../stores/loaderStore";
+import { useSnackbarStore } from "../stores/snackbarStore";
 
 const userID = ref(null);
 const password = ref(null);
 const remember = ref(false);
 const visible = ref(false);
 
-const loading = ref(false);
-
+const { loading } = useLoader();
 const router = useRouter();
+const route = useRoute();
+const snackbar = useSnackbarStore();
 
-const isSuccess = ref(false);
-const successTitle = ref(null);
-const errorTitle = ref(null);
-const snackbar = ref(false);
+onMounted(() => {
+    if (route.query.logout === "true") {
+        snackbar.openSnackbar({ text: `Logout successfully!`, success: true });
+        router.replace({ query: {} });
+    }
+});
 
 async function onSubmit() {
     loading.value = true;
@@ -106,20 +107,21 @@ async function onSubmit() {
         const response = await authLogin({ userID: userID.value, password: password.value });
 
         if (response.status === 200) {
-            if (response.data.voucherTypeCode && response.data.userTypeCode == "K") {
-                isSuccess.value = false;
-                errorTitle.value = `Status ${response.status}: Only admin account is allowed to access.`;
-                snackbar.value = true;
+            if (response.data.voucherTypeCode) {
+                snackbar.openSnackbar({
+                    text: `Status ${response.status}: Only admin account is allowed to access.`,
+                    success: false,
+                });
                 return;
             }
             const userStore = useUserStore();
             userStore.setUser(response.data);
-            router.push("/dashboard");
-        } else {
-            isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: Invalid User ID or Password`;
-            snackbar.value = true;
-        }
+            router.push({ path: "/dashboard", query: { login: "true" } });
+        } else
+            snackbar.openSnackbar({
+                text: `Status ${response.status}: Invalid User ID or Password`,
+                success: false,
+            });
     } catch (error) {
         console.error(error.message);
     } finally {
@@ -127,12 +129,7 @@ async function onSubmit() {
     }
 }
 
-useHotkey("Enter", onSubmit);
+const isFormValid = computed(() => {
+    return userID.value && password.value !== null;
+});
 </script>
-
-<style scoped>
-.v-btn:focus,
-.v-btn:active {
-    outline: none !important;
-}
-</style>

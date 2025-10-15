@@ -65,9 +65,7 @@
             <v-card rounded="xl">
                 <v-card-title class="d-flex justify-space-between align-center" style="background-color: #ffd700">
                     <span class="text-h6 font-weight-bold pl-2">View Detail</span>
-                    <v-btn icon variant="text" @click="modal = false">
-                        <v-icon>mdi-close</v-icon>
-                    </v-btn>
+                    <v-btn icon="mdi-close" flat @click="modal = false"> </v-btn>
                 </v-card-title>
                 <v-card-text>
                     <div class="text-center mb-12">
@@ -84,9 +82,9 @@
                         > -->
                     </div>
                     <v-row dense class="mt-1">
-                        <v-col cols="4" class="opacity-60">Guest Code:</v-col>
+                        <v-col cols="4" class="opacity-60">Guest Name:</v-col>
                         <v-col cols="8" class="font-weight-medium text-right">{{
-                            formatEmpty(selectedItem.guestCode)
+                            formatEmpty(selectedItem.guestName)
                         }}</v-col>
                     </v-row>
                     <v-row dense class="mt-1">
@@ -141,7 +139,7 @@ function viewItem(item) {
 
 const headers = ref([
     { title: "Voucher No.", key: "voucherNo", minWidth: 150 },
-    { title: "Guest Code", key: "guestCode", minWidth: 200 },
+    { title: "Guest Name", key: "guestName", minWidth: 200 },
     { title: "Email Address", key: "emailAddress", minWidth: 150 },
     { title: "Created Date", key: "createdAt", minWidth: 150 },
     { title: "Type", key: "action", minWidth: 80 },
@@ -172,9 +170,9 @@ function getIcon(action) {
         case "Expired":
             return "mdi-close-circle";
         case "Void":
-            return "mdi-cancel-circle";
+            return "mdi-cancel";
         default:
-            return "grey";
+            return "mdi-cog";
     }
 }
 

@@ -22,3 +22,6 @@ export const API_LOGIN = `${API_BACKOFFICE}/auth/login`;
 
 // Attendance
 export const API_ATTENDANCE = `${API_BACKOFFICE}/guestAttendance`;
+
+// Enquiry
+export const API_ENQUIRY = `${API_BACKOFFICE}/guestFollowUp`;

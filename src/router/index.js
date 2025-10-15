@@ -18,6 +18,7 @@ import VoucherBatchForm from "../modules/+voucher/VoucherBatchForm.vue";
 import NotFound from "../views/NotFound.vue";
 import { useUserStore } from "../stores/userStore";
 import { API_BACKOFFICE } from "../constants/api.constant";
+import EnquiryLog from "../modules/+enquiry-log/EnquiryLog.vue";
 
 const routes = [
     {
@@ -32,7 +33,7 @@ const routes = [
         path: "/voucher-type",
         meta: { requiresAuth: true },
         children: [
-            { path: "", component: VoucherType },
+            { path: "", name: "VoucherType", component: VoucherType },
             { path: ":id/detail", component: VoucherTypeDetail },
             { path: ":id/edit", component: VoucherTypeForm },
             { path: "create", component: VoucherTypeForm },
@@ -42,10 +43,10 @@ const routes = [
         path: "/voucher-batch-list",
         meta: { requiresAuth: true },
         children: [
-            { path: "", component: VoucherBatchList },
+            { path: "", name: "VoucherBatchList", component: VoucherBatchList },
             { path: ":id/detail", component: VoucherBatchDetail },
             { path: ":id/edit", component: VoucherBatchDetail },
-            { path: "batch-generate", name: "Voucher Batch Generate", component: VoucherBatchForm },
+            { path: "batch-generate", name: "VoucherBatchGenerate", component: VoucherBatchForm },
         ],
     },
     { path: "/voucher-log", component: VoucherLog, meta: { requiresAuth: true } },
@@ -53,17 +54,18 @@ const routes = [
         path: "/guest",
         meta: { requiresAuth: true },
         children: [
-            { path: "", component: Guest },
+            { path: "", name: "Guest", component: Guest },
             { path: ":id/detail", component: GuestDetail },
             { path: ":id/edit", component: GuestForm },
         ],
     },
-    { path: "/attendance-log", component: Attendance, meta: { requiresAuth: true } },
+    { path: "/attendance-log", name: "AttendanceLog", component: Attendance, meta: { requiresAuth: true } },
+    { path: "/enquiry-log", name: "EnquiryLog", component: EnquiryLog, meta: { requiresAuth: true } },
     {
         path: "/user",
         meta: { requiresAuth: true },
         children: [
-            { path: "", component: User },
+            { path: "", name: "User", component: User },
             { path: ":id/edit", component: UserForm },
             { path: ":id/detail", component: UserDetail },
             { path: "create", component: UserForm },
@@ -85,11 +87,19 @@ router.beforeEach((to, from, next) => {
     const userStore = useUserStore();
 
     if (to.meta.requiresAuth) {
-        if (!userStore.token) {
-            next({ path: "/login" });
-        } else {
-            next();
+        const expiryDate = userStore.expiryDate ? new Date(userStore.expiryDate) : null;
+        const now = new Date();
+
+        if (expiryDate && now >= expiryDate) {
+            userStore.cleanUser?.();
+            return next({ path: "/login" });
         }
+
+        if (!userStore.token) {
+            return next({ path: "/login" });
+        }
+
+        next();
     } else {
         next();
     }

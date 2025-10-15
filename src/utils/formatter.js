@@ -78,6 +78,32 @@ export function statusColor(status) {
     }
 }
 
+export function foodSelectionColor(value) {
+    switch (value) {
+        case "Vegetarian":
+            return "light-green";
+        case "Halal":
+            return "amber";
+        case "Non-Halal":
+            return "red";
+        default:
+            return "red";
+    }
+}
+
+export function foodSelectionIcon(selection) {
+    switch (selection) {
+        case "Vegetarian":
+            return "mdi-leaf";
+        case "Halal":
+            return "mdi-food-halal";
+        case "Non-Halal":
+            return "mdi-silverware-fork-knife";
+        default:
+            return "mdi-silverware-variant";
+    }
+}
+
 /**
  * Compress an image to WebP while keeping transparency.
  * @param {File} file           Original image file (PNG, etc.)

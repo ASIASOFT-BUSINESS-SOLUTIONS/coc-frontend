@@ -50,12 +50,13 @@
             </template>
             <template #item.foodSelection="{ item }">
                 <v-chip
-                    :color="getChipColor(item.foodSelection)"
+                    :color="foodSelectionColor(item.foodSelection)"
+                    :prepend-icon="foodSelectionIcon(item.foodSelection)"
                     size="small"
                     variant="flat"
                     rounded="xl"
                     label
-                    class="text-white font-weight-bold"
+                    class="text-white font-weight-bold pl-4"
                 >
                     {{ item.foodSelection }}
                 </v-chip>
@@ -186,24 +187,17 @@
                 </v-card-text>
             </v-card>
         </v-dialog>
-        <Snackbar
-            v-model="snackbar"
-            :title="isSuccess ? successTitle : errorTitle"
-            :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
-            :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
-            :iconColor="isSuccess ? '#388E3C' : '#F44336'"
-            :timeout="2500"
-        ></Snackbar>
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
-import Snackbar from "../../components/Snackbar.vue";
 import { useRoute, useRouter } from "vue-router";
 import { deactivateOrActivateGuest, deleteGuest, getGuests } from "../../api/guest";
-import { convertDatetime, formatEmpty } from "../../utils/formatter";
-import { loadDatatable } from "../../utils/loader";
+import { convertDatetime, formatEmpty, foodSelectionColor, foodSelectionIcon } from "../../utils/formatter";
+import { loadDatatable, withMinLoading } from "../../utils/loader";
+import { useLoader } from "../../stores/loaderStore";
+import { useSnackbarStore } from "../../stores/snackbarStore";
 
 // The Datatable
 const headers = ref([
@@ -217,7 +211,7 @@ const headers = ref([
     { title: "Action", key: "action", sortable: false, minWidth: 130, fixed: "end" },
 ]);
 
-const loading = ref(false);
+const { loading } = useLoader();
 const search = ref("");
 const items = ref([]); // Guests Data
 const totalItems = ref(0); // Total Guests Count (For Pagination)
@@ -238,13 +232,15 @@ async function loadItems({ page, itemsPerPage, sortBy }) {
     loading.value = true;
 
     try {
-        const { items: result, total } = await loadDatatable({
-            fetchFn: getGuests,
-            searchTerm: search.value,
-            page: page,
-            itemsPerPage: itemsPerPage,
-            sortBy: sortBy,
-        });
+        const { items: result, total } = await withMinLoading(
+            loadDatatable({
+                fetchFn: getGuests,
+                searchTerm: search.value,
+                page: page,
+                itemsPerPage: itemsPerPage,
+                sortBy: sortBy,
+            })
+        );
 
         totalItems.value = total;
         items.value = result;
@@ -255,26 +251,10 @@ async function loadItems({ page, itemsPerPage, sortBy }) {
     }
 }
 
-function getChipColor(selection) {
-    switch (selection) {
-        case "Vegetarian":
-            return "green";
-        case "Halal":
-            return "purple";
-        case "Non-Halal":
-            return "blue";
-        default:
-            return "grey";
-    }
-}
-
 const modal = ref(false);
 const selectedItem = ref(null);
 
-const snackbar = ref(false);
-const isSuccess = ref(false);
-const successTitle = ref(null);
-const errorTitle = ref(null);
+const snackbar = useSnackbarStore();
 
 function deleteItem(item) {
     selectedItem.value = item;
@@ -284,21 +264,14 @@ function deleteItem(item) {
 async function confirmDelete(id) {
     loading.value = true;
     try {
-        const response = await deleteGuest(id);
-        if (response.success) {
-            isSuccess.value = true;
-            successTitle.value = "The guest is successfully deleted!";
-        } else {
-            isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: Failed to delete guest`;
-        }
         modal.value = false;
-        snackbar.value = true;
-        reload();
+        const response = await withMinLoading(deleteGuest(id));
+        if (response.success) snackbar.openSnackbar({ text: `The guest is successfully deleted!`, success: true });
+        else snackbar.openSnackbar({ text: `Status ${response.status}: Failed to delete guest`, success: false });
     } catch (error) {
         console.error("Failed to delete guest.", error);
     } finally {
-        loading.value = false;
+        reload();
     }
 }
 
@@ -312,23 +285,32 @@ function openConfirm(item) {
 async function activateOrDeactivate(id) {
     loading.value = true;
     try {
-        const response = await deactivateOrActivateGuest(id);
-        if (response.success) {
-            isSuccess.value = true;
-            successTitle.value = `The guest has been ${selectedItem.value.isActive ? "deactivated" : "activated"}!`;
-        } else {
-            isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: Failed to ${
-                selectedItem.value.isActive ? "deactivate" : "activate"
-            } guest`;
-        }
         activationModal.value = false;
-        snackbar.value = true;
-        reload();
+        const response = await withMinLoading(deactivateOrActivateGuest(id));
+        if (response.success)
+            setTimeout(
+                () =>
+                    snackbar.openSnackbar({
+                        text: `The guest has been ${selectedItem.value.isActive ? "deactivated" : "activated"}!`,
+                        success: true,
+                    }),
+                2200
+            );
+        else
+            setTimeout(
+                () =>
+                    snackbar.openSnackbar({
+                        text: `Status ${response.status}: Failed to ${
+                            selectedItem.value.isActive ? "deactivate" : "activate"
+                        } guest`,
+                        success: false,
+                    }),
+                2200
+            );
     } catch (error) {
         console.error("Failed to delete guest.", error);
     } finally {
-        loading.value = false;
+        reload();
     }
 }
 

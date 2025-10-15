@@ -1,13 +1,5 @@
 <template>
-    <v-container v-if="loading" class="d-flex flex-column justify-center align-center pa-4 fill-height">
-        <div class="d-flex justify-center" style="width: 100px">
-            <v-img :src="logo" alt="Logo"></v-img>
-        </div>
-        <span class="text-body-1 text-uppercase font-weight-medium text-center pb-5 pt-3">Loading</span>
-        <v-progress-linear color="amber" height="6" indeterminate rounded></v-progress-linear>
-    </v-container>
-
-    <NotFound v-else-if="notFound" />
+    <NotFound v-if="notFound" />
 
     <div v-else class="pa-8">
         <v-row class="align-center">
@@ -33,13 +25,19 @@
                         rounded="lg"
                         color="#ffd700"
                         :to="{ path: `/voucher-batch-list/${id}/edit` }"
-                        class="ml-1"
+                        class="ml-1 hover-lift"
                     >
                         Edit
                     </v-btn>
                 </template>
                 <template v-else>
-                    <v-btn flat rounded="lg" @click="cancelModal = true" :style="{ border: `2px solid red` }">
+                    <v-btn
+                        flat
+                        rounded="lg"
+                        class="mr-1 hover-lift"
+                        @click="cancelModal = true"
+                        style="border: 2px solid #f44336; color: red"
+                    >
                         Discard Changes
                     </v-btn>
                     <ConfirmDialog
@@ -52,7 +50,14 @@
 
                     <v-dialog v-model="submitModal" width="500">
                         <template v-slot:activator="{ props: activatorProps }">
-                            <v-btn flat color="#ffd700" rounded="lg" class="ml-2" v-bind="activatorProps">
+                            <v-btn
+                                flat
+                                color="#ffd700"
+                                rounded="lg"
+                                class="ml-2 hover-lift"
+                                :disabled="!form.guestList.length"
+                                v-bind="activatorProps"
+                            >
                                 Save Changes
                             </v-btn>
                         </template>
@@ -111,81 +116,48 @@
                         <v-row>
                             <v-col>
                                 <v-card flat rounded="lg" class="pa-2 ma-auto">
-                                    <template v-if="detail?.colourSchema !== null">
-                                        <v-img
-                                            rounded="lg"
-                                            class="voucher-card"
-                                            min-height="150"
-                                            :gradient="`to right, ${detail?.colourSchema}`"
-                                        >
-                                            <v-container min-height="150" style="height: 100%">
-                                                <v-row dense align="center" style="height: 100%">
-                                                    <v-col cols="5">
-                                                        <template v-if="detail?.image">
-                                                            <v-img :src="detail?.image"></v-img>
-                                                        </template>
-                                                        <template v-else>
-                                                            <v-icon size="100" color="white" class="text-center"
-                                                                >mdi-file-image-remove</v-icon
-                                                            >
-                                                        </template>
-                                                    </v-col>
-                                                    <v-col cols="7" class="text-left">
-                                                        <v-row dense justify="stretch">
-                                                            <v-col cols="12">
-                                                                <div
-                                                                    class="text-white font-weight-bold text-sm-h2 text-md-h4"
-                                                                    :class="smAndDown ? 'text-h4' : 'text-h5'"
-                                                                >
-                                                                    {{ formatEmpty(detail?.voucherTypeCode) }}
-                                                                </div>
-                                                            </v-col>
-                                                        </v-row>
+                                    <v-img
+                                        ref="voucherCardRef"
+                                        class="voucher-card"
+                                        rounded="lg"
+                                        :aspect-ratio="30 / 9"
+                                        v-bind="
+                                            detail?.colourSchema
+                                                ? { gradient: `to right, ${detail.colourSchema}` }
+                                                : { color: '#D9D9D9' }
+                                        "
+                                    >
+                                        <v-row dense align="center" class="pl-5 pr-5" style="height: 100%">
+                                            <v-col cols="5">
+                                                <template v-if="detail?.image">
+                                                    <v-img :src="detail?.image"></v-img>
+                                                </template>
+                                                <template v-else>
+                                                    <v-icon :size="iconSize" color="white"
+                                                        >mdi-file-image-remove</v-icon
+                                                    >
+                                                </template>
+                                            </v-col>
+                                            <v-col cols="7" class="text-left">
+                                                <v-row dense justify="stretch">
+                                                    <v-col cols="12">
+                                                        <div
+                                                            class="text-white font-weight-bold text-truncate"
+                                                            :style="{ fontSize }"
+                                                        >
+                                                            {{ formatEmpty(detail?.voucherTypeCode) }}
+                                                        </div>
                                                     </v-col>
                                                 </v-row>
-                                            </v-container>
-                                        </v-img>
-                                        <div class="status-badge__wrapper active">
-                                            <div class="pl-3 pr-3 pt-1 pb-1 font-weight-bold status-badge active">
-                                                Active
-                                            </div>
+                                            </v-col>
+                                        </v-row>
+                                    </v-img>
+
+                                    <div class="status-badge__wrapper active" v-if="detail">
+                                        <div class="pl-3 pr-3 pt-1 pb-1 font-weight-bold status-badge active">
+                                            Active
                                         </div>
-                                    </template>
-                                    <template v-else>
-                                        <v-sheet
-                                            min-height="150"
-                                            rounded="lg"
-                                            color="#D9D9D9"
-                                            class="pt-3 voucher-card text-center"
-                                        >
-                                            <v-container style="height: 100%">
-                                                <v-row dense align="center" style="height: 100%">
-                                                    <v-col cols="5">
-                                                        <template v-if="detail?.image">
-                                                            <v-img :src="detail?.image"></v-img>
-                                                        </template>
-                                                        <template v-else>
-                                                            <v-icon size="100" color="white"
-                                                                >mdi-file-image-remove</v-icon
-                                                            >
-                                                        </template>
-                                                    </v-col>
-                                                    <v-col cols="7" class="text-left">
-                                                        <v-row dense justify="stretch">
-                                                            <v-col cols="12">
-                                                                <div
-                                                                    class="text-white font-weight-bold text-sm-h2 text-md-h4"
-                                                                    :class="smAndDown ? 'text-h4' : 'text-h5'"
-                                                                >
-                                                                    {{ detail?.voucherTypeCode }}
-                                                                </div>
-                                                            </v-col>
-                                                        </v-row>
-                                                    </v-col>
-                                                </v-row>
-                                            </v-container>
-                                        </v-sheet>
-                                    </template>
+                                    </div>
                                 </v-card>
                             </v-col>
                         </v-row>
@@ -237,6 +209,7 @@
                                 placeholder="Search guest"
                                 rounded="lg"
                                 hide-details
+                                color="info"
                                 prepend-inner-icon="mdi-magnify"
                                 variant="outlined"
                                 density="compact"
@@ -244,6 +217,13 @@
                                 clearable
                                 @keyup.enter=""
                             />
+                            <div class="text-body-1 mt-4">Filter by food selection</div>
+                            <v-chip-group v-model="filterByFoodSelection" multiple>
+                                <v-chip text="Normal" value="Normal" color="info" filter></v-chip>
+                                <v-chip text="Vegetarian" value="Vegetarian" color="success" filter></v-chip>
+                                <v-chip text="Halal" value="Halal" color="purple" filter></v-chip>
+                            </v-chip-group>
+                            <v-divider class="mb-4 mt-2"></v-divider>
                             <v-checkbox
                                 v-if="filteredGuests.length"
                                 color="info"
@@ -289,6 +269,7 @@
                                         <td>{{ item.voucherNo }}</td>
                                         <td>
                                             <v-chip
+                                                rounded="xl"
                                                 variant="flat"
                                                 :color="statusColor(item.status)"
                                                 size="small"
@@ -306,30 +287,24 @@
                 </v-card>
             </v-col>
         </v-row>
-        <v-btn class="ma-auto mt-6" rounded="lg" prepend-icon="mdi-arrow-left" @click="router.back()" flat>Back</v-btn>
-
-        <Snackbar
-            v-model="snackbar"
-            :title="isSuccess ? successTitle : errorTitle"
-            :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
-            :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
-            :iconColor="isSuccess ? '#388E3C' : '#F44336'"
-            :timeout="2500"
-        ></Snackbar>
+        <v-btn class="ma-auto mt-6 hover-lift" rounded="lg" prepend-icon="mdi-arrow-left" @click="router.back()" flat
+            >Back</v-btn
+        >
     </div>
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { editVoucher, getVoucher } from "../../api/voucher";
 import { formatDatetime, formatEmpty, statusColor } from "../../utils/formatter";
 import NotFound from "../../views/NotFound.vue";
-import logo from "../../assets/logo.svg";
 import { getGuests } from "../../api/guest";
 import ConfirmDialog from "../../components/ConfirmDialog.vue";
-import Snackbar from "../../components/Snackbar.vue";
 import { useDisplay } from "vuetify";
+import { useLoader } from "../../stores/loaderStore";
+import { useSnackbarStore } from "../../stores/snackbarStore";
+import { withMinLoading } from "../../utils/loader";
 
 const detail = ref(null);
 const route = useRoute();
@@ -338,18 +313,22 @@ const { smAndDown } = useDisplay();
 const id = route.params.id;
 const isEdit = computed(() => route.path.endsWith("/edit"));
 
-const isSuccess = ref(false);
-const successTitle = ref(null);
-const errorTitle = ref(null);
-const snackbar = ref(false);
+const snackbar = useSnackbarStore();
 
 // Breadcrumbs
-const breadcrumbs = [
-    { title: "Voucher Batch List", disabled: false, to: "/voucher-batch-list" },
-    { title: "View Detail", disabled: false },
-];
+const breadcrumbs = computed(() => {
+    const base = [{ title: "Voucher Batch List", to: "/voucher-batch-list", disabled: false }];
 
-const loading = ref(true);
+    if (isEdit.value) {
+        base.push({ title: "Edit Voucher", disabled: false });
+    } else {
+        base.push({ title: "View Detail", disabled: false });
+    }
+
+    return base;
+});
+
+const { loading } = useLoader();
 const notFound = ref(false);
 
 const allGuests = ref([]);
@@ -365,6 +344,10 @@ function resetForm() {
     form.value.guestList = originalData;
     cancelModal.value = false;
 }
+
+const voucherCardRef = ref(null);
+const fontSize = ref("1.5rem");
+const iconSize = ref(60);
 
 onMounted(async () => {
     try {
@@ -391,15 +374,42 @@ onMounted(async () => {
     } catch (err) {
         console.error(err);
         notFound.value = true;
-    } finally {
-        loading.value = false;
     }
+
+    const observer = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+            const { width, height } = entry.contentRect;
+            const ratio = width / height;
+
+            // Adjust font size
+            if (ratio < 1.2) fontSize.value = "1rem";
+            else if (ratio < 2) fontSize.value = "1.5rem";
+            else fontSize.value = "2rem";
+
+            // Adjust icon size (you can tweak scaling)
+            iconSize.value = Math.min(100, Math.max(50, height * 0.6));
+            // means: 60% of card height, capped between 50–100px
+        }
+    });
+
+    if (voucherCardRef.value?.$el) observer.observe(voucherCardRef.value.$el);
+
+    onBeforeUnmount(() => observer.disconnect());
 });
 
 const search = ref("");
+
+const filterByFoodSelection = ref([]);
 const filteredGuests = computed(() => {
-    if (!search.value) return allGuests.value;
-    return allGuests.value.filter((g) => g.guestName.toLowerCase().includes(search.value.toLowerCase()));
+    return allGuests.value.filter((g) => {
+        const matchesSearch = !search.value || g.name.toLowerCase().includes(search.value.toLowerCase());
+
+        const matchesFoodSelection =
+            !filterByFoodSelection.value.length ||
+            filterByFoodSelection.value.some((selection) => g.foodSelection === selection);
+
+        return matchesSearch && matchesFoodSelection;
+    });
 });
 
 const selectAll = computed({
@@ -440,19 +450,16 @@ async function submitForm() {
             details: buildPayload(),
         };
 
-        const response = await editVoucher(payload);
+        submitModal.value = false;
+        const response = await withMinLoading(editVoucher(payload), 1500);
         if (response.success) {
-            isSuccess.value = true;
-            successTitle.value = "Voucher updated successfully!";
-            snackbar.value = true;
+            snackbar.openSnackbar({ text: `Voucher updated successfully!`, success: true });
+
             const resetData = await getVoucher(id);
             originalData = resetData.data.details.map((g) => g.emailAddress);
         } else {
-            isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: ${response.message}`;
-            snackbar.value = true;
+            snackbar.openSnackbar({ text: `Status ${response.status}: ${response.message}`, success: false });
         }
-        submitModal.value = false;
     } catch (error) {
         console.error(error);
     } finally {
