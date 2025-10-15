@@ -117,44 +117,13 @@
                 </v-tooltip>
             </template>
         </v-data-table-server>
-
-        <v-dialog v-model="modal" width="400">
-            <v-card rounded="xl">
-                <v-card-title class="d-flex justify-space-between align-center" style="background-color: #f44336">
-                    <span class="text-h5 font-weight-bold pl-2" style="color: #ffffff">Delete</span>
-                    <v-btn icon variant="text" @click="modal = false" style="color: #ffffff">
-                        <v-icon>mdi-close</v-icon>
-                    </v-btn>
-                </v-card-title>
-                <v-card-text class="text-center mt-4">
-                    <div class="font-weight-medium">Are you sure you want to delete?</div>
-                    <v-row class="mt-6" dense>
-                        <v-col>
-                            <v-btn
-                                flat
-                                block
-                                rounded="lg"
-                                color="#f44336"
-                                size="large"
-                                @click="confirmDelete(selectedItem.voucherTypeKey)"
-                                >Yes</v-btn
-                            >
-                        </v-col>
-                        <v-col>
-                            <v-btn
-                                flat
-                                block
-                                rounded="lg"
-                                style="border: 2px solid #f44336"
-                                size="large"
-                                @click="modal = false"
-                                >Cancel</v-btn
-                            >
-                        </v-col>
-                    </v-row>
-                </v-card-text>
-            </v-card>
-        </v-dialog>
+        <ConfirmDialog
+            v-model="modal"
+            title="Delete"
+            message="Are you sure you want to delete?"
+            :onYes="() => confirmDelete(selectedItem?.voucherTypeKey)"
+            color="#f44336"
+        ></ConfirmDialog>
     </div>
 </template>
 
@@ -167,6 +136,7 @@ import { deleteFile } from "../../api/upload";
 import { loadDatatable, withMinLoading } from "../../utils/loader";
 import { useSnackbarStore } from "../../stores/snackbarStore";
 import { useLoader } from "../../stores/loaderStore";
+import ConfirmDialog from "../../components/ConfirmDialog.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -187,7 +157,7 @@ onMounted(() => {
 
 // The Datatable
 const headers = ref([
-    { title: "Voucher Type", key: "voucherTypeCode", align: "start", minWidth: 150 },
+    { title: "Voucher Type", key: "voucherTypeCode", align: "start", minWidth: 200 },
     { title: "Description", key: "voucherTypeDesc", sortable: false, minWidth: 300 },
     { title: "Start Date", key: "startDate", minWidth: 150 },
     { title: "End Date", key: "endDate", minWidth: 150 },

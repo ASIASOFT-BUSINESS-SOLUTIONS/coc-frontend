@@ -222,11 +222,16 @@ const handleSubmit = async (formData) => {
 };
 
 function exportFile() {
-    return exportCsv({
+    loading.value = true;
+
+    const file = exportCsv({
         fileTitle: "EnquiryLog",
         items: items.value,
         headers: headers.value,
     });
+
+    setTimeout(() => (loading.value = false), 1000);
+    return file;
 }
 
 const parsedRemarks = (remarkString) => {

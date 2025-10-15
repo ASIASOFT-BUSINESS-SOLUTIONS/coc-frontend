@@ -90,6 +90,8 @@ import { DoughnutChart, BarChart } from "vue-chart-3";
 import { formatDate, formatEmpty } from "../utils/formatter";
 import { getVoucher, getVoucherLog, getVouchers, voucherInquiry } from "../api/voucher";
 import { getVoucherTypes } from "../api/voucher-type";
+import { useRoute, useRouter } from "vue-router";
+import { useSnackbarStore } from "../stores/snackbarStore";
 
 ChartJS.register(Title, Tooltip, Legend, ArcElement, PieController);
 ChartJS.register(Title, Tooltip, Legend, CategoryScale, LinearScale, BarElement, BarController);
@@ -176,8 +178,16 @@ const cards = ref([
 ]);
 
 const showCards = ref(false);
+const router = useRouter();
+const route = useRoute();
+const snackbar = useSnackbarStore();
 
 onMounted(async () => {
+    if (route.query.login === "true") {
+        snackbar.openSnackbar({ text: `Login successfully!`, success: true });
+        router.replace({ query: {} });
+    }
+
     const voucherTypesApi = await getVoucherTypes();
     if (voucherTypesApi) cards.value[1].data = voucherTypesApi.data.length;
 

@@ -4,14 +4,13 @@
             <v-card-title class="d-flex justify-space-between align-center" style="background-color: #ffd700">
                 <span class="text-h6 font-weight-bold pl-2">{{ isEdit ? "Edit" : "New" }} Enquiry</span>
                 <v-btn
-                    icon
-                    variant="text"
+                    icon="mdi-close"
+                    flat
                     @click="
                         isOpen = false;
                         resetForm();
                     "
                 >
-                    <v-icon>mdi-close</v-icon>
                 </v-btn>
             </v-card-title>
             <v-card-text class="text-left">

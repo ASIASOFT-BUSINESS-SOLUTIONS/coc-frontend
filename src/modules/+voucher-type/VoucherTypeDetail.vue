@@ -15,56 +15,21 @@
                 <div class="text-grey-darken-1 text-left pt-1">View detail of voucher</div>
             </v-col>
             <v-col cols="12" sm="4" class="text-sm-right text-left mt-2 mt-md-0">
-                <v-dialog v-model="modal" width="400">
-                    <template v-slot:activator="{ props: activatorProps }">
-                        <v-btn
-                            flat
-                            rounded="lg"
-                            class="mr-2 hover-lift"
-                            style="border: 2px solid #f44336; color: red"
-                            v-bind="activatorProps"
-                            >Delete</v-btn
-                        >
-                    </template>
-                    <v-card rounded="xl">
-                        <v-card-title
-                            class="d-flex justify-space-between align-center"
-                            style="background-color: #f44336"
-                        >
-                            <span class="text-h5 font-weight-bold pl-2" style="color: #ffffff">Delete</span>
-                            <v-btn icon variant="text" @click="modal = false" style="color: #ffffff">
-                                <v-icon>mdi-close</v-icon>
-                            </v-btn>
-                        </v-card-title>
-                        <v-card-text class="text-center mt-4">
-                            <div class="font-weight-medium">Are you sure you want to delete?</div>
-                            <v-row class="mt-6" dense>
-                                <v-col>
-                                    <v-btn
-                                        flat
-                                        block
-                                        rounded="lg"
-                                        color="#f44336"
-                                        size="large"
-                                        @click="confirmDelete(route.params.id)"
-                                        >Yes</v-btn
-                                    >
-                                </v-col>
-                                <v-col>
-                                    <v-btn
-                                        flat
-                                        block
-                                        rounded="lg"
-                                        style="border: 2px solid #f44336"
-                                        size="large"
-                                        @click="modal = false"
-                                        >Cancel</v-btn
-                                    >
-                                </v-col>
-                            </v-row>
-                        </v-card-text>
-                    </v-card>
-                </v-dialog>
+                <v-btn
+                    flat
+                    rounded="lg"
+                    class="mr-2 hover-lift"
+                    style="border: 2px solid #f44336; color: red"
+                    @click="modal = true"
+                    >Delete</v-btn
+                >
+                <ConfirmDialog
+                    v-model="modal"
+                    title="Delete"
+                    message="Are you sure you want to delete?"
+                    :onYes="() => confirmDelete(route.params.id)"
+                    color="#f44336"
+                ></ConfirmDialog>
                 <v-btn
                     flat
                     rounded="lg"
@@ -159,6 +124,14 @@
                                 </div>
                             </v-col>
                         </v-row>
+                        <v-row>
+                            <v-col cols="12">
+                                <div class="text-subtitle-1 text-medium-emphasis">Remark</div>
+                                <div class="text-body-2 text-justify" style="white-space: pre-line">
+                                    {{ formatEmpty(detail?.remark) }}
+                                </div>
+                            </v-col>
+                        </v-row>
                     </v-card-text>
                 </v-card>
             </v-col>
@@ -249,6 +222,7 @@ import NotFound from "../../views/NotFound.vue";
 import { useDisplay } from "vuetify";
 import { useSnackbarStore } from "../../stores/snackbarStore";
 import { useLoader } from "../../stores/loaderStore";
+import ConfirmDialog from "../../components/ConfirmDialog.vue";
 
 const detail = ref(null);
 const snackbar = useSnackbarStore();

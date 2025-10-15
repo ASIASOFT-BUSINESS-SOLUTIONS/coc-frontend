@@ -50,16 +50,6 @@
                                             <div class="text-subtitle-1 text-medium-emphasis">
                                                 <strong class="text-red">*</strong> Voucher Type
                                             </div>
-                                            <!-- <v-select
-                                                v-model="form.voucherTypeCode"
-                                                density="compact"
-                                                class="mb-2"
-                                                placeholder="Select Voucher Type"
-                                                :rules="[validation.required]"
-                                                :items="voucherType"
-                                                item-title="name"
-                                                item-value="name"
-                                            ></v-select> -->
                                             <v-text-field
                                                 placeholder="Enter Voucher Type"
                                                 v-model="form.voucherTypeCode"
@@ -248,64 +238,26 @@
                                     </v-row>
                                     <v-row>
                                         <v-col sm="6" cols="12">
-                                            <v-dialog v-model="submitModal" width="500">
-                                                <template v-slot:activator="{ props: activatorProps }">
-                                                    <v-btn
-                                                        flat
-                                                        block
-                                                        rounded="lg"
-                                                        color="#FFD700"
-                                                        size="large"
-                                                        class="hover-lift"
-                                                        :disabled="!isFormValid"
-                                                        v-bind="activatorProps"
-                                                    >
-                                                        Submit
-                                                    </v-btn>
-                                                </template>
-
-                                                <v-card rounded="xl">
-                                                    <v-card-title
-                                                        class="d-flex justify-space-between align-center"
-                                                        style="background-color: #ffd700"
-                                                    >
-                                                        <span class="text-h6 font-weight-bold pl-2">Confirm</span>
-                                                        <v-btn icon variant="text" @click="submitModal = false">
-                                                            <v-icon>mdi-close</v-icon>
-                                                        </v-btn>
-                                                    </v-card-title>
-                                                    <v-card-text class="text-center mt-4">
-                                                        <div class="font-weight-medium">
-                                                            Are you sure you want to submit?
-                                                        </div>
-                                                        <v-row class="mt-6" dense>
-                                                            <v-col>
-                                                                <v-btn
-                                                                    flat
-                                                                    block
-                                                                    rounded="lg"
-                                                                    color="#FFD700"
-                                                                    size="large"
-                                                                    :loading="loading"
-                                                                    @click="submitForm"
-                                                                    >Yes</v-btn
-                                                                >
-                                                            </v-col>
-                                                            <v-col>
-                                                                <v-btn
-                                                                    flat
-                                                                    block
-                                                                    rounded="lg"
-                                                                    style="border: 2px solid #ffd700"
-                                                                    size="large"
-                                                                    @click="submitModal = false"
-                                                                    >No</v-btn
-                                                                >
-                                                            </v-col>
-                                                        </v-row>
-                                                    </v-card-text>
-                                                </v-card>
-                                            </v-dialog>
+                                            <v-btn
+                                                flat
+                                                block
+                                                rounded="lg"
+                                                color="#FFD700"
+                                                size="large"
+                                                class="hover-lift"
+                                                :disabled="!isFormValid"
+                                                @click="submitModal = true"
+                                            >
+                                                Submit
+                                            </v-btn>
+                                            <ConfirmDialog
+                                                v-model="submitModal"
+                                                title="Confirm"
+                                                message="Are you sure you want to submit?"
+                                                :onYes="submitForm"
+                                                color="#ffd700"
+                                                titleColor="text-black"
+                                            ></ConfirmDialog>
                                         </v-col>
                                         <v-col sm="6" cols="12">
                                             <v-btn

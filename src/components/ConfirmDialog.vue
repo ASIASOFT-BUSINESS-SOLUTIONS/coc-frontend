@@ -5,9 +5,7 @@
                 <span class="text-h5 font-weight-bold pl-2" :class="titleColor">
                     {{ title }}
                 </span>
-                <v-btn icon variant="text" :class="titleColor" @click="$emit('update:modelValue', false)">
-                    <v-icon>mdi-close</v-icon>
-                </v-btn>
+                <v-btn icon="mdi-close" flat @click="$emit('update:modelValue', false)"> </v-btn>
             </v-card-title>
 
             <v-card-text class="text-center mt-4">

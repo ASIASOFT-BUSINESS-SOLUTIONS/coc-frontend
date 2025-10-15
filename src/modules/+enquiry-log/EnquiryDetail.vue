@@ -30,9 +30,7 @@ const isOpen = computed({
         <v-card rounded="xl">
             <v-card-title class="d-flex justify-space-between align-center" style="background-color: #ffd700">
                 <span class="text-h6 font-weight-bold pl-2">View Detail</span>
-                <v-btn icon variant="text" @click="isOpen = false">
-                    <v-icon>mdi-close</v-icon>
-                </v-btn>
+                <v-btn icon="mdi-close" flat @click="isOpen = false"> </v-btn>
             </v-card-title>
             <v-card-text>
                 <div class="text-center mb-8">

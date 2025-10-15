@@ -142,7 +142,7 @@ const userStore = useUserStore();
 function logout() {
     const userStore = useUserStore();
     userStore.cleanUser();
-    router.push({ name: "Login" });
+    router.push({ name: "Login", query: { logout: "true" } });
 }
 
 const dialog = ref(false);

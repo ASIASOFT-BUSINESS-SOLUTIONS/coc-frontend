@@ -52,15 +52,6 @@
                         Submit
                     </v-btn>
                 </v-form>
-
-                <Snackbar
-                    v-model="snackbar"
-                    :title="isSuccess ? successTitle : errorTitle"
-                    :color="isSuccess ? '#C7FFC9' : '#FFCFC4'"
-                    :icon="isSuccess ? 'mdi-check-circle' : 'mdi-close-circle'"
-                    :iconColor="isSuccess ? '#388E3C' : '#F44336'"
-                    :timeout="2500"
-                ></Snackbar>
             </v-card-text>
         </v-card>
     </v-dialog>
@@ -70,10 +61,11 @@
 
 <script setup>
 import { ref, computed, watch } from "vue";
-import Snackbar from "./Snackbar.vue";
 import QrScanner from "./QrScanner.vue";
 import { redeemVoucher } from "../api/voucher";
 import { submitAttendance } from "../api/attendance";
+import { useSnackbarStore } from "../stores/snackbarStore";
+import { useLoader } from "../stores/loaderStore";
 
 function required(v) {
     return !!v || "Field is required";
@@ -105,11 +97,8 @@ watch(isOpen, (val) => {
 
 const form = ref(false);
 const code = ref("");
-const loading = ref(false);
-const isSuccess = ref(false);
-const successTitle = ref(null);
-const errorTitle = ref(null);
-const snackbar = ref(false);
+const { loading } = useLoader();
+const snackbar = useSnackbarStore();
 
 const typeLabel = computed(() => props.type.charAt(0).toUpperCase() + props.type.slice(1));
 
@@ -137,15 +126,12 @@ const onSubmit = async () => {
                 break;
         }
 
-        if (response.success) {
-            isSuccess.value = true;
-            successTitle.value = `${payload.type.charAt(0).toUpperCase() + props.type.slice(1)} submited successfully!`;
-            snackbar.value = true;
-        } else {
-            isSuccess.value = false;
-            errorTitle.value = `Status ${response.status}: ${response.message}`;
-            snackbar.value = true;
-        }
+        if (response.success)
+            snackbar.openSnackbar({
+                text: `${payload.type.charAt(0).toUpperCase() + props.type.slice(1)} submited successfully!`,
+                success: true,
+            });
+        else snackbar.openSnackbar({ text: `Status ${response.status}: ${response.message}`, success: false });
     } catch (error) {
         console.error(error);
     } finally {

@@ -66,9 +66,7 @@
             <v-card rounded="xl">
                 <v-card-title class="d-flex justify-space-between align-center" style="background-color: #ffd700">
                     <span class="text-h6 font-weight-bold pl-2">View Detail</span>
-                    <v-btn icon variant="text" @click="modal = false">
-                        <v-icon>mdi-close</v-icon>
-                    </v-btn>
+                    <v-btn icon="mdi-close" flat @click="modal = false"> </v-btn>
                 </v-card-title>
                 <v-card-text>
                     <div class="text-center mb-8">
@@ -92,7 +90,7 @@
                     <v-row dense class="mt-1">
                         <v-col cols="4" class="opacity-60">Check In Datetime:</v-col>
                         <v-col cols="8" class="font-weight-medium text-right">{{
-                            convertDatetime(selectedItem.createdAt) ?? "-"
+                            convertDatetime(selectedItem.createdAt)
                         }}</v-col>
                     </v-row>
 
@@ -122,9 +120,9 @@
 <script setup lang="ts">
 import { getAttendance } from "../../api/attendance";
 import { onMounted, ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
 import { convertDatetime, formatEmpty } from "../../utils/formatter";
-import { exportCsv, loadDatatable } from "../../utils/loader";
+import { exportCsv, loadDatatable, withMinLoading } from "../../utils/loader";
+import { useLoader } from "../../stores/loaderStore";
 
 // The Datatable
 const headers = ref([
@@ -144,7 +142,7 @@ function viewItem(item) {
     modal.value = true;
 }
 
-const loading = ref(false);
+const { loading } = useLoader();
 const search = ref("");
 const items = ref([]);
 const totalItems = ref(0);
@@ -165,13 +163,15 @@ async function loadItems({ page, itemsPerPage, sortBy }) {
     loading.value = true;
 
     try {
-        const { items: result, total } = await loadDatatable({
-            fetchFn: getAttendance,
-            searchTerm: search.value,
-            page: page,
-            itemsPerPage: itemsPerPage,
-            sortBy: sortBy,
-        });
+        const { items: result, total } = await withMinLoading(
+            loadDatatable({
+                fetchFn: getAttendance,
+                searchTerm: search.value,
+                page: page,
+                itemsPerPage: itemsPerPage,
+                sortBy: sortBy,
+            })
+        );
 
         totalItems.value = total;
         items.value = result;
@@ -182,14 +182,16 @@ async function loadItems({ page, itemsPerPage, sortBy }) {
     }
 }
 
-const route = useRoute();
-const router = useRouter();
-
 function exportFile() {
-    return exportCsv({
+    loading.value = true;
+
+    const file = exportCsv({
         fileTitle: "AttendanceLog",
         items: items.value,
         headers: headers.value.filter((h) => h.key !== "status"),
     });
+
+    setTimeout(() => (loading.value = false), 1000);
+    return file;
 }
 </script>

@@ -87,24 +87,19 @@ router.beforeEach((to, from, next) => {
     const userStore = useUserStore();
 
     if (to.meta.requiresAuth) {
-        if (!userStore.token) {
-            next({ path: "/login" });
-        } else {
-            const myHeaders = new Headers();
-            myHeaders.append("Accept", "application/json");
-            myHeaders.append("Authorization", `Bearer ${userStore.token}`);
+        const expiryDate = userStore.expiryDate ? new Date(userStore.expiryDate) : null;
+        const now = new Date();
 
-            const requestOptions = {
-                method: "GET",
-                headers: myHeaders,
-                redirect: "follow",
-            };
-
-            fetch(`${API_BACKOFFICE}/auth`, requestOptions)
-                .then((response) => response.json())
-                .then((result) => next())
-                .catch((error) => next({ path: "/login" }));
+        if (expiryDate && now >= expiryDate) {
+            userStore.cleanUser?.();
+            return next({ path: "/login" });
         }
+
+        if (!userStore.token) {
+            return next({ path: "/login" });
+        }
+
+        next();
     } else {
         next();
     }
