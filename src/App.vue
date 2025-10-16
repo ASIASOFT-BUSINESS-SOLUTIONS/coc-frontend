@@ -6,7 +6,6 @@ import { ref, computed } from "vue";
 import EnquiryForm from "./modules/+enquiry-log/EnquiryForm.vue";
 import { createGuestEnquiry } from "./api/enquiry";
 import Snackbar from "./components/Snackbar.vue";
-import { useRouter } from "vue-router";
 import Loader from "./views/Loader.vue";
 import loadingAnimation from "./assets/animations/Loading.json";
 import { useLoader } from "./stores/loaderStore";
@@ -58,15 +57,6 @@ const iconStyle = computed(() => ({
 }));
 
 const { loading } = useLoader();
-const router = useRouter();
-router.beforeEach((to, from, next) => {
-    loading.value = true;
-    next();
-});
-
-router.afterEach(() => {
-    setTimeout(() => (loading.value = false), 1000);
-});
 </script>
 
 <template>
