@@ -17,8 +17,8 @@ import VoucherBatchDetail from "../modules/+voucher/VoucherBatchDetail.vue";
 import VoucherBatchForm from "../modules/+voucher/VoucherBatchForm.vue";
 import NotFound from "../views/NotFound.vue";
 import { useUserStore } from "../stores/userStore";
-import { API_BACKOFFICE } from "../constants/api.constant";
 import EnquiryLog from "../modules/+enquiry-log/EnquiryLog.vue";
+import { useLoader } from "../stores/loaderStore";
 
 const routes = [
     {
@@ -102,6 +102,14 @@ router.beforeEach((to, from, next) => {
         next();
     } else {
         next();
+    }
+});
+
+router.afterEach((to) => {
+    const { loading } = useLoader();
+    if (to.name !== "NotFound") {
+        loading.value = true;
+        setTimeout(() => (loading.value = false), 1500);
     }
 });
 

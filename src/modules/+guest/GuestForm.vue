@@ -192,7 +192,9 @@
             </tbody>
         </v-table>
 
-        <v-btn class="ma-auto mt-6" rounded="lg" prepend-icon="mdi-arrow-left" @click="router.back()" flat>Back</v-btn>
+        <v-btn class="ma-auto mt-6 hover-lift" rounded="lg" prepend-icon="mdi-arrow-left" @click="router.back()" flat
+            >Back</v-btn
+        >
     </div>
 </template>
 
